@@ -1,0 +1,259 @@
+/* ── Hero ─────────────────────────────────────── */
+.ct-hero {
+  padding: 72px 0 48px;
+  text-align: center;
+}
+
+.ct-hero-inner {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.ct-hero h1 {
+  font-size: clamp(30px, 5vw, 40px);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ct-hero p {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+/* ── Grid ─────────────────────────────────────── */
+.ct-body {
+  padding: 0 0 80px;
+}
+
+.ct-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .ct-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 56px;
+  }
+}
+
+/* ── Info Panel ───────────────────────────────── */
+.ct-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ct-info-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+}
+
+.ct-info-card h2 {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.ct-info-card > p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 18px;
+}
+
+/* ── Channels ─────────────────────────────────── */
+.ct-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ct-channel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+
+.ct-channel:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+  transform: translateY(-1px);
+}
+
+.ct-channel-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--primary-tint);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ct-channel-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-faint);
+  margin-bottom: 1px;
+}
+
+.ct-channel-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color .15s;
+}
+
+.ct-channel:hover .ct-channel-value {
+  color: var(--primary);
+}
+
+/* ── Hours Card ───────────────────────────────── */
+.ct-hours-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 22px;
+}
+
+.ct-hours-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ct-hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--line);
+}
+
+.ct-hours-row:last-child {
+  border-bottom: none;
+}
+
+.ct-hours-val {
+  font-weight: 600;
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.ct-hours-row--off .ct-hours-val {
+  color: var(--red);
+}
+
+/* ── Form Panel ───────────────────────────────── */
+.ct-form-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.ct-form-head {
+  margin-bottom: 18px;
+}
+
+.ct-form-head h2 {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.ct-form-head p {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ── Form Fields ──────────────────────────────── */
+.ct-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ct-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .ct-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ct-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ct-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: .01em;
+}
+
+.ct-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-family: 'Inter', sans-serif;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.ct-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.ct-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+  background: var(--panel);
+}
+
+.ct-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.ct-submit {
+  margin-top: 2px;
+  gap: 8px;
+  font-size: 14px;
+  padding: 11px 18px;
+}

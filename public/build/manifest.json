@@ -1,0 +1,77 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-v63OYA1n.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/dashboard.css": {
+    "file": "assets/dashboard-BwLtejxj.css",
+    "name": "dashboard",
+    "names": [
+      "dashboard.css"
+    ],
+    "src": "resources/css/dashboard.css",
+    "isEntry": true
+  },
+  "resources/css/faq.css": {
+    "file": "assets/faq-yvdJoVmy.css",
+    "name": "faq",
+    "names": [
+      "faq.css"
+    ],
+    "src": "resources/css/faq.css",
+    "isEntry": true
+  },
+  "resources/css/landing.css": {
+    "file": "assets/landing-C1QzxBj9.css",
+    "name": "landing",
+    "names": [
+      "landing.css"
+    ],
+    "src": "resources/css/landing.css",
+    "isEntry": true
+  },
+  "resources/css/register.css": {
+    "file": "assets/register-Di6jfdND.css",
+    "name": "register",
+    "names": [
+      "register.css"
+    ],
+    "src": "resources/css/register.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BvRk9kiK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/contact.js": {
+    "file": "assets/contact-D_RyxyBr.js",
+    "name": "contact",
+    "src": "resources/js/contact.js",
+    "isEntry": true
+  },
+  "resources/js/dashboard.js": {
+    "file": "assets/dashboard-n9rKqmTh.js",
+    "name": "dashboard",
+    "src": "resources/js/dashboard.js",
+    "isEntry": true
+  },
+  "resources/js/faq.js": {
+    "file": "assets/faq-CDh2_mF2.js",
+    "name": "faq",
+    "src": "resources/js/faq.js",
+    "isEntry": true
+  },
+  "resources/js/landing.js": {
+    "file": "assets/landing-CidgUKEh.js",
+    "name": "landing",
+    "src": "resources/js/landing.js",
+    "isEntry": true
+  }
+}
