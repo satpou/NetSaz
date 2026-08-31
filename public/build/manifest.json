@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-v63OYA1n.css",
+    "file": "assets/app-Phh3OndX.css",
     "name": "app",
     "names": [
       "app.css"
@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/dashboard.css": {
-    "file": "assets/dashboard-BwLtejxj.css",
+    "file": "assets/dashboard-DFEyRqg7.css",
     "name": "dashboard",
     "names": [
       "dashboard.css"
@@ -18,7 +18,7 @@
     "isEntry": true
   },
   "resources/css/faq.css": {
-    "file": "assets/faq-yvdJoVmy.css",
+    "file": "assets/faq-x57XQi2y.css",
     "name": "faq",
     "names": [
       "faq.css"
@@ -27,7 +27,7 @@
     "isEntry": true
   },
   "resources/css/landing.css": {
-    "file": "assets/landing-C1QzxBj9.css",
+    "file": "assets/landing-DN3wuF_d.css",
     "name": "landing",
     "names": [
       "landing.css"
@@ -36,7 +36,7 @@
     "isEntry": true
   },
   "resources/css/register.css": {
-    "file": "assets/register-Di6jfdND.css",
+    "file": "assets/register-DEvnM60H.css",
     "name": "register",
     "names": [
       "register.css"

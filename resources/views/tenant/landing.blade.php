@@ -33,7 +33,7 @@
     <div style="max-width:1080px;margin:0 auto">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
             <div class="panel" style="padding:28px">
-                <div style="width:40px;height:40px;border-radius:10px;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+                <div style="width:40px;height:40px;border-radius:10px;background:var(--primary-tint-solid);color:var(--primary);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 </div>
                 <h3 style="font-size:15.5px;font-weight:600;margin-bottom:6px">Cepat &amp; Stabil</h3>

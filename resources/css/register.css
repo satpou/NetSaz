@@ -18,7 +18,7 @@
     padding: 48px 36px;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--ink) 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--deep) 100%);
     flex: 1;
   }
 
@@ -491,6 +491,8 @@
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-    -webkit-text-fill-color: #1f2937 !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--panel-soft) inset !important;
+    -webkit-text-fill-color: var(--ink) !important;
+    caret-color: var(--ink);
+    transition: background-color 9999s ease-in-out 0s;
   }

@@ -2,9 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 900;
-  backdrop-filter: saturate(180%) blur(14px);
-  background: rgba(246, 248, 252, .78);
-  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  background: rgba(10, 14, 26, .6);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .navbar-nav {
@@ -82,7 +83,7 @@
 }
 
 .footer {
-  background: var(--ink);
+  background: var(--deep);
   border-top: 1px solid rgba(255,255,255,.08);
   padding: 48px 0;
 }

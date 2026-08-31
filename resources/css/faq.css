@@ -45,8 +45,10 @@
 }
 
 .faq-item {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   overflow: hidden;
 }
@@ -65,7 +67,7 @@
 }
 
 .faq-item-header:hover {
-  background: #FBFCFF;
+  background: var(--glass-bg-strong);
 }
 
 .faq-item-title {

@@ -127,7 +127,7 @@
 
                     <div class="user-dropdown" x-show="showUserMenu" x-cloak @click.stop>
                         <div class="user-dropdown-header">
-                            <div class="avatar" style="width:38px;height:38px;border-radius:10px;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:13px">{{ substr(Auth::user()->name ?? 'U', 0, 2) }}</div>
+                            <div class="avatar" style="width:38px;height:38px;border-radius:10px;background:var(--primary-tint-solid);color:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:13px">{{ substr(Auth::user()->name ?? 'U', 0, 2) }}</div>
                             <div>
                                 <div class="dropdown-name">{{ Auth::user()->name ?? 'User' }}</div>
                                 <div class="dropdown-email">{{ Auth::user()->email ?? '' }}</div>

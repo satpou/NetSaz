@@ -2,9 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 900;
-  backdrop-filter: saturate(180%) blur(14px);
-  background: rgba(246, 248, 252, .78);
-  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  background: rgba(10, 14, 26, .6);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .navbar-nav {
@@ -197,8 +198,10 @@
   gap: 16px;
   padding: 20px;
   border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .hero-feature-icon-wrap {
@@ -237,8 +240,10 @@
   flex-direction: column;
   gap: 6px;
   padding: 20px;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   overflow: hidden;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -251,7 +256,7 @@
   bottom: -40px;
   width: 130px;
   height: 130px;
-  background: radial-gradient(closest-side, rgba(36,81,255,.10), transparent);
+  background: radial-gradient(closest-side, rgba(78,123,255,.18), transparent);
   opacity: 0;
   transition: opacity .2s ease;
   pointer-events: none;
@@ -260,7 +265,7 @@
 .bento-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow);
-  border-color: #d9e0f5;
+  border-color: var(--line-strong);
 }
 
 .bento-card:hover::after {
@@ -270,7 +275,7 @@
 .bento-featured {
   grid-column: 1 / -1;
   gap: 8px;
-  background: linear-gradient(135deg, var(--primary-tint) 0%, var(--panel) 65%);
+  background: linear-gradient(135deg, var(--primary-tint-solid) 0%, var(--glass-bg) 65%);
 }
 
 .bento-head {
@@ -284,8 +289,8 @@
   height: 48px;
   padding: 13px;
   border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
+  background: var(--panel-soft);
+  border: 1px solid var(--line-strong);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -305,9 +310,9 @@
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--primary-dark);
-  background: #fff;
-  border: 1px solid rgba(36,81,255,.25);
+  color: var(--primary);
+  background: var(--panel-soft);
+  border: 1px solid rgba(78,123,255,.35);
   padding: 4px 10px;
   border-radius: 100px;
 }
@@ -322,7 +327,7 @@
 
 .bento-featured .bento-value {
   font-size: 34px;
-  color: var(--primary-dark);
+  color: var(--primary);
 }
 
 .bento-desc {
@@ -357,8 +362,8 @@
 .bento-wide {
   grid-column: 1 / -1;
   gap: 0;
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--deep);
+  border-color: var(--deep);
 }
 
 .bento-wide .bento-chip {
@@ -431,7 +436,7 @@
 }
 
 .stats {
-  background: var(--ink);
+  background: var(--deep);
   padding: 46px 0;
 }
 
@@ -495,20 +500,22 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
+  background: var(--line-strong);
+  border: 1px solid var(--line-strong);
   border-radius: 16px;
   overflow: hidden;
 }
 
 .feature-card {
-  background: var(--panel);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   padding: 32px 28px;
   transition: background .2s ease;
 }
 
 .feature-card:hover {
-  background: #FBFCFF;
+  background: var(--glass-bg-strong);
 }
 
 .feature-icon {
@@ -603,10 +610,10 @@
 }
 
 .preview-panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
   border-radius: 18px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-glass);
   overflow: hidden;
 }
 
@@ -615,15 +622,15 @@
   align-items: center;
   gap: 8px;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-alt);
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--panel-soft);
 }
 
 .preview-bar i {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--line-strong);
 }
 
 .preview-body {
@@ -646,8 +653,8 @@
 }
 
 .preview-side .item.active {
-  background: var(--primary-tint);
-  color: var(--primary-dark);
+  background: var(--primary-tint-solid);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -755,8 +762,10 @@
 .carousel-card {
   width: 320px;
   flex-shrink: 0;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 32px 28px;
   display: flex;
@@ -901,8 +910,8 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--primary-tint);
-  color: var(--primary-dark);
+  background: var(--primary-tint-solid);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -916,7 +925,7 @@
 }
 
 .cta-panel {
-  background: var(--ink);
+  background: var(--deep);
   border-radius: 22px;
   padding: 64px 56px;
   text-align: center;
@@ -969,8 +978,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--primary-tint);
-  color: var(--primary-dark);
+  background: var(--primary-tint-solid);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1004,7 +1013,7 @@
 }
 
 .footer {
-  background: var(--ink);
+  background: var(--deep);
   border-top: 1px solid rgba(255,255,255,.08);
   padding: 72px 0 32px;
 }

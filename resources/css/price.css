@@ -27,8 +27,10 @@
 }
 
 .price-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: 14px;
   padding: 24px 20px;
   display: flex;
@@ -38,7 +40,7 @@
 
 .price-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px -8px rgba(16,24,53,.12);
+  box-shadow: 0 16px 40px -12px rgba(0,0,0,.5);
 }
 
 .price-card.highlight {

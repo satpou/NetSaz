@@ -1,8 +1,9 @@
 <style>
   .topbar {
-    background: rgba(246,248,252,.9);
-    backdrop-filter: saturate(180%) blur(14px);
-    border-bottom: 1px solid var(--line);
+    background: rgba(10,14,26,.62);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    border-bottom: 1px solid var(--glass-border);
     padding: 0 32px;
     height: 68px;
     display: flex;
@@ -33,7 +34,7 @@
     padding: 10px 16px 10px 42px;
     border-radius: 10px;
     border: 1px solid var(--line);
-    background: var(--bg);
+    background: var(--panel-soft);
     color: var(--ink);
     font-size: 14px;
     font-family: 'Inter', sans-serif;
@@ -88,21 +89,21 @@
   }
 
   .topbar-profile:hover {
-    background: var(--bg-alt);
+    background: var(--panel-soft);
   }
 
   .topbar-avatar {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--primary-tint);
+    background: var(--primary-tint-solid);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'JetBrains Mono', monospace;
     font-weight: 600;
     font-size: 13px;
-    color: var(--primary-dark);
+    color: var(--primary);
     overflow: hidden;
   }
 
@@ -143,10 +144,10 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    background: var(--panel);
-    border: 1px solid var(--line);
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
     border-radius: 14px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-glass);
     min-width: 220px;
     z-index: 100;
     display: none;
@@ -184,7 +185,7 @@
   }
 
   .topbar-dropdown-item:hover {
-    background: var(--bg-alt);
+    background: var(--panel-soft);
   }
 
   .topbar-dropdown-item.danger {
@@ -253,7 +254,7 @@
             <div onclick="var d=this.nextElementSibling;d.classList.toggle('show');event.stopPropagation();"
                  class="topbar-profile">
                 <div class="topbar-avatar">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'U') }}&color={{ urlencode('#163ACC') }}&background={{ urlencode('#E4EBFF') }}" alt="">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'U') }}&color={{ urlencode('#EAF0FB') }}&background={{ urlencode('#2B3A58') }}" alt="">
                 </div>
                 <div class="topbar-profile-info">
                     <div class="topbar-profile-name">{{ Auth::user()->name }}</div>
