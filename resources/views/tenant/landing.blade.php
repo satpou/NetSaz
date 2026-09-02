@@ -1,7 +1,7 @@
 @extends('layouts.tenant-public')
 
 @php($websiteContent = $tenant->settings['website_content'] ?? [])
-@php($brandColor = $tenant->brand_color ?: '#2451FF')
+@php($brandColor = $tenant->brand_color ?: '#00C67E')
 
 @section('title', $websiteContent['hero_title'] ?? $tenant->name)
 

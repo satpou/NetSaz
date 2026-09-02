@@ -195,12 +195,12 @@
   .login-form-logo-mark {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary), #6E8EFF);
+    background: linear-gradient(135deg, var(--primary), #5CFFBF);
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(36,81,255,.3);
+    box-shadow: 0 4px 12px rgba(0,198,126,.3);
   }
 
   .login-form-logo-mark span {
@@ -320,7 +320,7 @@
     font-weight: 600;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(16,24,53,.08), 0 8px 16px -8px rgba(36,81,255,.45);
+    box-shadow: 0 1px 2px rgba(16,24,53,.08), 0 8px 16px -8px rgba(0,198,126,.45);
     transition: background .15s, transform .15s, box-shadow .15s;
     position: relative;
     overflow: hidden;
@@ -329,7 +329,7 @@
   .login-submit:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(16,24,53,.08), 0 12px 24px -10px rgba(36,81,255,.55);
+    box-shadow: 0 2px 4px rgba(16,24,53,.08), 0 12px 24px -10px rgba(0,198,126,.55);
   }
 
   .login-submit:active {

@@ -190,12 +190,12 @@
   .login-form-logo-mark {
     width: 42px;
     height: 42px;
-    background: linear-gradient(135deg, var(--primary), #6E8EFF);
+    background: linear-gradient(135deg, var(--primary), #5CFFBF);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(36,81,255,.3);
+    box-shadow: 0 4px 12px rgba(0,200,126,.3);
   }
 
   .login-form-logo-mark span {

@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-Phh3OndX.css",
+    "file": "assets/app-CXByKIM7.css",
     "name": "app",
     "names": [
       "app.css"
@@ -9,7 +9,7 @@
     "isEntry": true
   },
   "resources/css/dashboard.css": {
-    "file": "assets/dashboard-DFEyRqg7.css",
+    "file": "assets/dashboard-C7U_b5hD.css",
     "name": "dashboard",
     "names": [
       "dashboard.css"
@@ -27,7 +27,7 @@
     "isEntry": true
   },
   "resources/css/landing.css": {
-    "file": "assets/landing-DN3wuF_d.css",
+    "file": "assets/landing-wkFK14tQ.css",
     "name": "landing",
     "names": [
       "landing.css"
@@ -36,7 +36,7 @@
     "isEntry": true
   },
   "resources/css/register.css": {
-    "file": "assets/register-DEvnM60H.css",
+    "file": "assets/register-CQNknd1s.css",
     "name": "register",
     "names": [
       "register.css"

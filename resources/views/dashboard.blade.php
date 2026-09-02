@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var pmtCtx = document.getElementById('paymentMethodChart');
     if (pmtCtx) {
         var pmtData = @json($paymentMethodChart);
-        var colors = ['#0071E3', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5856D6', '#8E8E93'];
+        var colors = ['#00C67E', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5CFFBF', '#8E8E93'];
         new Chart(pmtCtx, {
             type: 'doughnut',
             data: {

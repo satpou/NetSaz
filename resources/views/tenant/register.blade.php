@@ -1,6 +1,6 @@
 @extends('layouts.tenant-public')
 
-@php($brandColor = $tenant->brand_color ?: '#2451FF')
+@php($brandColor = $tenant->brand_color ?: '#00C67E')
 
 @section('title', 'Daftar Berlangganan')
 

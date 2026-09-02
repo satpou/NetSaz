@@ -128,7 +128,7 @@
         font-weight: 600;
         font-family: 'Inter', sans-serif;
         cursor: pointer;
-        box-shadow: 0 1px 2px rgba(16,24,53,.08), 0 8px 16px -8px rgba(36,81,255,.45);
+        box-shadow: 0 1px 2px rgba(16,24,53,.08), 0 8px 16px -8px rgba(0,198,126,.45);
         transition: background .15s, transform .15s, box-shadow .15s;
     }
 

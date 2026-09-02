@@ -73,7 +73,7 @@
     </style>
 </head>
 <body style="background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;margin:0">
-@php($brandColor = $tenant->brand_color ?: '#2451FF')
+@php($brandColor = $tenant->brand_color ?: '#00C67E')
 
 <header class="tp-nav">
     <nav class="tp-nav-inner">
