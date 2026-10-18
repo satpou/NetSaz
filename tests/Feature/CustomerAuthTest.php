@@ -23,19 +23,6 @@ class CustomerAuthTest extends TestCase
     {
         parent::setUp();
 
-        // Seed subscription plans
-        \App\Models\SubscriptionPlan::create([
-            'code' => 'launch',
-            'name' => 'Launch',
-            'price' => 99000,
-            'billing_period' => 'monthly',
-            'max_active_customers' => 150,
-            'max_routers' => 1,
-            'max_staff' => 1,
-            'features' => ['whatsapp_broadcast'],
-            'sort_order' => 1,
-        ]);
-
         $this->tenant = Tenant::factory()->create(['status' => 'active']);
         $package = Package::factory()->create(['tenant_id' => $this->tenant->id]);
         $this->customer = Customer::factory()->create([
@@ -60,17 +47,6 @@ class CustomerAuthTest extends TestCase
             'package_id' => $otherPackage->id,
             'status' => 'active',
             'join_date' => Carbon::now(),
-        ]);
-
-        // Create a subscription for testing
-        $launchPlan = \App\Models\SubscriptionPlan::where('code', 'launch')->first();
-        \App\Models\TenantSubscription::create([
-            'tenant_id' => $this->tenant->id,
-            'subscription_plan_id' => $launchPlan->id,
-            'status' => 'active',
-            'started_at' => Carbon::now(),
-            'current_period_start' => Carbon::now(),
-            'current_period_end' => Carbon::now()->addMonth(),
         ]);
 
         URL::defaults(['tenant_slug' => $this->tenant->slug]);

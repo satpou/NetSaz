@@ -15,6 +15,10 @@ use App\Http\Controllers\CustomerPortalController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\Admin\TenantSubscriptionController;
 
 $mainDomain = config('app.main_domain');
 $tenantDomain = config('app.tenant_domain');
@@ -74,6 +78,12 @@ Route::domain('{tenant_slug}.' . $tenantDomain)->middleware('tenant.subdomain')-
     Route::middleware(['auth', 'tenant'])->group(function () {
         Route::resource('customers', CustomerController::class)
             ->names(['index' => 'customers.index', 'create' => 'customers.create', 'store' => 'customers.store', 'show' => 'customers.show', 'edit' => 'customers.edit', 'update' => 'customers.update', 'destroy' => 'customers.destroy']);
+        Route::post('customers/{customer}/send-portal-link', [CustomerController::class, 'sendPortalLink'])->name('customers.send-portal-link');
+        Route::post('customers/{customer}/send-welcome', [CustomerController::class, 'sendWelcome'])->name('customers.send-welcome');
+        Route::post('customers/{customer}/pppoe/enable', [CustomerController::class, 'enablePppoe'])->name('customers.pppoe.enable');
+        Route::post('customers/{customer}/pppoe/disable', [CustomerController::class, 'disablePppoe'])->name('customers.pppoe.disable');
+        Route::post('customers/{customer}/pppoe/reset-password', [CustomerController::class, 'resetPppoePassword'])->name('customers.pppoe.reset-password');
+        Route::post('customers/{customer}/pppoe/delete', [CustomerController::class, 'deletePppoe'])->name('customers.pppoe.delete');
 
         Route::resource('packages', PackageController::class);
         Route::resource('areas', AreaController::class);
@@ -95,10 +105,22 @@ Route::domain('{tenant_slug}.' . $tenantDomain)->middleware('tenant.subdomain')-
             Route::get('/export/{type}', [ReportController::class, 'handleExport'])->name('export');
         });
 
+        Route::resource('partners', PartnerController::class);
+        Route::resource('tickets', TicketController::class);
+        Route::put('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.status');
+
+        Route::get('/import', [ImportController::class, 'index'])->name('import.index');
+        Route::post('/import', [ImportController::class, 'store'])->name('import.store');
+
         Route::get('/profile', [ProfileController::class, 'show'])->name('tenant.profile.show');
         Route::put('/profile', [ProfileController::class, 'update'])->name('tenant.profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('tenant.profile.password');
     });
+});
+
+// Admin routes (main domain, auth required)
+Route::domain($mainDomain)->middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::put('/tenant-subscriptions/{tenantSubscription}', [TenantSubscriptionController::class, 'update'])->name('tenant-subscriptions.update');
 });
 
 // Customer Portal — tenant subdomain

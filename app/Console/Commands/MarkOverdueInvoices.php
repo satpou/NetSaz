@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Scopes\TenantScope;
 use App\Models\Tenant;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class MarkOverdueInvoices extends Command
 {

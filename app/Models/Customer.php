@@ -56,6 +56,11 @@ class Customer extends CustomerAuthenticatable
         return $this->hasMany(CustomerOtp::class);
     }
 
+    public function mikrotikAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(MikrotikAccount::class);
+    }
+
     public function getPortalIdentifierAttribute(): string
     {
         return $this->phone ?? $this->email;

@@ -40,6 +40,68 @@
         </div>
     </div>
 
+    <div class="panel" style="padding:24px;margin-bottom:20px">
+        <div class="panel-head">
+            <h3 style="font-size:16px;font-weight:600">Akun PPPoE</h3>
+            @if($customer->mikrotikAccount)
+                @if($customer->mikrotikAccount->status === 'active')
+                    <span class="badge badge-paid">Aktif</span>
+                @else
+                    <span class="badge badge-late">Nonaktif</span>
+                @endif
+            @endif
+        </div>
+
+        @if($customer->mikrotikAccount)
+            @php($account = $customer->mikrotikAccount)
+            <div style="margin-top:8px">
+                <div class="summary-row">
+                    <span class="summary-label">Username</span>
+                    <span class="summary-value mono">{{ $account->pppoe_secret }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Service</span>
+                    <span class="summary-value">{{ $account->pppoe_service }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Router</span>
+                    <span class="summary-value">{{ $account->nasServer?->name ?? '-' }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Diproses di Router</span>
+                    <span class="summary-value">{{ $account->provisioned_at?->format('d M Y H:i') ?? 'Belum' }}</span>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+                @if($account->status === 'active')
+                    <form action="{{ route('customers.pppoe.disable', $customer->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-outline">Nonaktifkan di Router</button>
+                    </form>
+                @else
+                    <form action="{{ route('customers.pppoe.enable', $customer->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Aktifkan di Router</button>
+                    </form>
+                @endif
+
+                <form action="{{ route('customers.pppoe.reset-password', $customer->id) }}" method="POST" style="display:flex;gap:8px;flex-wrap:wrap">
+                    @csrf
+                    <input type="password" name="pppoe_password" placeholder="Password baru" class="form-input" style="width:180px" required>
+                    <button type="submit" class="btn btn-outline">Reset Password</button>
+                </form>
+
+                <form action="{{ route('customers.pppoe.delete', $customer->id) }}" method="POST" onsubmit="return confirm('Hapus akun PPPoE pelanggan ini?')">
+                    @csrf
+                    <button type="submit" class="btn btn-outline" style="color:var(--red)">Hapus Akun</button>
+                </form>
+            </div>
+        @else
+            <p style="font-size:13.5px;color:var(--ink-faint);margin-top:8px">Belum ada akun PPPoE. Isi username &amp; password PPPoE saat edit pelanggan untuk memprovision akun ke router.</p>
+        @endif
+    </div>
+
     <div class="lower-grid">
         <div class="panel" style="padding:24px">
             <div class="panel-head">

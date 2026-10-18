@@ -21,9 +21,9 @@ class MidtransService
             $this->clientKey = $tenantSettings['midtrans_client_key'] ?? '';
             $this->isProduction = !empty($tenantSettings['midtrans_is_production']);
         } else {
-            $this->serverKey = config('services.midtrans.server_key');
-            $this->clientKey = config('services.midtrans.client_key');
-            $this->isProduction = config('services.midtrans.is_production', false);
+            $this->serverKey = (string) (config('services.midtrans.server_key') ?? '');
+            $this->clientKey = (string) (config('services.midtrans.client_key') ?? '');
+            $this->isProduction = (bool) config('services.midtrans.is_production', false);
         }
         $this->baseUrl = $this->isProduction
             ? 'https://app.midtrans.com/snap/v1'
@@ -169,6 +169,7 @@ class MidtransService
 
         if ($newStatus === 'success') {
             $payment->invoice->recalculateStatus();
+            MikrotikService::reactivateAfterPayment($payment);
         }
     }
 

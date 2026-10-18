@@ -29,26 +29,7 @@ class CustomerPortalLinkTest extends TestCase
 
         $this->tenant = Tenant::factory()->create(['status' => 'active']);
 
-        $plan = SubscriptionPlan::create([
-            'code' => 'pro',
-            'name' => 'Pro',
-            'price' => 299000,
-            'billing_period' => 'monthly',
-            'max_active_customers' => 500,
-            'max_routers' => 10,
-            'max_staff' => 10,
-            'features' => ['radius_hub', 'olt_management'],
-            'sort_order' => 3,
-        ]);
 
-        TenantSubscription::create([
-            'tenant_id' => $this->tenant->id,
-            'subscription_plan_id' => $plan->id,
-            'status' => 'active',
-            'started_at' => Carbon::now(),
-            'current_period_start' => Carbon::now(),
-            'current_period_end' => Carbon::now()->addMonth()->subDay(),
-        ]);
 
         $this->user = User::factory()->create([
             'tenant_id' => $this->tenant->id,

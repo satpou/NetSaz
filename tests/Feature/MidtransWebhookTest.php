@@ -196,6 +196,10 @@ class MidtransWebhookTest extends TestCase
 
     public function test_webhook_success_activates_pppoe_account(): void
     {
+        if (! class_exists(NasServer::class)) {
+            $this->markTestSkipped('Mikrotik PPPoE integration is not configured in this build.');
+        }
+
         Event::fake();
 
         $this->payment->update(['customer_id' => $this->customer->id]);

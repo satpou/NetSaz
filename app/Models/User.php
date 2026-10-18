@@ -43,4 +43,21 @@ class User extends Authenticatable
     {
         return $this->role === 'staff';
     }
+
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_array($roles)) {
+            return in_array($this->role, $roles, true);
+        }
+
+        return $this->role === $roles;
+    }
+
+    public function assignRole(string $role): self
+    {
+        $this->role = $role;
+        $this->save();
+
+        return $this;
+    }
 }

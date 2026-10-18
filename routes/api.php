@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\BillingController;
+use App\Http\Controllers\API\RouterAgentController;
 use App\Http\Controllers\WebhookController;
 use App\Models\Payment;
 use App\Models\PaymentGatewayLog;
@@ -10,6 +11,13 @@ use App\Services\XenditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+
+// Router Agent API routes (authenticated via custom Bearer token, not Sanctum)
+Route::prefix('agent')->group(function () {
+    Route::post('/connect', [RouterAgentController::class, 'connect']);
+    Route::get('/commands/pending', [RouterAgentController::class, 'pendingCommands']);
+    Route::post('/commands/{commandId}/ack', [RouterAgentController::class, 'acknowledgeCommand']);
+});
 
 Route::post('/webhook/midtrans', function (Request $request) {
     $payload = $request->all();

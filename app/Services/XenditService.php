@@ -24,9 +24,9 @@ class XenditService
             $this->webhookToken = $tenantSettings['xendit_webhook_token'] ?? '';
             $this->isProduction = ! empty($tenantSettings['xendit_is_production']);
         } else {
-            $this->apiKey = config('services.xendit.api_key');
-            $this->webhookToken = config('services.xendit.webhook_token');
-            $this->isProduction = config('services.xendit.is_production', false);
+            $this->apiKey = (string) (config('services.xendit.api_key') ?? '');
+            $this->webhookToken = (string) (config('services.xendit.webhook_token') ?? '');
+            $this->isProduction = (bool) config('services.xendit.is_production', false);
         }
         $this->baseUrl = $this->isProduction
             ? 'https://api.xendit.co'
@@ -249,6 +249,7 @@ class XenditService
 
         if ($newStatus === 'success') {
             $payment->invoice->recalculateStatus();
+            MikrotikService::reactivateAfterPayment($payment);
         }
     }
 

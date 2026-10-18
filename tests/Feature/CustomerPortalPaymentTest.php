@@ -31,18 +31,6 @@ class CustomerPortalPaymentTest extends TestCase
     {
         parent::setUp();
 
-        SubscriptionPlan::create([
-            'code' => 'launch',
-            'name' => 'Launch',
-            'price' => 99000,
-            'billing_period' => 'monthly',
-            'max_active_customers' => 150,
-            'max_routers' => 1,
-            'max_staff' => 1,
-            'features' => ['whatsapp_broadcast'],
-            'sort_order' => 1,
-        ]);
-
         $this->tenant = Tenant::factory()->create(['status' => 'active']);
         $package = Package::factory()->create(['tenant_id' => $this->tenant->id]);
         $this->customer = Customer::factory()->create([
@@ -54,16 +42,6 @@ class CustomerPortalPaymentTest extends TestCase
             'package_id' => $package->id,
             'status' => 'active',
             'join_date' => Carbon::now(),
-        ]);
-
-        $plan = SubscriptionPlan::where('code', 'launch')->first();
-        TenantSubscription::create([
-            'tenant_id' => $this->tenant->id,
-            'subscription_plan_id' => $plan->id,
-            'status' => 'active',
-            'started_at' => Carbon::now(),
-            'current_period_start' => Carbon::now(),
-            'current_period_end' => Carbon::now()->addMonth(),
         ]);
 
         $this->invoice = Invoice::create([

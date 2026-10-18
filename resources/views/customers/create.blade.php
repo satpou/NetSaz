@@ -168,6 +168,27 @@
                 <span style="font-size:12px;color:var(--ink-faint)">Tanggal dalam bulan (1-28) saat invoice otomatis di-generate. Default: 1.</span>
             </div>
 
+            <div style="margin-bottom:24px;padding:16px;border:1px solid var(--line);border-radius:10px">
+                <label class="form-label" style="margin-bottom:12px">Akun PPPoE <span style="color:var(--ink-faint);font-weight:400">(opsional — langsung diproses ke router)</span></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+                    <div>
+                        <label class="form-label">Username</label>
+                        <input type="text" name="pppoe_username" value="{{ old('pppoe_username') }}" class="form-input" placeholder="cth: cust001">
+                    </div>
+                    <div>
+                        <label class="form-label">Password</label>
+                        <input type="password" name="pppoe_password" value="{{ old('pppoe_password') }}" class="form-input" placeholder="Password PPPoE">
+                    </div>
+                    <div>
+                        <label class="form-label">Service</label>
+                        <select name="pppoe_service" class="form-input">
+                            <option value="pppoe" {{ old('pppoe_service', 'pppoe') === 'pppoe' ? 'selected' : '' }}>pppoe</option>
+                            <option value="pppoeoe" {{ old('pppoe_service') === 'pppoeoe' ? 'selected' : '' }}>pppoeoe</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div style="display:flex;gap:12px">
                 <button type="submit" class="btn btn-primary">Simpan Pelanggan</button>
                 <a href="{{ route('customers.index') }}" class="btn btn-outline">Batal</a>
