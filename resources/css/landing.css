@@ -176,6 +176,7 @@
 }
 
 .hero-note span {
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -784,7 +785,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 11px;
   font-weight: 700;
   padding: 5px 14px;

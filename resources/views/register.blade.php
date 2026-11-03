@@ -55,7 +55,7 @@
     <div class="login-right">
         <div class="login-form-wrap" style="background:transparent;border:none;box-shadow:none;">
 <div class="login-form-logo">
-    <img src="{{ asset('images/netsaz/NetSaz_logo_transparent.png') }}" alt="NetSaz" style="height: 48px;">
+    <img src="{{ asset('images/netsaz/NetSaz_logo_white.png') }}" alt="NetSaz" style="height: 48px;">
 </div>
 
             <div class="login-form-header">

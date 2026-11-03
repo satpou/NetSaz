@@ -18,7 +18,7 @@
         padding: 40px;
         position: relative;
         overflow: hidden;
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--ink) 100%);
+        background: linear-gradient(150deg, var(--primary-dark) 0%, #0B3B2A 45%, var(--deep) 100%);
     }
 
     @media (min-width: 768px) {
@@ -169,7 +169,7 @@
         width: 100%;
         padding: 14px 24px;
         background: var(--primary);
-        color: #fff;
+        color: var(--on-primary);
         border: none;
         border-radius: 10px;
         font-size: 15px;
@@ -273,7 +273,7 @@
     <div class="register-right">
         <div class="register-form-wrap">
             <div class="register-form-logo">
-                <img src="{{ asset('images/netsaz/NetSaz_logo_transparent.png') }}" alt="NetSaz Logo">
+                <img src="{{ asset('images/netsaz/NetSaz_logo_white.png') }}" alt="NetSaz Logo">
             </div>
 
             <div class="register-form-header">

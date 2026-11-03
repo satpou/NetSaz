@@ -27,7 +27,8 @@
 <body>
     <aside class="sidebar" :class="{ 'collapsed': sidebarCollapsed }">
 <div class="sidebar-top">
-    <div class="logo-mark">N</div>
+    <img class="sidebar-logo" src="{{ asset('images/netsaz/NetSaz_icon.png') }}" alt="" width="34" height="34">
+    <span class="sidebar-brand">NetSaz</span>
 </div>
         <nav class="sidebar-nav">
             <div class="section-label">MENU</div>

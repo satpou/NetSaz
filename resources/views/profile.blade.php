@@ -107,7 +107,7 @@
 <style>
   .profile-wrap { max-width:920px; margin:0 auto; }
   .profile-header { display:flex; align-items:center; gap:20px; padding:24px; background:var(--panel); border:1px solid var(--line); border-radius:16px; margin-bottom:24px; box-shadow:var(--shadow); }
-  .profile-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:28px; flex-shrink:0; }
+  .profile-avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--on-primary); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:28px; flex-shrink:0; }
   .profile-name { font-family:'Space Grotesk'; font-size:22px; font-weight:700; color:var(--ink); margin-bottom:4px; letter-spacing:-0.02em; }
   .profile-email { font-size:13.5px; color:var(--ink-soft); margin-bottom:12px; }
   .profile-meta { display:flex; gap:8px; flex-wrap:wrap; }

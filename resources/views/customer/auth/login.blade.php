@@ -6,7 +6,7 @@
 <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
     <div style="width:100%;max-width:420px">
         <div style="text-align:center;margin-bottom:32px">
-            <div style="width:48px;height:48px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:22px;color:#fff;margin:0 auto 12px">PB</div>
+            <div style="width:48px;height:48px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:22px;color:var(--on-primary);margin:0 auto 12px">PB</div>
             <h1 style="font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px">Portal Pelanggan</h1>
             <p style="font-size:14px;color:var(--ink-soft)">Masuk untuk lihat tagihan dan pembayaran</p>
         </div>

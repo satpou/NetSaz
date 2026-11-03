@@ -17,14 +17,14 @@
     <!-- Page-specific styles -->
     @stack('styles')
 </head>
-<body style="background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased">
+<body>
     <!-- Scroll progress bar -->
     <div id="progress"></div>
 
     <!-- Navbar -->
     <header class="navbar">
 <nav class="navbar-nav">
-    <a href="{{ route('dashboard') }}" class="logo"><img src="{{ asset('images/netsaz/NetSaz_logo_transparent.png') }}" alt="NetSaz" style="height:36px;width:auto;object-fit:contain;display:block;"></a>
+    <a href="{{ route('dashboard') }}" class="logo"><img src="{{ asset('images/netsaz/NetSaz_logo_white.png') }}" alt="NetSaz" style="height:40px;width:auto;object-fit:contain;display:block;"></a>
     <div class="nav-links">
                 <a href="{{ route('features') }}" class="nav-link {{ request()->routeIs('features') ? 'nav-link-active' : '' }}">Fitur</a>
                 <a href="{{ route('price') }}" class="nav-link {{ request()->routeIs('price') ? 'nav-link-active' : '' }}">Harga</a>

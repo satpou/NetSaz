@@ -17,6 +17,16 @@
     --primary-dark: #00C67E;
     --primary-tint: rgba(0,255,156,.16);
     --primary-tint-solid: #0B2E22;
+    --primary-glow: rgba(0,255,156,.35);
+    --on-primary: #03140C; /* teks di atas hijau neon — putih kontrasnya terlalu rendah */
+
+    /* Biru brand (logo) */
+    --blue: #2660B0;
+    --blue-soft: #5B8EE0;
+    --blue-tint: rgba(38,96,176,.18);
+
+    --ring: 0 0 0 3px rgba(0,255,156,.28);
+    --ease-out: cubic-bezier(.2,.7,.3,1);
 
     --amber: #F5B94E;
     --amber-tint: rgba(245,185,78,.14);
@@ -61,6 +71,22 @@
     font-family: 'Space Grotesk', sans-serif;
     letter-spacing: -0.02em;
     color: var(--ink);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
   }
 
   .mono {
@@ -127,17 +153,25 @@
     font-size: 14.5px;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: transform .18s var(--ease-out), box-shadow .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
   }
 
   .btn-primary {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff;
+    color: var(--on-primary);
     box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 24px -10px rgba(0,255,156,.6);
   }
 
   .btn-primary:hover {
     background: linear-gradient(135deg, #4DFFB8, var(--primary));
+    box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 14px 32px -10px var(--primary-glow);
     transform: translateY(-1px);
   }
 
@@ -223,7 +257,7 @@
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.04);
   }
 
   /* ---------- glass surface ---------- */
@@ -276,6 +310,11 @@
   .badge-primary {
     background: var(--primary-tint);
     color: var(--primary);
+  }
+
+  .badge-blue {
+    background: var(--blue-tint);
+    color: var(--blue-soft);
   }
 
   .badge-ghost {
@@ -387,6 +426,7 @@
   }
 
   .stat-value {
+    font-variant-numeric: tabular-nums;
     font-family: 'JetBrains Mono';
     font-size: 28px;
     font-weight: 600;
@@ -421,6 +461,11 @@
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
     color: var(--ink-soft);
+    transition: background .15s ease;
+  }
+
+  .data-table tbody tr:hover td {
+    background: rgba(255,255,255,.025);
   }
 
   .data-table td.mono {
