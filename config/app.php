@@ -73,6 +73,9 @@ return [
 
     'timezone' => 'UTC',
 
+    // Zona waktu jadwal (invoice, isolir, reminder WA) mengikuti WIB.
+    'schedule_timezone' => env('SCHEDULE_TIMEZONE', 'Asia/Jakarta'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
