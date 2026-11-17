@@ -18,7 +18,7 @@
     @if($hasMidtrans)
     <div class="status-pill ok"><span class="dot"></span>Pembayaran online aktif</div>
     @else
-    <div class="status-pill warn"><span class="dot"></span>Pembayaran online — aktifkan Midtrans di pengaturan tenant</div>
+    <a href="{{ route('tenant.settings.edit', $ts ? ['tenant_slug' => $ts] : []) }}" class="status-pill warn" style="text-decoration:none"><span class="dot"></span>Pembayaran online — aktifkan Midtrans di pengaturan tenant &rarr;</a>
     @endif
 </div>
 

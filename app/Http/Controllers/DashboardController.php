@@ -22,7 +22,7 @@ class DashboardController extends Controller
         }
 
         if (!$isDashboard) {
-            return view('landing');
+            return redirect('/dashboard');
         }
 
         $user = Auth::user();
@@ -31,8 +31,17 @@ class DashboardController extends Controller
 
         $host = request()->getHost();
         $mainDomain = config('app.main_domain');
-        $isMainDomain = ($host === $mainDomain || !str_contains($host, '.'));
+        $tenantDomain = config('app.tenant_domain');
+        $isTenantDomain = ($host !== $tenantDomain && str_ends_with($host, '.' . $tenantDomain));
+        $isMainDomain = !$isTenantDomain;
         $isPlatformSuperAdmin = $user->isTenantSuperAdmin() && is_null($user->tenant_id);
+
+        $isSubdomainCapable = !str_contains($host, 'trycloudflare.com')
+            && !str_contains($host, 'ngrok')
+            && !str_contains($host, 'pinggy')
+            && !str_contains($host, 'loca.lt')
+            && !filter_var($host, FILTER_VALIDATE_IP)
+            && ($host === $tenantDomain || str_ends_with($host, '.' . $tenantDomain) || $host === 'localhost');
 
         if ($isMainDomain) {
             if ($isPlatformSuperAdmin) {
@@ -40,14 +49,19 @@ class DashboardController extends Controller
             }
 
             if ($user->tenant) {
-                $scheme = request()->getScheme();
-                $port = request()->getPort();
-                $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
+                if ($isSubdomainCapable && $host === $mainDomain && !app()->isLocal()) {
+                    $scheme = request()->getScheme();
+                    $port = request()->getPort();
+                    $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
 
-                return redirect("{$scheme}://{$user->tenant->slug}." . config('app.tenant_domain') . "{$portSuffix}/dashboard?email=" . urlencode($user->email));
+                    return redirect("{$scheme}://{$user->tenant->slug}." . config('app.tenant_domain') . "{$portSuffix}/dashboard?email=" . urlencode($user->email));
+                }
+                // When on tunnel, IP, or local dev: show tenant dashboard directly
+            } else {
+                // Authenticated user without tenant and not superadmin - show landing
+                Auth::logout();
+                return redirect('/')->with('error', 'Akun Anda tidak terkait dengan ISP manapun.');
             }
-
-            return view('landing');
         }
 
         if ($isPlatformSuperAdmin && !$tid) {
@@ -142,12 +156,14 @@ class DashboardController extends Controller
         $suspendedTenants = Tenant::where('status', 'suspended')->count();
 
         $totalUsers = User::whereNotNull('tenant_id')->count();
+        $adminUsers = User::whereNotNull('tenant_id')->whereIn('role', ['admin', 'tenant_admin', 'super_admin'])->count();
+        $staffUsers = User::whereNotNull('tenant_id')->where('role', 'staff')->count();
         $totalCustomers = Customer::count();
         $totalRevenue = Payment::where('status', 'success')->sum('amount');
 
         return view('dashboard-platform', compact(
             'totalTenants', 'activeTenants', 'pendingTenants', 'suspendedTenants',
-            'totalUsers', 'totalCustomers', 'totalRevenue'
+            'totalUsers', 'adminUsers', 'staffUsers', 'totalCustomers', 'totalRevenue'
         ));
     }
 

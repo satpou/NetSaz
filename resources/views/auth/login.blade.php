@@ -501,7 +501,7 @@
                 </div>
             @endif
 
-            <form action="{{ url()->current() }}" method="POST" class="login-form" onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.textContent='Memproses...';">
+            <form method="POST" class="login-form" onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.textContent='Memproses...';">
                 @csrf
 
                 <div style="display:flex;flex-direction:column;gap:18px">

@@ -34,6 +34,16 @@ class SubscriptionPlan extends Model
         return $this->hasMany(TenantSubscription::class);
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(TenantSubscription::class);
+    }
+
+    public function activeSubscriptions(): HasMany
+    {
+        return $this->hasMany(TenantSubscription::class)->whereIn('status', ['active', 'trial']);
+    }
+
     public function hasFeature(string $feature): bool
     {
         return in_array($feature, $this->features ?? [], true);

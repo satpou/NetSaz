@@ -29,6 +29,11 @@ class User extends Authenticatable
         return $this->belongsTo(Tenant::class);
     }
 
+    public function isPlatformSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin' && is_null($this->tenant_id);
+    }
+
     public function isTenantSuperAdmin(): bool
     {
         return $this->role === 'super_admin';

@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Tenant;
+use Illuminate\Http\Request;
+
+class TenantSettingController extends Controller
+{
+    public function edit()
+    {
+        $tid = tenantId();
+        $tenant = Tenant::findOrFail($tid);
+        $settings = $tenant->settings ?? [];
+
+        return view('tenant.settings', compact('tenant', 'settings'));
+    }
+
+    public function update(Request $request)
+    {
+        $tid = tenantId();
+        $tenant = Tenant::findOrFail($tid);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'whatsapp_number' => 'nullable|string|max:25',
+            'brand_color' => 'nullable|string|max:20',
+            'slogan' => 'nullable|string|max:255',
+            // Midtrans
+            'midtrans_server_key' => 'nullable|string|max:255',
+            'midtrans_client_key' => 'nullable|string|max:255',
+            'midtrans_is_production' => 'nullable|boolean',
+            // WhatsApp Gateway
+            'wa_gateway_provider' => 'nullable|string|max:50',
+            'wa_api_token' => 'nullable|string|max:255',
+            'wa_sender_number' => 'nullable|string|max:25',
+            // Billing preferences
+            'invoice_due_days' => 'nullable|integer|min:1|max:30',
+            'auto_isolate_enabled' => 'nullable|boolean',
+        ]);
+
+        $tenant->name = $validated['name'];
+        $tenant->whatsapp_number = $validated['whatsapp_number'] ?? null;
+        if (! empty($validated['brand_color'])) {
+            $tenant->brand_color = $validated['brand_color'];
+        }
+
+        // Encrypt secret settings
+        if (isset($validated['midtrans_server_key'])) {
+            $tenant->setSecretSetting('midtrans_server_key', $validated['midtrans_server_key']);
+        }
+        if (isset($validated['midtrans_client_key'])) {
+            $tenant->setSecretSetting('midtrans_client_key', $validated['midtrans_client_key']);
+        }
+
+        // Save public settings
+        $settings = $tenant->settings ?? [];
+        $settings['midtrans_is_production'] = $request->boolean('midtrans_is_production', false);
+        $settings['slogan'] = $validated['slogan'] ?? ($settings['slogan'] ?? null);
+        $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'fonnte';
+        $settings['wa_api_token'] = $validated['wa_api_token'] ?? ($settings['wa_api_token'] ?? null);
+        $settings['wa_sender_number'] = $validated['wa_sender_number'] ?? ($settings['wa_sender_number'] ?? null);
+        $settings['invoice_due_days'] = (int) ($validated['invoice_due_days'] ?? 7);
+        $settings['auto_isolate_enabled'] = $request->boolean('auto_isolate_enabled', true);
+
+        $tenant->settings = $settings;
+        $tenant->save();
+
+        return redirect()->route('tenant.settings.edit', request()->route('tenant_slug') ? ['tenant_slug' => request()->route('tenant_slug')] : [])
+            ->with('success', 'Pengaturan ISP berhasil diperbarui.');
+    }
+}

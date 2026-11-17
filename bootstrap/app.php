@@ -13,9 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'tenant' => \App\Http\Middleware\IdentifyTenant::class,
             'tenant.subdomain' => \App\Http\Middleware\ResolveTenantFromSubdomain::class,
+            'platform.superadmin' => \App\Http\Middleware\PlatformSuperAdminOnly::class,
         ]);
 
         // Payment gateway callbacks cannot send CSRF tokens

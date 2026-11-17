@@ -109,21 +109,18 @@ class AuthController extends Controller
         $host = $request->getHost();
         $mainDomain = config('app.main_domain');
         $tenantDomain = config('app.tenant_domain');
-        $isMainDomain = ($host === $mainDomain || !str_contains($host, '.'));
+        $isTenantDomain = ($host !== $tenantDomain && str_ends_with($host, '.' . $tenantDomain));
+        $isMainDomain = !$isTenantDomain;
 
         if (Auth::check()) {
             $user = Auth::user();
 
             if ($this->isPlatformSuperAdmin($user)) {
-                if ($isMainDomain) {
+                return redirect()->intended('/dashboard');
+            } elseif ($user->tenant) {
+                if ($isTenantDomain && $user->tenant->slug === Str::before($host, '.' . $tenantDomain)) {
                     return redirect()->intended('/dashboard');
                 }
-            } elseif (
-                !$isMainDomain
-                && $user->tenant
-                && str_ends_with($host, '.' . $tenantDomain)
-                && $user->tenant->slug === Str::before($host, '.' . $tenantDomain)
-            ) {
                 return redirect()->intended('/dashboard');
             }
         }
@@ -139,42 +136,19 @@ class AuthController extends Controller
         ]);
 
         $host = $request->getHost();
-        $mainDomain = config('app.main_domain');
-        $isMainDomain = ($host === $mainDomain || !str_contains($host, '.'));
+        $tenantDomain = config('app.tenant_domain');
+        $isTenantDomain = ($host !== $tenantDomain && str_ends_with($host, '.' . $tenantDomain));
+        $isMainDomain = !$isTenantDomain;
 
-        if ($isMainDomain) {
-            $user = User::where('email', $request->email)->first();
-
-            if ($user && $user->tenant) {
-                $scheme = $request->getScheme();
-                $port = $request->getPort();
-                $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
-                $tenantDomain = config('app.tenant_domain');
-
-                return redirect("{$scheme}://{$user->tenant->slug}.{$tenantDomain}{$portSuffix}/login?email=" . urlencode($request->email));
-            }
-
-            if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-                $request->session()->regenerate();
-                $user = Auth::user();
-
-                if (!$user->is_active) {
-                    Auth::logout();
-                    return back()->withErrors(['email' => 'Akun Anda tidak aktif.'])->onlyInput('email');
-                }
-
-                return redirect()->intended('/dashboard')
-                    ->with('success', 'Selamat datang kembali!');
-            }
-
-            return back()->withErrors([
-                'email' => 'Email atau password salah.',
-            ])->onlyInput('email');
-        }
+        $isSubdomainCapable = !str_contains($host, 'trycloudflare.com')
+            && !str_contains($host, 'ngrok')
+            && !str_contains($host, 'pinggy')
+            && !str_contains($host, 'loca.lt')
+            && !filter_var($host, FILTER_VALIDATE_IP)
+            && ($host === $tenantDomain || str_ends_with($host, '.' . $tenantDomain) || $host === 'localhost');
 
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
-
             $user = Auth::user();
 
             if (!$user->is_active) {
@@ -182,13 +156,41 @@ class AuthController extends Controller
                 return back()->withErrors(['email' => 'Akun Anda tidak aktif.'])->onlyInput('email');
             }
 
-            $tenantId = session('tenant_id');
+            // Set tenant session context if user belongs to a tenant
+            if ($user->tenant_id) {
+                session([
+                    'tenant_id' => $user->tenant_id,
+                    'active_tenant_id' => $user->tenant_id,
+                    'tenant_name' => $user->tenant?->name,
+                    'tenant_slug' => $user->tenant?->slug,
+                ]);
+                if ($user->tenant) {
+                    \Illuminate\Support\Facades\URL::defaults(['tenant_slug' => $user->tenant->slug]);
+                }
+            }
 
-            if (!$this->isPlatformSuperAdmin($user) && $user->tenant_id !== $tenantId) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Akun Anda tidak terdaftar di ISP ini.'
-                ])->onlyInput('email');
+            // Subdomain check: if accessed from a tenant subdomain, verify user belongs to this tenant
+            if ($isTenantDomain) {
+                $subdomainSlug = Str::before($host, '.' . $tenantDomain);
+                if (!$this->isPlatformSuperAdmin($user) && (!$user->tenant || $user->tenant->slug !== $subdomainSlug)) {
+                    Auth::logout();
+                    return back()->withErrors([
+                        'email' => 'Akun Anda tidak terdaftar di ISP ini.'
+                    ])->onlyInput('email');
+                }
+
+                return redirect()->intended('/dashboard')
+                    ->with('success', 'Selamat datang kembali!');
+            }
+
+            // If accessed from main domain, and subdomains are supported, and in production mode
+            if ($user->tenant && $isSubdomainCapable && $host === config('app.main_domain') && !app()->isLocal()) {
+                $scheme = $request->getScheme();
+                $port = $request->getPort();
+                $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
+
+                return redirect("{$scheme}://{$user->tenant->slug}.{$tenantDomain}{$portSuffix}/dashboard")
+                    ->with('success', 'Selamat datang kembali!');
             }
 
             return redirect()->intended('/dashboard')

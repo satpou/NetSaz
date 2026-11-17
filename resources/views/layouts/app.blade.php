@@ -3,7 +3,12 @@
     $tenantDomain = config('app.tenant_domain');
     $host = request()->getHost();
     $isTenantDomain = $host !== $tenantDomain && str_ends_with($host, '.'.$tenantDomain);
-    $ts = $isTenantDomain ? str_replace('.'.$tenantDomain, '', $host) : null;
+    $ts = $isTenantDomain ? str_replace('.'.$tenantDomain, '', $host) : ($user?->tenant?->slug ?? session('tenant_slug') ?? null);
+    $isTenantMode = $isTenantDomain || ($user && $user->tenant_id);
+    $isPlatformSuperAdmin = $user && $user->isPlatformSuperAdmin();
+    if ($ts) {
+        \Illuminate\Support\Facades\URL::defaults(['tenant_slug' => $ts]);
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebarCollapsed: false, showBugModal: false, showUserMenu: false }">
@@ -32,12 +37,32 @@
 </div>
         <nav class="sidebar-nav">
             <div class="section-label">MENU</div>
-            <a class="nav-item {{ request()->routeIs('tenant.dashboard') ? 'active' : '' }}" href="{{ $ts ? route('tenant.dashboard', ['tenant_slug' => $ts]) : route('dashboard') }}">
+            <a class="nav-item {{ request()->routeIs('tenant.dashboard') || request()->routeIs('dashboard') || request()->routeIs('dashboard.app') ? 'active' : '' }}" href="{{ $isTenantDomain && $ts ? route('tenant.dashboard', ['tenant_slug' => $ts]) : route('dashboard.app') }}">
                 <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 9.5V20a1 1 0 0 0 1 1h5v-6h2v6h5a1 1 0 0 0 1-1V9.5" stroke="currentColor" stroke-width="2"/></svg></span>
                 <span class="nav-label">Dashboard</span>
             </a>
 
-            @if($ts)
+            @if($isPlatformSuperAdmin)
+            <div class="section-label">SUPER ADMIN</div>
+            <a class="nav-item {{ request()->routeIs('admin.tenants*') ? 'active' : '' }}" href="{{ route('admin.tenants.index') }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+                <span class="nav-label">Kelola Tenant</span>
+            </a>
+            <a class="nav-item {{ request()->routeIs('admin.plans*') ? 'active' : '' }}" href="{{ route('admin.plans.index') }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+                <span class="nav-label">Paket Langganan</span>
+            </a>
+            <a class="nav-item {{ request()->routeIs('admin.subscriptions*') ? 'active' : '' }}" href="{{ route('admin.subscriptions.index') }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+                <span class="nav-label">Subscription</span>
+            </a>
+            <a class="nav-item {{ request()->routeIs('admin.reports*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+                <span class="nav-label">Laporan</span>
+            </a>
+            @endif
+
+            @if($isTenantMode)
             <div class="section-label">MANAJEMEN</div>
 
             {{-- Pelanggan & Billing --}}
@@ -50,18 +75,50 @@
                     <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
                 <div x-show="open" x-collapse class="nav-sub">
-                    <a href="{{ route('customers.index', ['tenant_slug' => $ts]) }}" class="nav-sub-item {{ request()->routeIs('customers*') ? 'active' : '' }}">Pelanggan</a>
-                    <a href="{{ route('areas.index', ['tenant_slug' => $ts]) }}" class="nav-sub-item {{ request()->routeIs('areas*') ? 'active' : '' }}">Area</a>
-                    <a href="{{ route('packages.index', ['tenant_slug' => $ts]) }}" class="nav-sub-item {{ request()->routeIs('packages*') ? 'active' : '' }}">Paket</a>
-                    <a href="{{ route('invoices.index', ['tenant_slug' => $ts]) }}" class="nav-sub-item {{ request()->routeIs('invoices*') ? 'active' : '' }}">Invoice</a>
-                    <a href="{{ route('payments.index', ['tenant_slug' => $ts]) }}" class="nav-sub-item {{ request()->routeIs('payments*') ? 'active' : '' }}">Pembayaran</a>
+                    <a href="{{ route('customers.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('customers*') ? 'active' : '' }}">Pelanggan</a>
+                    <a href="{{ route('areas.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('areas*') ? 'active' : '' }}">Area</a>
+                    <a href="{{ route('packages.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('packages*') ? 'active' : '' }}">Paket</a>
+                    <a href="{{ route('invoices.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('invoices*') ? 'active' : '' }}">Invoice</a>
+                    <a href="{{ route('payments.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('payments*') ? 'active' : '' }}">Pembayaran</a>
                 </div>
             </div>
 
+            {{-- Mitra / Reseller --}}
+            <a class="nav-item {{ request()->routeIs('partners*') ? 'active' : '' }}" href="{{ route('partners.index', $ts ? ['tenant_slug' => $ts] : []) }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <span class="nav-label">Mitra / Reseller</span>
+            </a>
+
+            {{-- Tiket Gangguan --}}
+            <a class="nav-item {{ request()->routeIs('tickets*') ? 'active' : '' }}" href="{{ route('tickets.index', $ts ? ['tenant_slug' => $ts] : []) }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+                <span class="nav-label">Tiket Gangguan</span>
+            </a>
+
             {{-- Laporan --}}
-            <a class="nav-item {{ request()->routeIs('reports*') ? 'active' : '' }}" href="{{ route('reports.index', ['tenant_slug' => $ts]) }}">
+            <a class="nav-item {{ request()->routeIs('reports*') ? 'active' : '' }}" href="{{ route('reports.index', $ts ? ['tenant_slug' => $ts] : []) }}">
                 <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
                 <span class="nav-label">Laporan</span>
+            </a>
+
+            {{-- Export & Import --}}
+            <a class="nav-item {{ request()->routeIs('import*') ? 'active' : '' }}" href="{{ route('import.index', $ts ? ['tenant_slug' => $ts] : []) }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                <span class="nav-label">Export & Import</span>
+            </a>
+
+            <div class="section-label">JARINGAN & INTEGRASI</div>
+
+            {{-- Router MikroTik --}}
+            <a class="nav-item {{ request()->routeIs('routers*') ? 'active' : '' }}" href="{{ route('routers.index', $ts ? ['tenant_slug' => $ts] : []) }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></span>
+                <span class="nav-label">Router MikroTik</span>
+            </a>
+
+            {{-- Pengaturan ISP --}}
+            <a class="nav-item {{ request()->routeIs('tenant.settings*') ? 'active' : '' }}" href="{{ route('tenant.settings.edit', $ts ? ['tenant_slug' => $ts] : []) }}">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="nav-label">Pengaturan ISP</span>
             </a>
             @endif
         </nav>
@@ -114,7 +171,7 @@
 
     <div class="main" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
         <div class="topbar">
-            <form action="{{ $ts ? route('customers.index', ['tenant_slug' => $ts]) : '#' }}" method="GET" class="search">
+            <form action="{{ $isTenantDomain && $ts ? route('customers.index', ['tenant_slug' => $ts]) : ($isTenantMode ? route('customers.index', $ts ? ['tenant_slug' => $ts] : []) : '#') }}" method="GET" class="search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 <input type="text" name="search" placeholder="Cari pelanggan, invoice..." value="{{ request('search') }}" autocomplete="off" style="border:none;background:transparent;flex:1;outline:none;font-size:13.5px;color:var(--ink);font-family:inherit">
             </form>
@@ -135,16 +192,16 @@
                             </div>
                         </div>
                         <div class="user-dropdown-divider"></div>
-                        <a href="{{ $ts ? route('tenant.profile.show', ['tenant_slug' => $ts]) : route('profile.show') }}" class="user-dropdown-item">
+                        <a href="{{ $isTenantDomain && $ts ? route('tenant.profile.show', ['tenant_slug' => $ts]) : ($isTenantMode ? route('tenant.profile.show', $ts ? ['tenant_slug' => $ts] : []) : route('profile.show')) }}" class="user-dropdown-item">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             Lihat Profil
                         </a>
-                        <a href="{{ $ts ? route('tenant.profile.show', ['tenant_slug' => $ts]) . '#password' : route('profile.show') . '#password' }}" class="user-dropdown-item">
+                        <a href="{{ ($isTenantDomain && $ts ? route('tenant.profile.show', ['tenant_slug' => $ts]) : ($isTenantMode ? route('tenant.profile.show', $ts ? ['tenant_slug' => $ts] : []) : route('profile.show'))) . '#password' }}" class="user-dropdown-item">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                             Ganti Password
                         </a>
                         <div class="user-dropdown-divider"></div>
-                        <form method="POST" action="{{ $ts ? route('tenant.logout', ['tenant_slug' => $ts]) : route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="user-dropdown-item danger" style="width:100%;text-align:left;background:transparent;border:none;cursor:pointer">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>

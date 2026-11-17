@@ -67,11 +67,16 @@ class Tenant extends Model
         return $this->hasMany(TenantSubscription::class);
     }
 
+    public function currentSubscription(): HasOne
+    {
+        return $this->hasOne(TenantSubscription::class)->latestOfMany();
+    }
+
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(TenantSubscription::class)
             ->whereIn('status', ['active', 'trial'])
-            ->latest();
+            ->latestOfMany();
     }
 
     public function isActive(): bool
