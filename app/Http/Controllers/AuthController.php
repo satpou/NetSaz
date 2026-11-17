@@ -112,19 +112,6 @@ class AuthController extends Controller
         $isTenantDomain = ($host !== $tenantDomain && str_ends_with($host, '.' . $tenantDomain));
         $isMainDomain = !$isTenantDomain;
 
-        if (Auth::check()) {
-            $user = Auth::user();
-
-            if ($this->isPlatformSuperAdmin($user)) {
-                return redirect()->intended('/dashboard');
-            } elseif ($user->tenant) {
-                if ($isTenantDomain && $user->tenant->slug === Str::before($host, '.' . $tenantDomain)) {
-                    return redirect()->intended('/dashboard');
-                }
-                return redirect()->intended('/dashboard');
-            }
-        }
-
         return view('auth.login', compact('isMainDomain'));
     }
 
