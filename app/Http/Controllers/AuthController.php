@@ -196,6 +196,15 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        $mainDomain = config('app.main_domain');
+        $scheme = $request->getScheme();
+        $port = $request->getPort();
+        $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
+
+        if ($mainDomain && !app()->isLocal() && !filter_var($request->getHost(), FILTER_VALIDATE_IP) && !str_contains($request->getHost(), 'trycloudflare.com')) {
+            return redirect("{$scheme}://{$mainDomain}{$portSuffix}/");
+        }
+
         return redirect('/');
     }
 }
