@@ -121,4 +121,29 @@ class WebhookController extends Controller
 
         return redirect('/')->with('error', 'Pembayaran tidak dapat ditampilkan.');
     }
+
+    public function githubDeploy(Request $request)
+    {
+        $secret = config('services.github.webhook_secret') ?? env('GITHUB_WEBHOOK_SECRET');
+
+        if (!empty($secret)) {
+            $signature = $request->header('X-Hub-Signature-256');
+            if (!$signature) {
+                return response()->json(['error' => 'Missing signature header'], 401);
+            }
+            $expectedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+            if (!hash_equals($expectedSignature, $signature)) {
+                return response()->json(['error' => 'Invalid webhook signature'], 403);
+            }
+        }
+
+        \Illuminate\Support\Facades\Artisan::call('git:sync', ['--force' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'VM synchronized with GitHub successfully',
+            'output' => trim($output),
+        ]);
+    }
 }

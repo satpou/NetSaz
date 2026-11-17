@@ -123,6 +123,8 @@ Route::post('/webhook/xendit', function (Request $request) {
     return response()->json(['status' => 'ok']);
 })->middleware('throttle:60,1');
 
+Route::post('/webhook/github-deploy', [WebhookController::class, 'githubDeploy'])->middleware('throttle:30,1');
+
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/customers/{customer}/invoices/unpaid', [BillingController::class, 'unpaidInvoices']);
     Route::get('/customers/{customer}/payments', [BillingController::class, 'customerPaymentHistory']);

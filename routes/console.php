@@ -29,6 +29,13 @@ Schedule::command('subscriptions:check-status')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/subscription-check.log'));
 
+// Auto-sync code from GitHub repository every 2 minutes
+Schedule::command('git:sync')
+    ->everyTwoMinutes()
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/git-sync.log'));
+
 // Auto-isolate at 03:00
 Schedule::command('auto-isolate:run')
     ->dailyAt('03:00')
