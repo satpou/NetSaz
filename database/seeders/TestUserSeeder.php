@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Models\TenantSubscription;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,6 +21,20 @@ class TestUserSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        $launchPlan = SubscriptionPlan::where('code', 'launch')->first()
+            ?? SubscriptionPlan::orderBy('sort_order')->first();
+
+        if ($launchPlan && ! TenantSubscription::where('tenant_id', $tenant->id)->whereIn('status', ['active', 'trial'])->exists()) {
+            TenantSubscription::create([
+                'tenant_id' => $tenant->id,
+                'subscription_plan_id' => $launchPlan->id,
+                'status' => 'active',
+                'started_at' => now(),
+                'current_period_start' => now(),
+                'current_period_end' => now()->addMonth(),
+            ]);
+        }
 
         // Platform super admin (no tenant — manages all ISPs)
         $superAdmin = User::firstOrCreate(

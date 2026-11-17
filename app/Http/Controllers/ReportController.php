@@ -175,14 +175,13 @@ class ReportController extends Controller
 
     public function exportRevenue(Request $request)
     {
-        $year = $request->query('year', now()->year);
+        $year = (int) $request->query('year', now()->year);
 
         $monthly = Payment::where('status', 'success')
             ->whereYear('paid_at', $year)
-            ->selectRaw("strftime('%m', paid_at) as month, SUM(amount) as total")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month');
+            ->get(['paid_at', 'amount'])
+            ->groupBy(fn ($payment) => Carbon::parse($payment->paid_at)->format('m'))
+            ->map(fn ($group) => $group->sum('amount'));
 
         $months = [
             '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',

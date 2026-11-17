@@ -16,7 +16,7 @@ class ResolveTenantFromSubdomain
         if (app()->isLocal() && $request->has('tenant')) {
             $tenant = Tenant::where('slug', $request->query('tenant'))->first();
             if ($tenant) {
-                session(['tenant_id' => $tenant->id]);
+                session(['tenant_id' => $tenant->id, 'active_tenant_id' => $tenant->id]);
                 URL::defaults(['tenant_slug' => $tenant->slug]);
                 return $next($request);
             }
@@ -33,7 +33,7 @@ class ResolveTenantFromSubdomain
                 abort(404, 'ISP tidak ditemukan.');
             }
 
-            session(['tenant_id' => $tenant->id]);
+            session(['tenant_id' => $tenant->id, 'active_tenant_id' => $tenant->id]);
             URL::defaults(['tenant_slug' => $tenant->slug]);
         }
 

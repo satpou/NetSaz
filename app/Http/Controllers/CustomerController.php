@@ -12,6 +12,7 @@ use App\Services\MikrotikService;
 use App\Services\PlanLimitChecker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -53,9 +54,15 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        $tid = tenantId();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:customers,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('customers', 'email')->where(fn ($q) => $q->where('tenant_id', $tid)),
+            ],
             'phone' => 'nullable|string|max:20',
             'address' => 'required|string',
             'area' => 'nullable|string|max:255',
@@ -63,7 +70,10 @@ class CustomerController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'ktp_id' => 'nullable|string|max:50',
             'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'package_id' => 'required|exists:packages,id',
+            'package_id' => [
+                'required',
+                Rule::exists('packages', 'id')->where(fn ($q) => $q->where('tenant_id', $tid)),
+            ],
             'status' => 'required|in:active,isolated,suspended',
             'join_date' => 'required|date',
             'billing_cycle_day' => 'nullable|integer|min:1|max:28',
@@ -144,9 +154,17 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
+        $tid = tenantId();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:customers,email,'.$customer->id,
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('customers', 'email')
+                    ->ignore($customer->id)
+                    ->where(fn ($q) => $q->where('tenant_id', $tid)),
+            ],
             'phone' => 'nullable|string|max:20',
             'address' => 'required|string',
             'area' => 'nullable|string|max:255',
@@ -154,7 +172,10 @@ class CustomerController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'ktp_id' => 'nullable|string|max:50',
             'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'package_id' => 'required|exists:packages,id',
+            'package_id' => [
+                'required',
+                Rule::exists('packages', 'id')->where(fn ($q) => $q->where('tenant_id', $tid)),
+            ],
             'status' => 'required|in:active,isolated,suspended',
             'join_date' => 'required|date',
             'billing_cycle_day' => 'nullable|integer|min:1|max:28',

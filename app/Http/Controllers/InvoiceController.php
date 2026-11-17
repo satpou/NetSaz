@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\InvoiceNumberGenerator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
@@ -203,7 +204,7 @@ class InvoiceController extends Controller
             ->with('success', 'Invoice berhasil dibatalkan.');
     }
 
-    public function pay(Invoice $invoice, Request $request)
+    public function pay(Request $request, Invoice $invoice)
     {
         $this->authorize('pay', $invoice);
 
@@ -223,9 +224,11 @@ class InvoiceController extends Controller
             'tenant_id' => tenantId(),
             'invoice_id' => $invoice->id,
             'customer_id' => $invoice->customer_id,
+            'payment_number' => 'PAY/' . date('YmdHis') . '/' . $invoice->tenant_id . '/' . random_int(1000, 9999),
             'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
-            'reference_number' => $validated['payment_number'],
+            'reference_number' => $validated['payment_number'] ?? null,
+            'notes' => $validated['notes'] ?? null,
             'status' => 'success',
             'paid_at' => now(),
             'verified_by' => Auth::id(),
@@ -252,10 +255,11 @@ class InvoiceController extends Controller
             'tenant_id' => $invoice->tenant_id,
             'invoice_id' => $invoice->id,
             'customer_id' => $invoice->customer_id,
+            'payment_number' => 'MAN/' . date('YmdHis') . '/' . $invoice->tenant_id . '/' . random_int(1000, 9999),
             'amount' => $request->input('amount', $invoice->remaining_amount),
             'payment_method' => $validated['payment_method'],
-            'reference_number' => $validated['reference_number'],
-            'notes' => $validated['notes'],
+            'reference_number' => $validated['reference_number'] ?? null,
+            'notes' => $validated['notes'] ?? null,
             'status' => 'pending',
         ]);
 

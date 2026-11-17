@@ -37,8 +37,8 @@ Route::domain($mainDomain)->group(function () {
     Route::get('/register', fn() => view('register'))->name('register');
     Route::get('/daftar', fn() => view('register'))->name('daftar');
 
-    Route::get('/register/tenant', [PublicTenantController::class, 'landing'])->name('tenant.register');
-    Route::post('/register', [PublicTenantController::class, 'processRegistration'])->name('tenant.register.store')->middleware('throttle:3,1');
+    Route::get('/register/tenant', fn() => view('register'))->name('tenant.register.form');
+    Route::post('/register', [AuthController::class, 'registerTenant'])->name('tenant.register.store')->middleware('throttle:3,1');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

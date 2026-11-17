@@ -171,4 +171,44 @@ class InvoiceTenantIsolationTest extends TestCase
         $this->assertFalse($tenantBIds->contains($this->invoiceA->id));
         $this->assertTrue($tenantBIds->contains($this->invoiceB->id));
     }
+
+    public function test_isp_owner_super_admin_cannot_access_other_tenant_and_gets_active_tenant_session(): void
+    {
+        $ownerA = User::create([
+            'name' => 'Owner A',
+            'email' => 'ownera@test.com',
+            'password' => bcrypt('password'),
+            'tenant_id' => $this->tenantA->id,
+            'role' => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($ownerA)
+            ->get(route('payments.index', ['tenant_slug' => $this->tenantA->slug]))
+            ->assertOk()
+            ->assertSessionHas('active_tenant_id', $this->tenantA->id);
+
+        $this->actingAs($ownerA)
+            ->get(route('payments.index', ['tenant_slug' => $this->tenantB->slug]))
+            ->assertStatus(403);
+    }
+
+    public function test_invoice_pay_records_verified_by_without_missing_auth_error(): void
+    {
+        $this->actingAs($this->userA)
+            ->post(route('invoices.pay', ['tenant_slug' => $this->tenantA->slug, 'invoice' => $this->invoiceA->id]), [
+                'amount' => 100000,
+                'payment_method' => 'cash',
+                'notes' => 'Pembayaran tunai',
+            ])
+            ->assertRedirect(route('invoices.show', ['tenant_slug' => $this->tenantA->slug, 'invoice' => $this->invoiceA->id]));
+
+        $this->assertDatabaseHas('payments', [
+            'invoice_id' => $this->invoiceA->id,
+            'tenant_id' => $this->tenantA->id,
+            'amount' => 100000,
+            'status' => 'success',
+            'verified_by' => $this->userA->id,
+        ]);
+    }
 }

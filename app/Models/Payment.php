@@ -36,6 +36,17 @@ class Payment extends Model
 
     public $timestamps = true;
 
+    protected static function booted(): void
+    {
+        static::creating(function (Payment $payment) {
+            if (empty($payment->payment_number)) {
+                $prefix = $payment->status === 'pending' ? 'MAN' : 'PAY';
+                $tenantPart = $payment->tenant_id ?? tenantId() ?? '0';
+                $payment->payment_number = "{$prefix}/" . date('YmdHis') . "/{$tenantPart}/" . random_int(1000, 9999);
+            }
+        });
+    }
+
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
