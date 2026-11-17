@@ -31,11 +31,7 @@
                 <a href="{{ route('faq') }}" class="nav-link {{ request()->routeIs('faq') ? 'nav-link-active' : '' }}">FAQ</a>
                 <a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'nav-link-active' : '' }}">Kontak</a>
             </div>
-            @auth
-                <a class="btn btn-primary" href="{{ route('dashboard.app') }}" style="font-weight:600">Buka Dashboard</a>
-            @else
-                <a class="btn btn-outline" href="{{ route('login') }}">Masuk</a>
-            @endauth
+            <a class="btn btn-outline" href="{{ route('login') }}">Masuk</a>
         </nav>
     </header>
 

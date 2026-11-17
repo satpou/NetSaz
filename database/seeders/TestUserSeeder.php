@@ -60,6 +60,17 @@ class TestUserSeeder extends Seeder
             ]
         );
 
+        User::firstOrCreate(
+            ['email' => 'admin@isp.com'],
+            [
+                'name' => 'Admin ISP',
+                'password' => Hash::make('password'),
+                'role' => 'super_admin',
+                'tenant_id' => $tenant->id,
+                'is_active' => true,
+            ]
+        );
+
         // admin (tenant-level operational)
         $opAdmin = User::firstOrCreate(
             ['email' => 'opadmin@test.com'],
