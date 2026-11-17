@@ -15,14 +15,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $isDashboard = request()->path() === 'dashboard';
-
         if (!Auth::check()) {
-            return $isDashboard ? redirect('/login') : view('landing');
-        }
-
-        if (!$isDashboard) {
-            return redirect('/dashboard');
+            return redirect('/login');
         }
 
         $user = Auth::user();
@@ -54,7 +48,7 @@ class DashboardController extends Controller
                     $port = request()->getPort();
                     $portSuffix = in_array($port, [80, 443]) ? '' : ":{$port}";
 
-                    return redirect("{$scheme}://{$user->tenant->slug}." . config('app.tenant_domain') . "{$portSuffix}/dashboard?email=" . urlencode($user->email));
+                    return redirect("{$scheme}://{$user->tenant->slug}." . config('app.tenant_domain') . "{$portSuffix}/dashboard");
                 }
                 // When on tunnel, IP, or local dev: show tenant dashboard directly
             } else {

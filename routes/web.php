@@ -30,7 +30,7 @@ $isSubdomainCapable = !str_contains($host, 'trycloudflare.com')
     && !filter_var($host, FILTER_VALIDATE_IP);
 
 Route::group([], function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', fn() => view('landing'))->name('dashboard');
     Route::get('/landing', fn() => view('landing'))->name('landing');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.app');
 
