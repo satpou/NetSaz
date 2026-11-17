@@ -270,7 +270,7 @@
                 </a>
                 @endif
                 <div class="topbar-dropdown-divider"></div>
-                <form method="POST" action="{{ route('tenant.logout', ['tenant_slug' => Auth::user()->tenant->slug]) }}" style="padding:0;margin:0">
+                <form method="POST" action="{{ Auth::user()->tenant ? route('tenant.logout', ['tenant_slug' => Auth::user()->tenant->slug]) : route('logout') }}" style="padding:0;margin:0">
                     @csrf
                     <a href="#" onclick="event.preventDefault();this.closest('form').submit();"
                        class="topbar-dropdown-item danger" style="text-decoration:none">

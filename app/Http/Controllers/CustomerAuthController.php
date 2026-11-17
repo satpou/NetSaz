@@ -95,6 +95,6 @@ class CustomerAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('customer.auth.login');
+        return redirect('/');
     }
 }
