@@ -22,13 +22,13 @@
     <div class="contact-card-main">
       <div class="contact-card-topbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:20px 28px;background:var(--bg-alt);border-bottom:1px solid var(--line)">
         <div style="display:flex;align-items:center;gap:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:14px">AS</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--primary-tint);color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:14px">AZ</div>
           <div>
-            <div style="font-size:15px;font-weight:600;color:var(--ink)">Andika Saputra</div>
+            <div style="font-size:15px;font-weight:600;color:var(--ink)">Ahmad Zidnan</div>
             <div style="font-size:13px;color:var(--ink-soft);margin-top:2px">Sales Consultant, NetSaz</div>
           </div>
         </div>
-        <div style="font-size:13px;color:var(--ink-faint);font-family:'JetBrains Mono'">+62 812-3456-7890 &nbsp;•&nbsp; srahmaddhani@gmail.com</div>
+        <div style="font-size:13px;color:var(--ink-faint);font-family:'JetBrains Mono'">+62 831-6223-8930 &nbsp;•&nbsp; ahmadzidnanf@gmail.com</div>
       </div>
       <div class="contact-card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:0">
         <div class="contact-left" style="padding:32px 28px;border-right:1px solid var(--line)">
@@ -37,11 +37,11 @@
           <div style="display:flex;flex-direction:column;gap:14px">
             <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink-soft)">
               <svg width="18" height="18" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-              <a href="mailto:srahmaddhani@gmail.com" style="color:var(--primary);text-decoration:none">srahmaddhani@gmail.com</a>
+              <a href="mailto:ahmadzidnanf@gmail.com" style="color:var(--primary);text-decoration:none">ahmadzidnanf@gmail.com</a>
             </div>
             <div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink-soft)">
               <svg width="18" height="18" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14m-10 4V5a2 2 0 012-2h11.232a2 2 0 011.414.586l7.768 7.768a2 2 0 010 2.828l-7.768 7.768a2 2 0 01-1.414.586H2a2 2 0 01-2-2z"/></svg>
-              <a href="https://wa.me/6281234567890" style="color:var(--primary);text-decoration:none">+62 812-3456-7890</a>
+              <a href="https://wa.me/6283162238930" style="color:var(--primary);text-decoration:none">+62 831-6223-8930</a>
             </div>
           </div>
         </div>

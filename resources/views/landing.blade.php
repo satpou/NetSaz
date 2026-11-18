@@ -14,7 +14,7 @@
       <h1>Platform Billing Modern untuk RT/RW Net &amp; ISP Kecil</h1>
       <p class="lead">NetSaz dirancang khusus untuk kebutuhan RT/RW Net dan ISP kecil di Indonesia — manajemen pelanggan, tagihan otomatis, dan pembayaran online dalam satu platform yang mudah dioperasikan.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="https://wa.me/6281287282084" target="_blank" rel="noopener">Daftar Sekarang</a>
+        <a class="btn btn-primary" href="https://wa.me/6283162238930" target="_blank" rel="noopener">Daftar Sekarang</a>
         <a class="btn btn-outline" href="{{ route('features') }}">Lihat Fitur</a>
       </div>
       <div class="hero-note">
@@ -216,16 +216,16 @@
       <h2>Berhenti mengejar tagihan secara manual.</h2>
       <p>Ceritakan jumlah pelanggan dan area layanan Anda, tim sales kami akan bantu pilih paket yang sesuai.</p>
       <div class="contact-card">
-        <div class="contact-avatar">AS</div>
+        <div class="contact-avatar">AZ</div>
         <div class="contact-info">
-          <div class="contact-name">Andika Saputra</div>
+          <div class="contact-name">Ahmad Zidnan</div>
           <div class="contact-role">Sales Consultant, NetSaz</div>
-          <div class="contact-detail mono">+62 812-8728-2084 &nbsp;•&nbsp; srahmaddhani@gmail.com</div>
+          <div class="contact-detail mono">+62 831-6223-8930 &nbsp;•&nbsp; ahmadzidnanf@gmail.com</div>
         </div>
       </div>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://wa.me/6281287282084" target="_blank" rel="noopener">Chat via WhatsApp</a>
-        <a class="btn btn-outline" href="mailto:srahmaddhani@gmail.com">Kirim Email</a>
+        <a class="btn btn-primary" href="https://wa.me/6283162238930" target="_blank" rel="noopener">Chat via WhatsApp</a>
+        <a class="btn btn-outline" href="mailto:ahmadzidnanf@gmail.com">Kirim Email</a>
       </div>
     </div>
   </div>

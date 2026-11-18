@@ -71,8 +71,8 @@
                 <div class="footer-col">
                     <div class="footer-col-title">Kontak</div>
                     <ul class="footer-col-links">
-                        <li><a href="mailto:srahmaddhani@gmail.com">srahmaddhani@gmail.com</a></li>
-                        <li><a href="https://wa.me/6281234567890">+62 812-3456-7890</a></li>
+                        <li><a href="mailto:ahmadzidnanf@gmail.com">ahmadzidnanf@gmail.com</a></li>
+                        <li><a href="https://wa.me/6283162238930">+62 831-6223-8930</a></li>
                     </ul>
                 </div>
             </div>
