@@ -270,15 +270,11 @@ class ImportController extends Controller
         );
         $pkgName = trim($pkgName, " \t\n\r\0\x0B\"'");
 
-        $biaya = (int) preg_replace('/[^0-9]/', '',
-            $data['paket_tarif'] ??
-            $data['biaya'] ??
-            $data['harga'] ??
-            $data['tarif'] ??
-            $data['total bayar'] ??
-            $data['total_bayar'] ??
-            '0'
-        );
+        $rawPrice = $data['paket_tarif'] ?? $data['biaya'] ?? $data['harga'] ?? $data['tarif'] ?? $data['total bayar'] ?? $data['total_bayar'] ?? null;
+        $biaya = ($rawPrice !== null && trim($rawPrice) !== '') ? (int) preg_replace('/[^0-9]/', '', $rawPrice) : 150000;
+        if (str_contains(strtolower($pkgName), 'free') || str_contains(strtolower($pkgName), 'voucher')) {
+            $biaya = 0;
+        }
 
         $package = null;
         if (! empty($pkgName)) {
@@ -290,7 +286,7 @@ class ImportController extends Controller
             $package = Package::firstOrCreate(
                 ['tenant_id' => $tid, 'name' => $pkgName],
                 [
-                    'price' => $biaya > 0 ? $biaya : 150000,
+                    'price' => $biaya,
                     'speed' => $speed,
                     'is_taxable' => false,
                 ]
