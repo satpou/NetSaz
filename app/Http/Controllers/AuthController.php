@@ -45,31 +45,7 @@ class AuthController extends Controller
             $counter++;
         }
 
-        [$tenant, $user] = DB::transaction(function () use ($validated, $slug) {
-            $tenant = Tenant::create([
-                'name' => $validated['company_name'],
-                'slug' => $slug,
-                'email' => $validated['email'],
-                'whatsapp_number' => $validated['whatsapp_number'] ?? null,
-                'status' => 'active',
-                'settings' => array_filter([
-                    'pic_name' => $validated['pic_name'] ?? null,
-                    'city' => $validated['city'] ?? null,
-                    'estimated_customers' => $validated['customers'] ?? null,
-                    'estimated_mitra' => $validated['mitra'] ?? null,
-                    'selected_package' => $validated['package'] ?? 'launch',
-                ], fn ($v) => $v !== null && $v !== ''),
-            ]);
-
-            $user = User::create([
-                'name' => $validated['pic_name'] ?? $validated['company_name'],
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'tenant_id' => $tenant->id,
-                'role' => 'super_admin',
-                'is_active' => true,
-            ]);
-
+        $tenant = DB::transaction(function () use ($validated, $slug) {
             $planKey = ($validated['package'] ?? 'launch') === 'professional'
                 ? 'pro'
                 : ($validated['package'] ?? 'launch');
@@ -77,31 +53,52 @@ class AuthController extends Controller
             $plan = SubscriptionPlan::where('code', $planKey)->first()
                 ?? SubscriptionPlan::orderBy('sort_order')->first();
 
+            $annualPrice = $plan ? $plan->price : 399000;
+
+            $tenant = Tenant::create([
+                'name' => $validated['company_name'],
+                'slug' => $slug,
+                'email' => $validated['email'],
+                'whatsapp_number' => $validated['whatsapp_number'] ?? null,
+                'status' => 'pending_payment',
+                'settings' => array_filter([
+                    'pic_name' => $validated['pic_name'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'estimated_customers' => $validated['customers'] ?? null,
+                    'estimated_mitra' => $validated['mitra'] ?? null,
+                    'selected_package' => $planKey,
+                    'selected_package_id' => $plan?->id,
+                    'payment_amount' => $annualPrice,
+                    'payment_status' => 'pending',
+                    'billing_period' => 'yearly',
+                ], fn ($v) => $v !== null && $v !== ''),
+            ]);
+
+            User::create([
+                'name' => $validated['pic_name'] ?? $validated['company_name'],
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'tenant_id' => $tenant->id,
+                'role' => 'super_admin',
+                'is_active' => false,
+            ]);
+
             if ($plan) {
                 TenantSubscription::create([
                     'tenant_id' => $tenant->id,
                     'subscription_plan_id' => $plan->id,
-                    'status' => 'trial',
-                    'started_at' => now(),
-                    'current_period_start' => now(),
-                    'current_period_end' => now()->addDays(14),
+                    'status' => 'pending_payment',
+                    'started_at' => null,
+                    'current_period_start' => null,
+                    'current_period_end' => null,
                 ]);
             }
 
-            return [$tenant, $user];
+            return $tenant;
         });
 
-        Auth::login($user);
-        $request->session()->regenerate();
-        session(['tenant_id' => $tenant->id, 'active_tenant_id' => $tenant->id]);
-
-        $scheme = $request->getScheme();
-        $port = $request->getPort();
-        $portSuffix = in_array($port, [80, 443, null], true) ? '' : ":{$port}";
-        $tenantDomain = config('app.tenant_domain');
-
-        return redirect("{$scheme}://{$tenant->slug}.{$tenantDomain}{$portSuffix}/dashboard")
-            ->with('success', 'Akun ISP Anda berhasil dibuat!');
+        return redirect()->route('register.payment', ['slug' => $tenant->slug])
+            ->with('info', 'Pendaftaran akun ISP Anda berhasil dicatat. Silakan lakukan pembayaran untuk aktivasi akun.');
     }
 
     public function showLogin(Request $request)
@@ -138,9 +135,21 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            if ($user->tenant && $user->tenant->status === 'pending_payment') {
+                Auth::logout();
+                return redirect()->route('register.payment', ['slug' => $user->tenant->slug])
+                    ->with('warning', 'Pendaftaran Anda belum selesai. Silakan lakukan pembayaran atau unggah bukti transfer.');
+            }
+
+            if ($user->tenant && $user->tenant->status === 'rejected') {
+                Auth::logout();
+                $reason = $user->tenant->settings['rejection_reason'] ?? 'Pendaftaran tidak disetujui';
+                return back()->withErrors(['email' => "Pendaftaran ISP Anda ditolak: {$reason}. Hubungi WhatsApp Sales di 083162238930."])->onlyInput('email');
+            }
+
             if (!$user->is_active) {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Akun Anda tidak aktif.'])->onlyInput('email');
+                return back()->withErrors(['email' => 'Akun Anda belum aktif. Silakan tunggu verifikasi admin atau hubungi sales.'])->onlyInput('email');
             }
 
             // Set tenant session context if user belongs to a tenant

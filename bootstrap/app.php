@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Payment gateway callbacks cannot send CSRF tokens
         $middleware->validateCsrfTokens(except: [
             'webhook/midtrans/*',
+            'webhook/midtrans-subscription',
             'api/webhook/midtrans',
             'api/webhook/xendit',
         ]);

@@ -146,4 +146,62 @@ class WebhookController extends Controller
             'output' => trim($output),
         ]);
     }
+
+    public function subscriptionMidtrans(Request $request)
+    {
+        $payload = $request->all();
+        $orderId = $payload['order_id'] ?? '';
+        $transactionStatus = $payload['transaction_status'] ?? '';
+        $fraudStatus = $payload['fraud_status'] ?? '';
+
+        Log::info('Platform Subscription Midtrans webhook received', [
+            'order_id' => $orderId,
+            'status' => $transactionStatus,
+            'fraud' => $fraudStatus,
+        ]);
+
+        if (preg_match('/^SUB-(\d+)-/', $orderId, $matches)) {
+            $tenantId = (int) $matches[1];
+            $tenant = \App\Models\Tenant::find($tenantId);
+
+            if ($tenant) {
+                if (in_array($transactionStatus, ['capture', 'settlement']) && ($fraudStatus === 'accept' || empty($fraudStatus))) {
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($tenant, $payload) {
+                        $settings = $tenant->settings ?? [];
+                        $settings['payment_method'] = 'midtrans';
+                        $settings['payment_status'] = 'paid';
+                        $settings['paid_at'] = now()->toDateTimeString();
+                        $settings['midtrans_transaction_id'] = $payload['transaction_id'] ?? null;
+                        $settings['midtrans_payment_type'] = $payload['payment_type'] ?? null;
+
+                        $tenant->update([
+                            'status' => 'active',
+                            'settings' => $settings,
+                        ]);
+
+                        \App\Models\User::where('tenant_id', $tenant->id)->update([
+                            'is_active' => true,
+                        ]);
+
+                        $sub = \App\Models\TenantSubscription::where('tenant_id', $tenant->id)->latest()->first();
+                        $now = \Carbon\Carbon::now();
+                        $end = (clone $now)->addYear();
+
+                        if ($sub) {
+                            $sub->update([
+                                'status' => 'active',
+                                'started_at' => $now,
+                                'current_period_start' => $now,
+                                'current_period_end' => $end,
+                            ]);
+                        }
+                    });
+
+                    Log::info("Tenant {$tenant->id} ({$tenant->slug}) activated via Midtrans subscription payment.");
+                }
+            }
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
 }

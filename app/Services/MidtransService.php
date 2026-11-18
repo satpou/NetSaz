@@ -21,13 +21,84 @@ class MidtransService
             $this->clientKey = $tenantSettings['midtrans_client_key'] ?? '';
             $this->isProduction = !empty($tenantSettings['midtrans_is_production']);
         } else {
-            $this->serverKey = (string) (config('services.midtrans.server_key') ?? '');
-            $this->clientKey = (string) (config('services.midtrans.client_key') ?? '');
-            $this->isProduction = (bool) config('services.midtrans.is_production', false);
+            $this->serverKey = (string) (\App\Models\PlatformSetting::get('midtrans_server_key') ?: config('services.midtrans.server_key') ?: '');
+            $this->clientKey = (string) (\App\Models\PlatformSetting::get('midtrans_client_key') ?: config('services.midtrans.client_key') ?: '');
+            $isProd = \App\Models\PlatformSetting::get('midtrans_is_production');
+            $this->isProduction = $isProd !== null ? (bool) $isProd : (bool) config('services.midtrans.is_production', false);
         }
         $this->baseUrl = $this->isProduction
             ? 'https://app.midtrans.com/snap/v1'
             : 'https://app.sandbox.midtrans.com/snap/v1';
+    }
+
+    public function isConfigured(): bool
+    {
+        return !empty($this->serverKey) && !empty($this->clientKey);
+    }
+
+    public function getClientKey(): string
+    {
+        return $this->clientKey;
+    }
+
+    public function getSnapUrl(): string
+    {
+        return $this->isProduction
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    }
+
+    public function createSubscriptionTransaction(\App\Models\Tenant $tenant, \App\Models\SubscriptionPlan $plan, float $amount): array
+    {
+        if (! $this->isConfigured()) {
+            throw new \Exception('Payment gateway Midtrans platform belum dikonfigurasi.');
+        }
+
+        $orderId = 'SUB-' . $tenant->id . '-' . date('YmdHis');
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) round($amount),
+            ],
+            'item_details' => [
+                [
+                    'id' => 'PLAN-' . $plan->code,
+                    'price' => (int) round($amount),
+                    'quantity' => 1,
+                    'name' => 'Langganan NetSaz ' . $plan->name . ' (1 Tahun)',
+                ],
+            ],
+            'customer_details' => [
+                'first_name' => $tenant->name,
+                'email' => $tenant->email,
+                'phone' => $tenant->whatsapp_number ?? '',
+            ],
+        ];
+
+        $response = Http::withBasicAuth($this->serverKey, '')
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ])
+            ->post("{$this->baseUrl}/transactions", $params);
+
+        if ($response->failed()) {
+            Log::error('Midtrans platform subscription transaction failed', [
+                'tenant_id' => $tenant->id,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+            throw new \Exception('Gagal membuat transaksi pembayaran online: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return [
+            'snap_token' => $data['token'] ?? null,
+            'redirect_url' => $data['redirect_url'] ?? null,
+            'order_id' => $orderId,
+        ];
     }
 
     public function createTransaction(Invoice $invoice, ?float $amount = null): array

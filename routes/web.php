@@ -45,6 +45,9 @@ Route::group([], function () {
 
     Route::get('/register/tenant', fn() => view('register'))->name('tenant.register.form');
     Route::post('/register', [AuthController::class, 'registerTenant'])->name('tenant.register.store')->middleware('throttle:3,1');
+    Route::get('/register/payment/{slug}', [\App\Http\Controllers\RegistrationPaymentController::class, 'show'])->name('register.payment');
+    Route::post('/register/payment/{slug}/manual', [\App\Http\Controllers\RegistrationPaymentController::class, 'submitManual'])->name('register.payment.manual');
+    Route::post('/webhook/midtrans-subscription', [\App\Http\Controllers\WebhookController::class, 'subscriptionMidtrans'])->name('webhook.midtrans.subscription');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -167,6 +170,15 @@ Route::middleware(['auth', 'platform.superadmin'])->prefix('admin')->name('admin
     // Platform Reports
     Route::get('reports', [\App\Http\Controllers\Admin\PlatformReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [\App\Http\Controllers\Admin\PlatformReportController::class, 'export'])->name('reports.export');
+
+    // Tenant Verifications & Approvals
+    Route::get('verifications', [\App\Http\Controllers\Admin\TenantVerificationController::class, 'index'])->name('verifications.index');
+    Route::post('verifications/{tenant}/accept', [\App\Http\Controllers\Admin\TenantVerificationController::class, 'accept'])->name('verifications.accept');
+    Route::post('verifications/{tenant}/reject', [\App\Http\Controllers\Admin\TenantVerificationController::class, 'reject'])->name('verifications.reject');
+
+    // Platform Settings (Banks, Midtrans, Contacts)
+    Route::get('settings', [\App\Http\Controllers\Admin\PlatformSettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [\App\Http\Controllers\Admin\PlatformSettingController::class, 'update'])->name('settings.update');
 });
 
 // Customer Portal
