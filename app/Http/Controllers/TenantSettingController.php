@@ -46,6 +46,7 @@ class TenantSettingController extends Controller
         $tenant->whatsapp_number = $validated['whatsapp_number'] ?? null;
         if (! empty($validated['brand_color'])) {
             $tenant->brand_color = $validated['brand_color'];
+            $tenant->brand_updated_at = now();
         }
 
         // Encrypt secret settings
@@ -63,9 +64,9 @@ class TenantSettingController extends Controller
         $settings = $tenant->settings ?? [];
         $settings['midtrans_is_production'] = $request->boolean('midtrans_is_production', false);
         $settings['slogan'] = $validated['slogan'] ?? ($settings['slogan'] ?? null);
-        $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'open_wa';
-        $settings['wa_api_url'] = $validated['wa_api_url'] ?? ($settings['wa_api_url'] ?? 'http://localhost:2785');
-        $settings['wa_session_id'] = $validated['wa_session_id'] ?? ($settings['wa_session_id'] ?? 'default');
+        $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'internal';
+        $settings['wa_api_url'] = $validated['wa_api_url'] ?? ($settings['wa_api_url'] ?? 'http://127.0.0.1:3001');
+        $settings['wa_session_id'] = $validated['wa_session_id'] ?? ($settings['wa_session_id'] ?? 'tenant_' . $tenant->id);
         $settings['wa_sender_number'] = $validated['wa_sender_number'] ?? ($settings['wa_sender_number'] ?? null);
         $settings['invoice_due_days'] = (int) ($validated['invoice_due_days'] ?? 7);
         $settings['auto_isolate_enabled'] = $request->boolean('auto_isolate_enabled', true);
