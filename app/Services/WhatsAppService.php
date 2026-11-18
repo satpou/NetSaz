@@ -80,6 +80,23 @@ class WhatsAppService
     }
 
     /**
+     * Get isolated session ID for this tenant.
+     * Prevents different ISPs from sharing the same WhatsApp session.
+     */
+    public function getSessionId(): string
+    {
+        if ($this->tenant && $this->tenant->id) {
+            return 'tenant_' . $this->tenant->id;
+        }
+
+        if (function_exists('tenantId') && tenantId()) {
+            return 'tenant_' . tenantId();
+        }
+
+        return 'default';
+    }
+
+    /**
      * Send message using NetSaz Built-in Internal WhatsApp Gateway (Auto QR Code on port 3001)
      */
     public function sendViaInternal(string $phone, string $message): array
@@ -88,6 +105,7 @@ class WhatsAppService
 
         try {
             $response = Http::timeout(12)->post("{$baseUrl}/send", [
+                'sessionId' => $this->getSessionId(),
                 'to' => $phone,
                 'message' => $message,
             ]);
@@ -115,14 +133,16 @@ class WhatsAppService
     }
 
     /**
-     * Get real-time status and live QR code from Internal Gateway
+     * Get real-time status and live QR code from Internal Gateway for this specific tenant
      */
     public function getInternalStatus(): array
     {
         $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
 
         try {
-            $response = Http::timeout(3)->get("{$baseUrl}/status");
+            $response = Http::timeout(4)->get("{$baseUrl}/status", [
+                'sessionId' => $this->getSessionId(),
+            ]);
             if ($response->successful()) {
                 return $response->json();
             }
@@ -141,14 +161,16 @@ class WhatsAppService
     }
 
     /**
-     * Logout and reset internal WhatsApp session to generate new QR
+     * Logout and reset internal WhatsApp session for this tenant to generate new QR
      */
     public function logoutInternal(): array
     {
         $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
 
         try {
-            $response = Http::timeout(5)->post("{$baseUrl}/logout");
+            $response = Http::timeout(5)->post("{$baseUrl}/logout", [
+                'sessionId' => $this->getSessionId(),
+            ]);
             return $response->json() ?? ['success' => true];
         } catch (\Throwable $e) {
             return ['success' => false, 'error' => $e->getMessage()];
@@ -163,7 +185,7 @@ class WhatsAppService
     {
         $baseUrl = rtrim($this->settings['wa_api_url'] ?? config('services.open_wa.api_url', 'http://localhost:2785'), '/');
         $apiKey = $this->tenant?->getSecretSetting('wa_api_token') ?? ($this->settings['wa_api_token'] ?? config('services.open_wa.api_key', ''));
-        $sessionId = $this->settings['wa_session_id'] ?? config('services.open_wa.session_id', 'default');
+        $sessionId = $this->settings['wa_session_id'] ?? $this->getSessionId();
 
         $chatId = str_ends_with($phone, '@c.us') ? $phone : "{$phone}@c.us";
 
@@ -235,7 +257,7 @@ class WhatsAppService
     {
         $baseUrl = rtrim($this->settings['wa_api_url'] ?? config('services.open_wa.api_url', 'http://localhost:2785'), '/');
         $apiKey = $this->tenant?->getSecretSetting('wa_api_token') ?? ($this->settings['wa_api_token'] ?? config('services.open_wa.api_key', ''));
-        $sessionId = $this->settings['wa_session_id'] ?? config('services.open_wa.session_id', 'default');
+        $sessionId = $this->settings['wa_session_id'] ?? $this->getSessionId();
 
         $headers = [
             'Accept' => 'application/json',
@@ -304,7 +326,7 @@ class WhatsAppService
     {
         $baseUrl = rtrim($this->settings['wa_api_url'] ?? 'http://localhost:3000', '/');
         $apiKey = $this->tenant?->getSecretSetting('wa_api_token') ?? ($this->settings['wa_api_token'] ?? '');
-        $sessionId = $this->settings['wa_session_id'] ?? 'default';
+        $sessionId = $this->settings['wa_session_id'] ?? $this->getSessionId();
 
         $chatId = str_ends_with($phone, '@c.us') ? $phone : "{$phone}@c.us";
 

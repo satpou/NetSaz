@@ -163,11 +163,11 @@
                 <div>
                     <h4 style="font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
                         <span style="display:inline-block;width:10px;height:10px;border-radius:50%" :style="{ background: status === 'CONNECTED' ? '#10B981' : (status === 'SCAN_QR' ? '#F59E0B' : '#64748B') }"></span>
-                        Status WhatsApp Gateway:
+                        Status WhatsApp ({{ $tenant->name }}):
                         <span x-text="statusText()" :style="{ color: status === 'CONNECTED' ? '#10B981' : (status === 'SCAN_QR' ? '#F59E0B' : 'var(--ink)') }"></span>
                     </h4>
                     <p style="font-size:12.5px;color:var(--ink-soft);margin-top:2px">
-                        Sesi login tersimpan permanen di server. Jika sewaktu-waktu terputus, QR Code baru akan langsung muncul di sini secara otomatis.
+                        Sesi WhatsApp terisolasi khusus untuk <b>{{ $tenant->name }}</b> (tidak bercampur dengan ISP lain). Sesi tersimpan permanen di server.
                     </p>
                 </div>
 
@@ -185,7 +185,7 @@
             <!-- JIKA STATUS: SCAN_QR (QR CODE LANGSUNG MUNCUL DI LAYAR) -->
             <div x-show="status === 'SCAN_QR'" style="display:flex;flex-direction:column;align-items:center;padding:24px;background:var(--bg);border-radius:10px;border:1px dashed var(--line);text-align:center">
                 <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px">
-                    Pindai QR Code Menggunakan WhatsApp di HP Anda
+                    Pindai QR Code untuk WhatsApp {{ $tenant->name }}
                 </div>
                 <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;max-width:440px">
                     1. Buka WhatsApp di ponsel &rarr; Ketuk <b>Menu (⋮)</b> atau <b>Pengaturan</b><br>
