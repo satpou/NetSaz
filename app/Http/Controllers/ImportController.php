@@ -315,34 +315,74 @@ class ImportController extends Controller
             }
         }
 
-        // 11. Customer Matching (upsert)
-        $customer = Customer::where('tenant_id', $tid)
-            ->where(function ($q) use ($email, $phone, $pppoe, $name) {
-                if (! empty($pppoe)) {
-                    $q->whereHas('mikrotikAccount', fn ($m) => $m->where('pppoe_secret', $pppoe));
-                }
-                if (! empty($phone)) {
-                    $q->orWhere('phone', $phone);
-                }
-                $q->orWhere('email', $email);
-                $q->orWhere('name', $name);
-            })->first();
+        // 11. Customer Matching (Auto-Replace if data already exists)
+        $customer = null;
+
+        // Prioritas 1: User PPPoE (paling unik dan akurat di ISP)
+        if (! empty($pppoe)) {
+            $customer = Customer::where('tenant_id', $tid)
+                ->whereHas('mikrotikAccount', fn ($m) => $m->where('pppoe_secret', $pppoe))
+                ->first();
+        }
+
+        // Prioritas 2: Nomor Telepon
+        if (! $customer && ! empty($phone) && strlen($phone) >= 7) {
+            $customer = Customer::where('tenant_id', $tid)
+                ->where(function ($q) use ($phone) {
+                    $q->where('phone', $phone);
+                    if (str_starts_with($phone, '62')) {
+                        $q->orWhere('phone', '0' . substr($phone, 2));
+                    } elseif (str_starts_with($phone, '0')) {
+                        $q->orWhere('phone', '62' . substr($phone, 1));
+                    }
+                })->first();
+        }
+
+        // Prioritas 3: Nama Lengkap (case-insensitive)
+        if (! $customer && ! empty($name)) {
+            $customer = Customer::where('tenant_id', $tid)
+                ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+                ->first();
+        }
+
+        // Prioritas 4: Email
+        if (! $customer && ! empty($email)) {
+            $customer = Customer::where('tenant_id', $tid)
+                ->where('email', $email)
+                ->first();
+        }
 
         $action = 'created';
 
         if ($customer) {
-            $customer->update([
-                'name' => $name,
-                'phone' => $phone ?: $customer->phone,
-                'address' => $address ?: $customer->address,
-                'area' => $areaName ?: $customer->area,
-                'package_id' => $package ? $package->id : $customer->package_id,
+            // AUTO REPLACE: Perbarui semua data pelanggan yang ada dengan data terbaru dari file
+            $updateData = [
+                'name' => $name ?: $customer->name,
                 'status' => $status,
                 'billing_cycle_day' => $billingCycleDay,
-                'latitude' => $latitude ?? $customer->latitude,
-                'longitude' => $longitude ?? $customer->longitude,
-                'ktp_id' => $nik ?: $customer->ktp_id,
-            ]);
+            ];
+
+            if (! empty($phone)) {
+                $updateData['phone'] = $phone;
+            }
+            if (! empty($address) && $address !== 'Alamat belum diatur') {
+                $updateData['address'] = $address;
+            }
+            if (! empty($areaName)) {
+                $updateData['area'] = $areaName;
+            }
+            if ($package) {
+                $updateData['package_id'] = $package->id;
+            }
+            if ($latitude !== null && $longitude !== null) {
+                $updateData['latitude'] = $latitude;
+                $updateData['longitude'] = $longitude;
+            }
+            if (! empty($nik)) {
+                $updateData['ktp_id'] = $nik;
+            }
+
+            $customer->update($updateData);
             $action = 'updated';
         } else {
             if ($limitChecker && ! $limitChecker->canAddCustomer()) {
@@ -367,7 +407,7 @@ class ImportController extends Controller
             $action = 'created';
         }
 
-        // 12. MikrotikAccount Link
+        // 12. MikrotikAccount Link (Auto Replace credentials)
         if (! empty($pppoe)) {
             MikrotikAccount::updateOrCreate(
                 ['tenant_id' => $tid, 'customer_id' => $customer->id],
@@ -380,7 +420,7 @@ class ImportController extends Controller
             );
         }
 
-        // 13. Create/Sync Invoice if tagihan data present
+        // 13. Create/Sync Invoice if tagihan data present (Auto Replace existing invoice)
         $bulanTagihan = trim($data['bulan tagihan'] ?? $data['periode'] ?? '');
         $totalBayar = (int) preg_replace('/[^0-9]/', '', $data['total bayar'] ?? $data['biaya'] ?? '0');
         $diskon = (int) preg_replace('/[^0-9]/', '', $data['diskon'] ?? '0');
@@ -413,7 +453,7 @@ class ImportController extends Controller
             $periodStart = "{$yearMonthDash}-01";
             $periodEnd = Carbon::parse($periodStart)->endOfMonth()->format('Y-m-d');
 
-            Invoice::firstOrCreate(
+            Invoice::updateOrCreate(
                 [
                     'tenant_id' => $tid,
                     'customer_id' => $customer->id,
