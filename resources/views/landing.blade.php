@@ -165,7 +165,7 @@
           <h3>{{ $plan['name'] }}</h3>
           <div class="desc">{{ $plan['description'] }}</div>
           <div class="amount">{{ $plan['price'] }}</div>
-          <div class="per">/bulan, {{ $plan['kuota'] }}</div>
+          <div class="per">/tahun, {{ $plan['kuota'] }}</div>
           <ul>
             @foreach (array_slice($plan['benefits'], 0, 3) as $benefit)
             <li>{{ $benefit }}</li>
@@ -184,7 +184,7 @@
           <h3>{{ $plan['name'] }}</h3>
           <div class="desc">{{ $plan['description'] }}</div>
           <div class="amount">{{ $plan['price'] }}</div>
-          <div class="per">/bulan, {{ $plan['kuota'] }}</div>
+          <div class="per">/tahun, {{ $plan['kuota'] }}</div>
           <ul>
             @foreach (array_slice($plan['benefits'], 0, 3) as $benefit)
             <li>{{ $benefit }}</li>

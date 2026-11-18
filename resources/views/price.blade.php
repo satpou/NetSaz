@@ -28,7 +28,7 @@
         <h3>{{ $plan['name'] }}</h3>
         <div class="desc">{{ $plan['description'] }}</div>
         <div class="amount">{{ $plan['price'] }}</div>
-        <div class="per">/bulan, {{ $plan['kuota'] }}</div>
+        <div class="per">/tahun, {{ $plan['kuota'] }}</div>
         <ul>
           @foreach ($plan['benefits'] as $benefit)
           <li>{{ $benefit }}</li>
