@@ -13,18 +13,20 @@ class PlanLimitChecker
     }
 
     /**
-     * Retrieve the active (or trial) subscription for this tenant, with caching.
+     * Retrieve the active (or trial) subscription for this tenant, with safe caching.
      */
     protected function getActiveSubscription(): ?TenantSubscription
     {
-        $cacheKey = "tenant_active_subscription:{$this->tenant->id}";
+        $cacheKey = "tenant_active_sub_id:{$this->tenant->id}";
 
-        return Cache::remember($cacheKey, 60, function () {
+        $subId = Cache::remember($cacheKey, 60, function () {
             return TenantSubscription::where('tenant_id', $this->tenant->id)
                 ->whereIn('status', ['active', 'trial'])
                 ->latest()
-                ->first();
+                ->value('id');
         });
+
+        return $subId ? TenantSubscription::with('plan')->find($subId) : null;
     }
 
     /**
