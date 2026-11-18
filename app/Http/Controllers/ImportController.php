@@ -407,6 +407,11 @@ class ImportController extends Controller
             }
 
             $dueDate = "{$yearMonthDash}-" . sprintf('%02d', $billingCycleDay);
+            $amount = $biaya > 0 ? $biaya : ($package?->price ?? 150000);
+            $tax = 0;
+            $totalAmount = max(0, $amount - $diskon + $tax);
+            $periodStart = "{$yearMonthDash}-01";
+            $periodEnd = Carbon::parse($periodStart)->endOfMonth()->format('Y-m-d');
 
             Invoice::firstOrCreate(
                 [
@@ -415,9 +420,13 @@ class ImportController extends Controller
                     'invoice_number' => $invNumber,
                 ],
                 [
-                    'amount' => $biaya > 0 ? $biaya : ($package->price ?? 150000),
+                    'package_id' => $package?->id,
+                    'period_start' => $periodStart,
+                    'period_end' => $periodEnd,
+                    'amount' => $amount,
                     'discount' => $diskon,
-                    'tax' => 0,
+                    'tax' => $tax,
+                    'total_amount' => $totalAmount,
                     'status' => $invStatus,
                     'due_date' => $dueDate,
                     'notes' => 'Tagihan impor Beatcom ' . ($bulanTagihan ?: date('F Y')),
