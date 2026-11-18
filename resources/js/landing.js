@@ -43,192 +43,132 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.4 });
   document.querySelectorAll('.stat-num').forEach(el => counterIo.observe(el));
 
-  // Interactive Pricing Carousel & Slider
-  initPricingCarousel();
+  // Continuous Auto-Slide Pricing Showcase
+  initAutoSlidePricing();
 });
 
-function initPricingCarousel() {
-  const container = document.querySelector('.pricing-carousel-container');
+function initAutoSlidePricing() {
+  const wrapper = document.querySelector('.pricing-carousel-wrapper');
   const track = document.querySelector('.pricing-carousel-track');
-  if (!container || !track) return;
+  if (!wrapper || !track) return;
 
-  const cards = Array.from(track.querySelectorAll('.carousel-card'));
-  const dots = Array.from(document.querySelectorAll('.carousel-dot'));
-  const prevBtns = Array.from(document.querySelectorAll('.prev-btn, .float-prev'));
-  const nextBtns = Array.from(document.querySelectorAll('.next-btn, .float-next'));
-
-  if (cards.length === 0) return;
-
-  let currentIndex = 0;
+  let pos = 0;
+  let isHovered = false;
   let isDragging = false;
   let startX = 0;
-  let scrollStart = 0;
-  let totalDragDelta = 0;
-  let autoTimer = null;
-  const autoPlayDelay = 4000;
+  let startPos = 0;
+  let dragDelta = 0;
+  let lastTime = performance.now();
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Speed: 48 pixels per second (smooth, calm, readable, continuous)
+  const speedPerSecond = 48;
 
-  function getTargetScroll(index) {
-    if (!cards[index]) return 0;
-    const card = cards[index];
-    const trackWidth = track.clientWidth;
-    const cardWidth = card.offsetWidth;
-    // Center card within track viewport
-    return card.offsetLeft - (trackWidth - cardWidth) / 2;
+  function getHalfWidth() {
+    return track.scrollWidth / 2;
   }
 
-  function scrollToIndex(index, smooth = true) {
-    if (cards.length === 0) return;
-    if (index < 0) index = cards.length - 1;
-    if (index >= cards.length) index = 0;
+  function tick(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
 
-    currentIndex = index;
-    const target = getTargetScroll(currentIndex);
-    const behavior = (!prefersReducedMotion && smooth) ? 'smooth' : 'auto';
-
-    track.scrollTo({
-      left: target,
-      behavior: behavior
-    });
-
-    updateActiveDot(currentIndex);
-  }
-
-  function updateActiveDot(index) {
-    dots.forEach((dot, idx) => {
-      const isActive = idx === index;
-      dot.classList.toggle('active', isActive);
-      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    });
-  }
-
-  // Scroll sync to update dots and current index on manual scroll / swipe
-  let isTicking = false;
-  track.addEventListener('scroll', () => {
-    if (isDragging) return;
-    if (!isTicking) {
-      window.requestAnimationFrame(() => {
-        const trackCenter = track.scrollLeft + track.clientWidth / 2;
-        let closestIndex = 0;
-        let minDistance = Infinity;
-
-        cards.forEach((card, idx) => {
-          const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-          const dist = Math.abs(trackCenter - cardCenter);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestIndex = idx;
-          }
-        });
-
-        currentIndex = closestIndex;
-        updateActiveDot(currentIndex);
-        isTicking = false;
-      });
-      isTicking = true;
+    if (!isHovered && !isDragging) {
+      pos -= speedPerSecond * dt;
+      const halfWidth = getHalfWidth();
+      if (halfWidth > 0 && Math.abs(pos) >= halfWidth) {
+        pos += halfWidth;
+      }
+      track.style.transform = `translate3d(${pos}px, 0, 0)`;
     }
-  }, { passive: true });
 
-  // Navigation Arrows
-  prevBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      scrollToIndex(currentIndex - 1);
-      resetAutoPlay();
-    });
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+
+  // Pause when hovered
+  wrapper.addEventListener('mouseenter', () => { isHovered = true; });
+  wrapper.addEventListener('mouseleave', () => {
+    isHovered = false;
+    lastTime = performance.now();
   });
 
-  nextBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      scrollToIndex(currentIndex + 1);
-      resetAutoPlay();
-    });
-  });
-
-  // Dots
-  dots.forEach((dot, idx) => {
-    dot.addEventListener('click', (e) => {
-      e.preventDefault();
-      scrollToIndex(idx);
-      resetAutoPlay();
-    });
-  });
-
-  // Mouse Drag To Scroll
-  track.addEventListener('mousedown', (e) => {
+  // Mouse & Touch Dragging
+  function handleDragStart(clientX) {
     isDragging = true;
-    startX = e.pageX - track.offsetLeft;
-    scrollStart = track.scrollLeft;
-    totalDragDelta = 0;
+    startX = clientX;
+    startPos = pos;
+    dragDelta = 0;
     track.classList.add('is-dragging');
-    pauseAutoPlay();
-  });
+  }
 
-  window.addEventListener('mousemove', (e) => {
+  function handleDragMove(clientX) {
     if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - track.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    track.scrollLeft = scrollStart - walk;
-    totalDragDelta += Math.abs(walk);
-  });
+    const delta = clientX - startX;
+    dragDelta = delta;
+    pos = startPos + delta;
 
-  window.addEventListener('mouseup', () => {
+    const halfWidth = getHalfWidth();
+    if (halfWidth > 0) {
+      if (pos > 0) {
+        pos -= halfWidth;
+        startPos -= halfWidth;
+      } else if (Math.abs(pos) >= halfWidth) {
+        pos += halfWidth;
+        startPos += halfWidth;
+      }
+    }
+    track.style.transform = `translate3d(${pos}px, 0, 0)`;
+  }
+
+  function handleDragEnd() {
     if (!isDragging) return;
     isDragging = false;
     track.classList.remove('is-dragging');
-    resumeAutoPlay();
+    lastTime = performance.now();
+  }
+
+  // Mouse drag
+  track.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    handleDragStart(e.clientX);
   });
 
-  // Prevent link click if user was dragging
+  window.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      handleDragMove(e.clientX);
+    }
+  });
+
+  window.addEventListener('mouseup', handleDragEnd);
+
+  // Touch drag
+  track.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      handleDragStart(e.touches[0].clientX);
+    }
+  }, { passive: true });
+
+  track.addEventListener('touchmove', (e) => {
+    if (isDragging && e.touches.length === 1) {
+      handleDragMove(e.touches[0].clientX);
+    }
+  }, { passive: true });
+
+  track.addEventListener('touchend', handleDragEnd);
+  track.addEventListener('touchcancel', handleDragEnd);
+
+  // Prevent link click if user dragged
   track.addEventListener('click', (e) => {
-    if (totalDragDelta > 10) {
+    if (Math.abs(dragDelta) > 10) {
       e.preventDefault();
       e.stopPropagation();
     }
   }, true);
 
-  // Auto-play timer
-  function startAutoPlay() {
-    if (autoTimer) clearInterval(autoTimer);
-    autoTimer = setInterval(() => {
-      scrollToIndex(currentIndex + 1);
-    }, autoPlayDelay);
-  }
-
-  function pauseAutoPlay() {
-    if (autoTimer) {
-      clearInterval(autoTimer);
-      autoTimer = null;
-    }
-  }
-
-  function resumeAutoPlay() {
-    pauseAutoPlay();
-    startAutoPlay();
-  }
-
-  function resetAutoPlay() {
-    pauseAutoPlay();
-    startAutoPlay();
-  }
-
-  container.addEventListener('mouseenter', pauseAutoPlay);
-  container.addEventListener('mouseleave', resumeAutoPlay);
-  container.addEventListener('touchstart', pauseAutoPlay, { passive: true });
-  container.addEventListener('touchend', resumeAutoPlay, { passive: true });
-
+  // Pause when tab not active
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      pauseAutoPlay();
-    } else {
-      resumeAutoPlay();
-    }
+    isHovered = document.hidden;
+    lastTime = performance.now();
   });
-
-  // Initial scroll position
-  updateActiveDot(0);
-  startAutoPlay();
 }
