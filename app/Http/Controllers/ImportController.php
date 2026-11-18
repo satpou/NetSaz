@@ -256,24 +256,53 @@ class ImportController extends Controller
         }
 
         // 5. Package & Price (Auto-create Package if missing!)
-        $pkgName = trim($data['paket'] ?? $data['nama_paket'] ?? $data['package'] ?? '');
+        $pkgName = trim(
+            $data['paket_nama'] ??
+            $data['paket'] ??
+            $data['nama_paket'] ??
+            $data['nama paket'] ??
+            $data['package'] ??
+            $data['profile'] ??
+            $data['profil'] ??
+            $data['profile_pppoe'] ??
+            $data['layanan'] ??
+            ''
+        );
         $pkgName = trim($pkgName, " \t\n\r\0\x0B\"'");
-        $biaya = (int) preg_replace('/[^0-9]/', '', $data['biaya'] ?? $data['harga'] ?? $data['total bayar'] ?? '0');
 
-        $package = $defaultPackage;
+        $biaya = (int) preg_replace('/[^0-9]/', '',
+            $data['paket_tarif'] ??
+            $data['biaya'] ??
+            $data['harga'] ??
+            $data['tarif'] ??
+            $data['total bayar'] ??
+            $data['total_bayar'] ??
+            '0'
+        );
+
+        $package = null;
         if (! empty($pkgName)) {
+            // Speed deduction from package name if available (e.g. "20 Mbps", "10Mbps")
+            $speed = '20 Mbps';
+            if (preg_match('/(\d+)\s*(mbps|kbps)/i', $pkgName, $sm)) {
+                $speed = $sm[1] . ' ' . strtoupper($sm[2]);
+            }
             $package = Package::firstOrCreate(
                 ['tenant_id' => $tid, 'name' => $pkgName],
                 [
                     'price' => $biaya > 0 ? $biaya : 150000,
-                    'speed' => '20 Mbps',
+                    'speed' => $speed,
                     'is_taxable' => false,
                 ]
             );
         }
 
+        if (! $package) {
+            $package = $defaultPackage;
+        }
+
         // 6. Billing Cycle Day (Tanggal Tagihan)
-        $billingDayRaw = trim($data['tanggal tagihan'] ?? $data['tgl_tagihan'] ?? $data['billing_day'] ?? '1');
+        $billingDayRaw = trim($data['tanggal'] ?? $data['tanggal tagihan'] ?? $data['tgl_tagihan'] ?? $data['tgl tagihan'] ?? $data['billing_day'] ?? '1');
         $bDay = (int) preg_replace('/[^0-9]/', '', $billingDayRaw);
         $billingCycleDay = ($bDay >= 1 && $bDay <= 28) ? $bDay : 1;
 
@@ -294,6 +323,22 @@ class ImportController extends Controller
         // 8. NIK / KTP
         $nik = trim($data['nik'] ?? $data['ktp'] ?? $data['no_ktp'] ?? '');
         $nik = trim($nik, " \t\n\r\0\x0B\"'");
+
+        // 8b. Tanggal Pasang / Register
+        $tglRegister = trim($data['tanggal register'] ?? $data['tgl_register'] ?? $data['tanggal pasang'] ?? $data['tgl_pasang'] ?? $data['join_date'] ?? '');
+        $joinDate = null;
+        if (! empty($tglRegister)) {
+            $monthsId = [
+                'Jan' => 'Jan', 'Febr' => 'Feb', 'Feb' => 'Feb', 'Maret' => 'Mar', 'Mar' => 'Mar',
+                'Apr' => 'Apr', 'Mei' => 'May', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Ags' => 'Aug',
+                'Agst' => 'Aug', 'Sept' => 'Sep', 'Sep' => 'Sep', 'Okt' => 'Oct', 'Nov' => 'Nov', 'Des' => 'Dec',
+            ];
+            $normalizedDate = strtr($tglRegister, $monthsId);
+            $parsedJoin = strtotime($normalizedDate);
+            if ($parsedJoin) {
+                $joinDate = date('Y-m-d', $parsedJoin);
+            }
+        }
 
         // 9. Customer Status from context
         $status = 'active';
@@ -381,6 +426,9 @@ class ImportController extends Controller
             if (! empty($nik)) {
                 $updateData['ktp_id'] = $nik;
             }
+            if ($joinDate) {
+                $updateData['join_date'] = $joinDate;
+            }
 
             $customer->update($updateData);
             $action = 'updated';
@@ -398,7 +446,7 @@ class ImportController extends Controller
                 'area' => $areaName ?: null,
                 'package_id' => $package ? $package->id : null,
                 'status' => $status,
-                'join_date' => date('Y-m-d'),
+                'join_date' => $joinDate ?: date('Y-m-d'),
                 'billing_cycle_day' => $billingCycleDay,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
@@ -422,7 +470,7 @@ class ImportController extends Controller
 
         // 13. Create/Sync Invoice if tagihan data present (Auto Replace existing invoice)
         $bulanTagihan = trim($data['bulan tagihan'] ?? $data['periode'] ?? '');
-        $totalBayar = (int) preg_replace('/[^0-9]/', '', $data['total bayar'] ?? $data['biaya'] ?? '0');
+        $totalBayar = (int) preg_replace('/[^0-9]/', '', $data['total bayar'] ?? $data['total_bayar'] ?? $data['paket_tarif'] ?? $data['biaya'] ?? '0');
         $diskon = (int) preg_replace('/[^0-9]/', '', $data['diskon'] ?? '0');
         $tglBayar = trim($data['tanggal bayar'] ?? '');
 
