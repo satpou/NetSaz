@@ -28,4 +28,5 @@ Thumbs.db
 .wwebjs_cache/
 whatsapp-gateway/node_modules/
 whatsapp-gateway/auth_info/
+whatsapp-gateway/package-lock.json
 /public/build
