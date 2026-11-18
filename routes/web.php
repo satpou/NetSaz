@@ -115,6 +115,7 @@ $tenantManagementRoutes = function () {
     Route::put('/settings', [\App\Http\Controllers\TenantSettingController::class, 'update'])->name('tenant.settings.update');
     Route::post('/settings/test-whatsapp', [\App\Http\Controllers\TenantSettingController::class, 'testWhatsapp'])->name('tenant.settings.test-whatsapp');
     Route::get('/settings/whatsapp-status', [\App\Http\Controllers\TenantSettingController::class, 'checkWhatsappStatus'])->name('tenant.settings.whatsapp-status');
+    Route::post('/settings/whatsapp-logout', [\App\Http\Controllers\TenantSettingController::class, 'logoutWhatsapp'])->name('tenant.settings.whatsapp-logout');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('tenant.profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('tenant.profile.update');

@@ -55,14 +55,15 @@ class WhatsAppService
             ];
         }
 
-        $provider = $this->settings['wa_gateway_provider'] ?? config('services.wa.default_provider', 'open_wa');
+        $provider = $this->settings['wa_gateway_provider'] ?? config('services.wa.default_provider', 'internal');
 
         try {
             return match ($provider) {
+                'internal' => $this->sendViaInternal($phone, $message),
                 'open_wa' => $this->sendViaOpenWa($phone, $message),
                 'fonnte' => $this->sendViaFonnte($phone, $message),
                 'waha' => $this->sendViaWaha($phone, $message),
-                default => $this->sendViaCallmebotOrGeneric($phone, $message),
+                default => $this->sendViaInternal($phone, $message),
             };
         } catch (\Throwable $e) {
             Log::error('WhatsApp send error: ' . $e->getMessage(), [
@@ -75,6 +76,82 @@ class WhatsAppService
                 'success' => false,
                 'message' => 'Gagal mengirim pesan WhatsApp: ' . $e->getMessage(),
             ];
+        }
+    }
+
+    /**
+     * Send message using NetSaz Built-in Internal WhatsApp Gateway (Auto QR Code on port 3001)
+     */
+    public function sendViaInternal(string $phone, string $message): array
+    {
+        $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
+
+        try {
+            $response = Http::timeout(12)->post("{$baseUrl}/send", [
+                'to' => $phone,
+                'message' => $message,
+            ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'message' => 'Pesan WhatsApp berhasil dikirim via Gateway Internal NetSaz.',
+                    'response' => $response->json(),
+                ];
+            }
+
+            $body = $response->json();
+            return [
+                'success' => false,
+                'message' => $body['message'] ?? 'Gateway Internal mengembalikan status ' . $response->status(),
+                'response' => $body,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'message' => 'Gagal terhubung ke WhatsApp Gateway Internal: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get real-time status and live QR code from Internal Gateway
+     */
+    public function getInternalStatus(): array
+    {
+        $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
+
+        try {
+            $response = Http::timeout(3)->get("{$baseUrl}/status");
+            if ($response->successful()) {
+                return $response->json();
+            }
+            return [
+                'success' => false,
+                'status' => 'DISCONNECTED',
+                'error' => 'Gateway mengembalikan status HTTP ' . $response->status(),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'status' => 'DISCONNECTED',
+                'error' => 'Service Gateway belum berjalan (' . $e->getMessage() . ')',
+            ];
+        }
+    }
+
+    /**
+     * Logout and reset internal WhatsApp session to generate new QR
+     */
+    public function logoutInternal(): array
+    {
+        $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
+
+        try {
+            $response = Http::timeout(5)->post("{$baseUrl}/logout");
+            return $response->json() ?? ['success' => true];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
@@ -99,7 +176,6 @@ class WhatsAppService
             $headers['api_key'] = $apiKey;
         }
 
-        // 1. Primary Easy API session endpoint
         $endpoint = "{$baseUrl}/api/sessions/{$sessionId}/messages/send-text";
         $payload = [
             'chatId' => $chatId,
@@ -111,14 +187,12 @@ class WhatsAppService
                 ->timeout(12)
                 ->post($endpoint, $payload);
         } catch (\Throwable $e) {
-            // If connection refused or error, return clear message
             return [
                 'success' => false,
                 'message' => 'Gagal terhubung ke Open-WA (' . $baseUrl . '): ' . $e->getMessage(),
             ];
         }
 
-        // 2. Fallback to /sendText if endpoint returned 404
         if ($response->status() === 404) {
             $fallbackEndpoint = "{$baseUrl}/sendText";
             $fallbackPayload = [

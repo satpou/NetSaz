@@ -26,4 +26,6 @@ Homestead.yaml
 Thumbs.db
 .wwebjs_auth/
 .wwebjs_cache/
+whatsapp-gateway/node_modules/
+whatsapp-gateway/auth_info/
 /public/build

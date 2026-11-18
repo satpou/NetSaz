@@ -106,12 +106,27 @@ class TenantSettingController extends Controller
         $tenant = Tenant::findOrFail($tid);
         $waService = new WhatsAppService($tenant);
 
-        $provider = $tenant->settings['wa_gateway_provider'] ?? 'open_wa';
+        $provider = $tenant->settings['wa_gateway_provider'] ?? 'internal';
+        if ($provider === 'internal') {
+            $status = $waService->getInternalStatus();
+            return response()->json($status);
+        }
+
         if ($provider === 'open_wa') {
             $status = $waService->checkOpenWaStatus();
             return response()->json($status);
         }
 
-        return response()->json(['connected' => true, 'provider' => $provider]);
+        return response()->json(['connected' => true, 'status' => 'CONNECTED', 'provider' => $provider]);
+    }
+
+    public function logoutWhatsapp()
+    {
+        $tid = tenantId();
+        $tenant = Tenant::findOrFail($tid);
+        $waService = new WhatsAppService($tenant);
+        $res = $waService->logoutInternal();
+
+        return response()->json($res);
     }
 }

@@ -17,7 +17,7 @@
     <a href="{{ route('tenant.dashboard', $ts ? ['tenant_slug' => $ts] : []) }}" style="color:inherit;text-decoration:none">Home</a> &gt; <b>Pengaturan ISP</b>
 </div>
 
-<x-page-header title="Pengaturan ISP" subtitle="Kelola profil, integrasi payment gateway Midtrans, WhatsApp gateway (Open-WA), dan otomasi billing">
+<x-page-header title="Pengaturan ISP" subtitle="Kelola profil, integrasi payment gateway Midtrans, WhatsApp gateway (Scan QR otomatis), dan otomasi billing">
 </x-page-header>
 
 @if(session('success'))
@@ -134,8 +134,8 @@
         </div>
     </div>
 
-    <!-- Panel 4: Integrasi WhatsApp Gateway (Termasuk Open-WA) -->
-    <div class="panel reveal d4" style="padding:26px 28px;margin-bottom:24px" x-data="{ provider: '{{ old('wa_gateway_provider', $settings['wa_gateway_provider'] ?? 'open_wa') }}', statusLoading: false, statusResult: null }">
+    <!-- Panel 4: Integrasi WhatsApp Gateway (Auto QR Code & Open-WA) -->
+    <div class="panel reveal d4" style="padding:26px 28px;margin-bottom:24px" x-data="whatsappGateway()">
         <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:10px">
             <span style="width:28px;height:28px;border-radius:7px;background:rgba(16, 185, 129, 0.15);color:#10B981;display:inline-flex;align-items:center;justify-content:center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -143,83 +143,151 @@
             WhatsApp Gateway (Kirim Tagihan & Reminder Otomatis)
         </h3>
         <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">
-            Hubungkan WhatsApp API Anda untuk pengiriman otomatis notifikasi invoice baru, pengingat jatuh tempo H-3 & H-1, kredensial portal pelanggan, dan bukti pembayaran.
+            Hubungkan WhatsApp Anda untuk pengiriman otomatis notifikasi invoice baru, pengingat jatuh tempo H-3 & H-1, kredensial portal pelanggan, dan bukti pembayaran.
         </p>
 
-        <!-- Open-WA Highlight Banner -->
-        <div style="background:rgba(16, 185, 129, 0.08);border:1px solid rgba(16, 185, 129, 0.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
-            <div style="display:flex;gap:12px">
-                <span style="color:#10B981;margin-top:2px">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                </span>
+        <div style="margin-bottom:20px">
+            <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Metode WhatsApp Gateway</label>
+            <select name="wa_gateway_provider" x-model="provider" class="form-input" style="width:100%;max-width:560px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                <option value="internal">Gateway Bawaan NetSaz (Scan QR Langsung di Layar - Otomatis & Tanpa Terminal)</option>
+                <option value="open_wa">Open-WA (wa-automate - www.open-wa.org) [External REST API]</option>
+                <option value="fonnte">Fonnte (Cloud API)</option>
+                <option value="waha">WAHA (WhatsApp HTTP API)</option>
+                <option value="callmebot">CallMeBot / Webhook Custom</option>
+            </select>
+        </div>
+
+        <!-- ================= MODE 1: INTERNAL GATEWAY (SCAN QR LANGSUNG) ================= -->
+        <div x-show="provider === 'internal'" style="background:var(--bg-alt);border:1px solid var(--line);border-radius:12px;padding:24px;margin-bottom:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
                 <div>
-                    <div style="font-size:13.5px;font-weight:700;color:var(--ink)">Dukungan Resmi: Open-WA (wa-automate)</div>
-                    <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5">
-                        NetSaz mendukung integrasi penuh dengan <a href="https://www.open-wa.org/" target="_blank" rel="noopener" style="color:#10B981;font-weight:600;text-decoration:underline">Open-WA (wa-automate)</a>, gateway WhatsApp open-source yang dapat Anda host sendiri (Self-Hosted) secara gratis tanpa biaya langganan bulanan.
-                    </div>
+                    <h4 style="font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px">
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%" :style="{ background: status === 'CONNECTED' ? '#10B981' : (status === 'SCAN_QR' ? '#F59E0B' : '#64748B') }"></span>
+                        Status WhatsApp Gateway:
+                        <span x-text="statusText()" :style="{ color: status === 'CONNECTED' ? '#10B981' : (status === 'SCAN_QR' ? '#F59E0B' : 'var(--ink)') }"></span>
+                    </h4>
+                    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:2px">
+                        Sesi login tersimpan permanen di server. Jika sewaktu-waktu terputus, QR Code baru akan langsung muncul di sini secara otomatis.
+                    </p>
+                </div>
+
+                <div style="display:flex;gap:8px">
+                    <button type="button" @click="fetchStatus()" class="btn btn-ghost" style="padding:7px 14px;font-size:12.5px;border:1px solid var(--line);display:flex;align-items:center;gap:6px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ 'spin': isRefreshing }"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        Refresh Status
+                    </button>
+                    <button type="button" x-show="status === 'CONNECTED'" @click="logout()" class="btn" style="background:rgba(239, 68, 68, 0.1);color:#EF4444;border:1px solid #EF4444;padding:7px 14px;font-size:12.5px;border-radius:6px">
+                        Putuskan Sesi / Scan Ulang
+                    </button>
                 </div>
             </div>
-            <a href="https://www.open-wa.org/" target="_blank" rel="noopener" class="btn btn-ghost" style="white-space:nowrap;font-size:12px;padding:6px 12px;border:1px solid rgba(16, 185, 129, 0.4);color:#10B981">
-                Buka Docs Open-WA &rarr;
-            </a>
-        </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-            <div>
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Provider Gateway</label>
-                <select name="wa_gateway_provider" x-model="provider" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
-                    <option value="open_wa">Open-WA (wa-automate - www.open-wa.org) [Self-Hosted]</option>
-                    <option value="fonnte">Fonnte (Cloud API)</option>
-                    <option value="waha">WAHA (WhatsApp HTTP API)</option>
-                    <option value="callmebot">CallMeBot / Webhook Custom</option>
-                </select>
+            <!-- JIKA STATUS: SCAN_QR (QR CODE LANGSUNG MUNCUL DI LAYAR) -->
+            <div x-show="status === 'SCAN_QR'" style="display:flex;flex-direction:column;align-items:center;padding:24px;background:var(--bg);border-radius:10px;border:1px dashed var(--line);text-align:center">
+                <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px">
+                    Pindai QR Code Menggunakan WhatsApp di HP Anda
+                </div>
+                <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;max-width:440px">
+                    1. Buka WhatsApp di ponsel &rarr; Ketuk <b>Menu (⋮)</b> atau <b>Pengaturan</b><br>
+                    2. Pilih <b>Perangkat Tertaut</b> &rarr; Ketuk <b>Tautkan Perangkat</b><br>
+                    3. Arahkan kamera ke QR Code di bawah ini.
+                </div>
+
+                <template x-if="qr">
+                    <div style="padding:16px;background:#FFFFFF;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);display:inline-block">
+                        <img :src="qr" alt="WhatsApp QR Code" style="width:260px;height:260px;display:block">
+                    </div>
+                </template>
+
+                <div style="font-size:11.5px;color:var(--ink-soft);margin-top:14px;display:flex;align-items:center;gap:6px">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#F59E0B"></span>
+                    Menunggu pemindaian... QR akan diperbarui otomatis.
+                </div>
             </div>
 
-            <!-- Server URL for Open-WA / WAHA -->
-            <div x-show="provider === 'open_wa' || provider === 'waha' || provider === 'callmebot'">
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">
-                    <span x-show="provider === 'open_wa'">Endpoint URL Open-WA</span>
-                    <span x-show="provider === 'waha'">Endpoint URL WAHA</span>
-                    <span x-show="provider === 'callmebot'">Webhook API URL</span>
-                </label>
-                <input type="text" name="wa_api_url" value="{{ old('wa_api_url', $settings['wa_api_url'] ?? 'http://localhost:2785') }}" placeholder="http://localhost:2785 atau https://wa.domain-anda.com" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
-                <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px">Contoh port default Open-WA Easy API: <code>http://localhost:2785</code></div>
+            <!-- JIKA STATUS: CONNECTED (SUDAH TERHUBUNG AKTIF) -->
+            <div x-show="status === 'CONNECTED'" style="padding:20px 24px;background:rgba(16, 185, 129, 0.08);border:1px solid rgba(16, 185, 129, 0.3);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+                <div style="display:flex;align-items:center;gap:14px">
+                    <div style="width:44px;height:44px;border-radius:10px;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:15px;font-weight:700;color:var(--ink)">WhatsApp Siap Digunakan</div>
+                        <div style="font-size:13px;color:var(--ink-soft);margin-top:2px">
+                            Nomor Pengirim: <b style="color:#10B981" x-text="user?.phone ? '+' + user.phone : 'Aktif'"></b>
+                            <span x-show="user?.name" x-text="'(' + user?.name + ')'"></span>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size:12px;color:var(--ink-soft)">
+                    Terhubung sejak: <span x-text="connected_at ? new Date(connected_at).toLocaleString('id-ID') : 'Sesi Aktif'"></span>
+                </div>
             </div>
 
-            <!-- API Key / Token -->
-            <div>
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">
-                    <span x-show="provider === 'open_wa'">API Key / Secret Token (Opsional)</span>
-                    <span x-show="provider === 'fonnte'">Token API Fonnte</span>
-                    <span x-show="provider === 'waha'">X-Api-Key WAHA</span>
-                    <span x-show="provider === 'callmebot'">API Key CallMeBot</span>
-                </label>
-                <input type="password" name="wa_api_token" value="{{ old('wa_api_token', $tenant->getSecretSetting('wa_api_token') ?? ($settings['wa_api_token'] ?? '')) }}" placeholder="Token / API Key..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
-            </div>
-
-            <!-- Session ID for Open-WA / WAHA -->
-            <div x-show="provider === 'open_wa' || provider === 'waha'">
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Session ID</label>
-                <input type="text" name="wa_session_id" value="{{ old('wa_session_id', $settings['wa_session_id'] ?? 'default') }}" placeholder="default" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
-                <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px">Nama sesi instance Open-WA Anda (default: <code>default</code>)</div>
-            </div>
-        </div>
-
-        <!-- Cara Menjalankan Open-WA Info Box -->
-        <div x-show="provider === 'open_wa'" style="margin-top:16px;padding:16px;background:var(--bg-alt);border-radius:8px;border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--ink)">
-            <b style="color:#10B981">💡 Cara Menjalankan Open-WA di Server/VPS Anda:</b>
-            <div style="margin-top:6px">
-                Jalankan perintah ini di terminal server Anda untuk menyalakan REST API Open-WA:
-                <pre style="background:#0F172A;color:#38BDF8;padding:10px 14px;border-radius:6px;margin:8px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px">npx @open-wa/wa-automate --port 2785 --api-key "kunci-rahasia-anda"</pre>
-                Scan QR code yang muncul di terminal menggunakan aplikasi WhatsApp di HP Anda. Setelah terhubung, status akan langsung aktif!
+            <!-- JIKA STATUS: INITIALIZING / DISCONNECTED -->
+            <div x-show="status !== 'SCAN_QR' && status !== 'CONNECTED'" style="padding:30px 20px;text-align:center;color:var(--ink-soft)">
+                <div style="font-size:14px;font-weight:600;margin-bottom:8px" x-text="status === 'INITIALIZING' ? 'Memulai WhatsApp Gateway...' : 'Menghubungkan ke Service Gateway...'"></div>
+                <div style="font-size:12.5px">Mohon tunggu beberapa detik, sistem sedang menyiapkan koneksi WhatsApp...</div>
             </div>
         </div>
-    </div>
 
-    <div style="display:flex;justify-content:flex-end;margin-bottom:28px">
-        <button type="submit" class="btn btn-primary" style="padding:12px 32px;font-size:15px;font-weight:700">
-            Simpan Semua Pengaturan
-        </button>
+        <!-- ================= MODE 2: EXTERNAL OPEN-WA / WAHA / FONNTE ================= -->
+        <div x-show="provider !== 'internal'">
+            <!-- Open-WA Highlight Banner -->
+            <div x-show="provider === 'open_wa'" style="background:rgba(16, 185, 129, 0.08);border:1px solid rgba(16, 185, 129, 0.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+                <div style="display:flex;gap:12px">
+                    <span style="color:#10B981;margin-top:2px">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    </span>
+                    <div>
+                        <div style="font-size:13.5px;font-weight:700;color:var(--ink)">Dukungan Resmi: Open-WA (wa-automate)</div>
+                        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5">
+                            NetSaz mendukung integrasi penuh dengan <a href="https://www.open-wa.org/" target="_blank" rel="noopener" style="color:#10B981;font-weight:600;text-decoration:underline">Open-WA (wa-automate)</a>, gateway WhatsApp open-source yang dapat Anda host sendiri (Self-Hosted) secara gratis tanpa biaya langganan bulanan.
+                        </div>
+                    </div>
+                </div>
+                <a href="https://www.open-wa.org/" target="_blank" rel="noopener" class="btn btn-ghost" style="white-space:nowrap;font-size:12px;padding:6px 12px;border:1px solid rgba(16, 185, 129, 0.4);color:#10B981">
+                    Buka Docs Open-WA &rarr;
+                </a>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <!-- Server URL for Open-WA / WAHA -->
+                <div x-show="provider === 'open_wa' || provider === 'waha' || provider === 'callmebot'">
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">
+                        <span x-show="provider === 'open_wa'">Endpoint URL Open-WA</span>
+                        <span x-show="provider === 'waha'">Endpoint URL WAHA</span>
+                        <span x-show="provider === 'callmebot'">Webhook API URL</span>
+                    </label>
+                    <input type="text" name="wa_api_url" value="{{ old('wa_api_url', $settings['wa_api_url'] ?? 'http://localhost:2785') }}" placeholder="http://localhost:2785 atau https://wa.domain-anda.com" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px">Contoh port default Open-WA Easy API: <code>http://localhost:2785</code></div>
+                </div>
+
+                <!-- API Key / Token -->
+                <div>
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">
+                        <span x-show="provider === 'open_wa'">API Key / Secret Token (Opsional)</span>
+                        <span x-show="provider === 'fonnte'">Token API Fonnte</span>
+                        <span x-show="provider === 'waha'">X-Api-Key WAHA</span>
+                        <span x-show="provider === 'callmebot'">API Key CallMeBot</span>
+                    </label>
+                    <input type="password" name="wa_api_token" value="{{ old('wa_api_token', $tenant->getSecretSetting('wa_api_token') ?? ($settings['wa_api_token'] ?? '')) }}" placeholder="Token / API Key..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                </div>
+
+                <!-- Session ID for Open-WA / WAHA -->
+                <div x-show="provider === 'open_wa' || provider === 'waha'">
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Session ID</label>
+                    <input type="text" name="wa_session_id" value="{{ old('wa_session_id', $settings['wa_session_id'] ?? 'default') }}" placeholder="default" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px">Nama sesi instance Open-WA Anda (default: <code>default</code>)</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:16px">
+            <button type="submit" class="btn btn-primary" style="padding:12px 32px;font-size:15px;font-weight:700">
+                Simpan Semua Pengaturan
+            </button>
+        </div>
     </div>
 </form>
 
@@ -230,7 +298,7 @@
         Uji Coba Pengiriman WhatsApp
     </h4>
     <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px">
-        Kirim pesan tes ke nomor Anda untuk memastikan koneksi WhatsApp Gateway (Open-WA / Fonnte / WAHA) berfungsi dengan benar.
+        Kirim pesan tes ke nomor Anda untuk memastikan koneksi WhatsApp Gateway berfungsi dengan benar.
     </p>
 
     <form method="POST" action="{{ route('tenant.settings.test-whatsapp', $ts ? ['tenant_slug' => $ts] : []) }}" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
@@ -249,4 +317,74 @@
         </button>
     </form>
 </div>
+
+<script>
+function whatsappGateway() {
+    return {
+        provider: '{{ old('wa_gateway_provider', $settings['wa_gateway_provider'] ?? 'internal') }}',
+        status: 'INITIALIZING',
+        qr: null,
+        user: null,
+        connected_at: null,
+        isRefreshing: false,
+        pollTimer: null,
+
+        init() {
+            this.fetchStatus();
+            // Auto poll every 3 seconds if on internal mode and not connected
+            this.pollTimer = setInterval(() => {
+                if (this.provider === 'internal' && this.status !== 'CONNECTED') {
+                    this.fetchStatus(false);
+                }
+            }, 3000);
+        },
+
+        statusText() {
+            if (this.status === 'CONNECTED') return 'Terhubung (Online)';
+            if (this.status === 'SCAN_QR') return 'Menunggu Pindai QR Code';
+            if (this.status === 'INITIALIZING') return 'Memulai Gateway...';
+            return 'Terputus (Disconnected)';
+        },
+
+        async fetchStatus(showSpin = true) {
+            if (showSpin) this.isRefreshing = true;
+            try {
+                const res = await fetch('{{ route('tenant.settings.whatsapp-status', $ts ? ['tenant_slug' => $ts] : []) }}');
+                const data = await res.json();
+                this.status = data.status || (data.connected ? 'CONNECTED' : 'DISCONNECTED');
+                this.qr = data.qr || null;
+                this.user = data.user || null;
+                this.connected_at = data.connected_at || null;
+            } catch (e) {
+                console.error('Failed to fetch WA status', e);
+            } finally {
+                if (showSpin) this.isRefreshing = false;
+            }
+        },
+
+        async logout() {
+            if (!confirm('Apakah Anda yakin ingin memutuskan sesi WhatsApp ini dan membuat QR Code baru?')) return;
+            try {
+                await fetch('{{ route('tenant.settings.whatsapp-logout', $ts ? ['tenant_slug' => $ts] : []) }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                this.status = 'INITIALIZING';
+                this.qr = null;
+                setTimeout(() => this.fetchStatus(), 1500);
+            } catch (e) {
+                alert('Gagal memutuskan sesi: ' + e.message);
+            }
+        }
+    }
+}
+</script>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+</style>
 @endsection
