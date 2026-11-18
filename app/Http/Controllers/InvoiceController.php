@@ -266,4 +266,39 @@ class InvoiceController extends Controller
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Pembayaran manual berhasil dicatat dan menunggu verifikasi.');
     }
+
+    public function sendWhatsapp(Invoice $invoice)
+    {
+        abort_unless($invoice->tenant_id === tenantId(), 403);
+
+        $customer = $invoice->customer;
+        if (! $customer || empty($customer->phone)) {
+            return back()->with('error', 'Nomor WhatsApp pelanggan belum diisi.');
+        }
+
+        $formattedTotal = 'Rp ' . number_format($invoice->total_amount, 0, ',', '.');
+        $dueDate = $invoice->due_date ? $invoice->due_date->format('d M Y') : '-';
+        $portalUrl = $customer->portalUrl() . '/invoices/' . $invoice->id;
+        $tenantName = $customer->tenant?->name ?? 'NetSaz';
+
+        $message = "*TAGIHAN INTERNET - {$tenantName}*\n\n"
+            . "Yth. *{$customer->name}*,\n"
+            . "Berikut informasi tagihan internet Anda:\n\n"
+            . "• No. Invoice: *{$invoice->invoice_number}*\n"
+            . "• Total Tagihan: *{$formattedTotal}*\n"
+            . "• Jatuh Tempo: *{$dueDate}*\n"
+            . "• Status: *" . strtoupper($invoice->status) . "*\n\n"
+            . "Lihat rincian dan bayar tagihan online melalui link portal berikut:\n"
+            . "{$portalUrl}\n\n"
+            . "Terima kasih atas kepercayaannya menggunakan layanan kami.";
+
+        $waService = new \App\Services\WhatsAppService($invoice->tenant);
+        $result = $waService->sendMessage($customer->phone, $message);
+
+        if ($result['success']) {
+            return back()->with('success', 'Pemberitahuan invoice berhasil dikirim ke WhatsApp ' . $customer->phone);
+        }
+
+        return back()->with('error', $result['message']);
+    }
 }

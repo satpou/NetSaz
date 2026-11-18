@@ -262,15 +262,14 @@ class CustomerController extends Controller
             . "Login cepat: {$magicUrl}\n"
             . "PIN: *{$pin}*";
 
-        $apiUrl = config('services.wa_notification.api_url', 'https://api.callmebot.com/whatsapp.php');
+        $waService = new \App\Services\WhatsAppService($customer->tenant);
+        $result = $waService->sendMessage($customer->phone, $message);
 
-        Http::get($apiUrl, [
-            'phone' => $customer->phone,
-            'text' => $message,
-            'apikey' => config('services.wa_notification.api_key'),
-        ]);
+        if ($result['success']) {
+            return back()->with('success', 'Link portal berhasil dikirim ke WhatsApp ' . $customer->phone);
+        }
 
-        return back()->with('success', 'Link portal berhasil dikirim ke WhatsApp.');
+        return back()->with('error', $result['message']);
     }
 
     public function sendWelcome(Customer $customer)
@@ -288,15 +287,14 @@ class CustomerController extends Controller
             . "Login cepat: {$magicUrl}\n"
             . "PIN: *{$pin}*";
 
-        $apiUrl = config('services.wa_notification.api_url', 'https://api.callmebot.com/whatsapp.php');
+        $waService = new \App\Services\WhatsAppService($customer->tenant);
+        $result = $waService->sendMessage($customer->phone, $message);
 
-        Http::get($apiUrl, [
-            'phone' => $customer->phone,
-            'text' => $message,
-            'apikey' => config('services.wa_notification.api_key'),
-        ]);
+        if ($result['success']) {
+            return back()->with('success', 'Pesan selamat datang berhasil dikirim ke WhatsApp ' . $customer->phone);
+        }
 
-        return back()->with('success', 'Pesan selamat datang berhasil dikirim ke WhatsApp.');
+        return back()->with('error', $result['message']);
     }
 
     public function enablePppoe(Customer $customer)

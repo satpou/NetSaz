@@ -72,6 +72,14 @@
                     @endif
                 </td>
                 <td style="padding:18px 28px 18px 20px;text-align:right">
+                    @if($invoice->status != 'paid')
+                        <form action="{{ route('invoices.send-whatsapp', $invoice->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Kirim rincian invoice ke WhatsApp pelanggan ({{ $invoice->customer?->phone }})?')">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost" style="padding:8px;color:#10B981" title="Kirim Notifikasi WhatsApp">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                            </button>
+                        </form>
+                    @endif
                     <a href="{{ route('invoices.show', $invoice->id) }}" class="btn btn-ghost" style="padding:8px;color:var(--primary)" title="Detail">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     </a>

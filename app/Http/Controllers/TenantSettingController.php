@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tenant;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 
 class TenantSettingController extends Controller
@@ -32,7 +33,9 @@ class TenantSettingController extends Controller
             'midtrans_is_production' => 'nullable|boolean',
             // WhatsApp Gateway
             'wa_gateway_provider' => 'nullable|string|max:50',
+            'wa_api_url' => 'nullable|string|max:255',
             'wa_api_token' => 'nullable|string|max:255',
+            'wa_session_id' => 'nullable|string|max:100',
             'wa_sender_number' => 'nullable|string|max:25',
             // Billing preferences
             'invoice_due_days' => 'nullable|integer|min:1|max:30',
@@ -52,13 +55,17 @@ class TenantSettingController extends Controller
         if (isset($validated['midtrans_client_key'])) {
             $tenant->setSecretSetting('midtrans_client_key', $validated['midtrans_client_key']);
         }
+        if (isset($validated['wa_api_token'])) {
+            $tenant->setSecretSetting('wa_api_token', $validated['wa_api_token']);
+        }
 
         // Save public settings
         $settings = $tenant->settings ?? [];
         $settings['midtrans_is_production'] = $request->boolean('midtrans_is_production', false);
         $settings['slogan'] = $validated['slogan'] ?? ($settings['slogan'] ?? null);
-        $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'fonnte';
-        $settings['wa_api_token'] = $validated['wa_api_token'] ?? ($settings['wa_api_token'] ?? null);
+        $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'open_wa';
+        $settings['wa_api_url'] = $validated['wa_api_url'] ?? ($settings['wa_api_url'] ?? 'http://localhost:2785');
+        $settings['wa_session_id'] = $validated['wa_session_id'] ?? ($settings['wa_session_id'] ?? 'default');
         $settings['wa_sender_number'] = $validated['wa_sender_number'] ?? ($settings['wa_sender_number'] ?? null);
         $settings['invoice_due_days'] = (int) ($validated['invoice_due_days'] ?? 7);
         $settings['auto_isolate_enabled'] = $request->boolean('auto_isolate_enabled', true);
@@ -68,5 +75,43 @@ class TenantSettingController extends Controller
 
         return redirect()->route('tenant.settings.edit', request()->route('tenant_slug') ? ['tenant_slug' => request()->route('tenant_slug')] : [])
             ->with('success', 'Pengaturan ISP berhasil diperbarui.');
+    }
+
+    public function testWhatsapp(Request $request)
+    {
+        $request->validate([
+            'test_phone' => 'required|string|max:25',
+            'test_message' => 'nullable|string|max:500',
+        ]);
+
+        $tid = tenantId();
+        $tenant = Tenant::findOrFail($tid);
+
+        $waService = new WhatsAppService($tenant);
+        $phone = $request->input('test_phone');
+        $message = $request->input('test_message') ?: "Halo! Ini adalah pesan uji coba WhatsApp Gateway dari {$tenant->name} via NetSaz.";
+
+        $result = $waService->sendMessage($phone, $message);
+
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        }
+
+        return back()->with('error', $result['message']);
+    }
+
+    public function checkWhatsappStatus()
+    {
+        $tid = tenantId();
+        $tenant = Tenant::findOrFail($tid);
+        $waService = new WhatsAppService($tenant);
+
+        $provider = $tenant->settings['wa_gateway_provider'] ?? 'open_wa';
+        if ($provider === 'open_wa') {
+            $status = $waService->checkOpenWaStatus();
+            return response()->json($status);
+        }
+
+        return response()->json(['connected' => true, 'provider' => $provider]);
     }
 }

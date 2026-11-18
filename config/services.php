@@ -58,6 +58,17 @@ return [
     'wa_notification' => [
         'phone' => env('WA_PHONE'),
         'api_url' => env('WA_API_URL', 'https://api.callmebot.com/whatsapp.php'),
+        'api_key' => env('WA_API_KEY'),
+    ],
+
+    'open_wa' => [
+        'api_url' => env('OPEN_WA_API_URL', 'http://localhost:2785'),
+        'api_key' => env('OPEN_WA_API_KEY', ''),
+        'session_id' => env('OPEN_WA_SESSION_ID', 'default'),
+    ],
+
+    'wa' => [
+        'default_provider' => env('WA_DEFAULT_PROVIDER', 'open_wa'),
     ],
 
 ];

@@ -18,6 +18,7 @@ class Tenant extends Model
         'midtrans_client_key',
         'xendit_api_key',
         'xendit_webhook_token',
+        'wa_api_token',
     ];
 
     protected $fillable = [

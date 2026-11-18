@@ -80,6 +80,7 @@ $tenantManagementRoutes = function () {
     Route::resource('invoices', InvoiceController::class);
     Route::post('invoices/{invoice}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
     Route::post('invoices/{invoice}/add-payment', [InvoiceController::class, 'addManualPayment'])->name('invoices.add-payment');
+    Route::post('invoices/{invoice}/send-whatsapp', [InvoiceController::class, 'sendWhatsapp'])->name('invoices.send-whatsapp');
     Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 
     Route::resource('payments', PaymentController::class);
@@ -112,6 +113,8 @@ $tenantManagementRoutes = function () {
     // Tenant Settings
     Route::get('/settings', [\App\Http\Controllers\TenantSettingController::class, 'edit'])->name('tenant.settings.edit');
     Route::put('/settings', [\App\Http\Controllers\TenantSettingController::class, 'update'])->name('tenant.settings.update');
+    Route::post('/settings/test-whatsapp', [\App\Http\Controllers\TenantSettingController::class, 'testWhatsapp'])->name('tenant.settings.test-whatsapp');
+    Route::get('/settings/whatsapp-status', [\App\Http\Controllers\TenantSettingController::class, 'checkWhatsappStatus'])->name('tenant.settings.whatsapp-status');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('tenant.profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('tenant.profile.update');
