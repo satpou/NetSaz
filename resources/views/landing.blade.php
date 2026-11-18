@@ -149,20 +149,10 @@
 
 <section class="pricing" id="harga" aria-roledescription="carousel" aria-label="Paket Langganan NetSaz">
   <div class="wrap">
-    <div class="pricing-header-row reveal">
-      <div class="section-head" style="margin-bottom:0;">
-        <div class="eyebrow"><span class="dot"></span>HARGA</div>
-        <h2>Harga mengikuti jumlah pelanggan Anda</h2>
-        <p>Tanpa biaya setup. Geser atau pilih paket yang paling cocok untuk pertumbuhan ISP Anda.</p>
-      </div>
-      <div class="carousel-nav-arrows">
-        <button type="button" class="carousel-arrow-btn prev-btn" aria-label="Paket sebelumnya" title="Paket Sebelumnya">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button type="button" class="carousel-arrow-btn next-btn" aria-label="Paket berikutnya" title="Paket Berikutnya">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span>HARGA</div>
+      <h2>Harga mengikuti jumlah pelanggan Anda</h2>
+      <p>Tanpa biaya setup. Geser atau pilih paket yang paling cocok untuk pertumbuhan ISP Anda.</p>
     </div>
     
     <div class="pricing-carousel-container">
@@ -204,17 +194,25 @@
       </button>
     </div>
 
-    <!-- Carousel Dots / Indicators -->
-    <div class="carousel-indicators" role="tablist" aria-label="Indikator Paket">
-      @foreach (config('pricing_plans') as $index => $plan)
-      <button type="button" 
-              role="tab" 
-              class="carousel-dot {{ $index === 0 ? 'active' : '' }}" 
-              data-index="{{ $index }}" 
-              aria-label="Paket {{ $plan['name'] }}"
-              aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
+    <!-- Carousel Bottom Controls (Arrows + Indicators) -->
+    <div class="carousel-bottom-nav">
+      <button type="button" class="carousel-arrow-btn prev-btn" aria-label="Paket sebelumnya" title="Paket Sebelumnya">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      @endforeach
+      <div class="carousel-indicators" role="tablist" aria-label="Indikator Paket">
+        @foreach (config('pricing_plans') as $index => $plan)
+        <button type="button" 
+                role="tab" 
+                class="carousel-dot {{ $index === 0 ? 'active' : '' }}" 
+                data-index="{{ $index }}" 
+                aria-label="Paket {{ $plan['name'] }}"
+                aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
+        </button>
+        @endforeach
+      </div>
+      <button type="button" class="carousel-arrow-btn next-btn" aria-label="Paket berikutnya" title="Paket Berikutnya">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
     </div>
 
     <div style="text-align:center;margin-top:24px;" class="reveal">

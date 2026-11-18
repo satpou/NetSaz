@@ -972,12 +972,19 @@
   text-decoration: none;
 }
 
+.carousel-bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
 .carousel-indicators {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 24px;
 }
 
 .carousel-dot {
