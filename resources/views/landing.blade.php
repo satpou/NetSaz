@@ -147,58 +147,78 @@
   </div>
 </section>
 
-<section class="pricing" id="harga">
+<section class="pricing" id="harga" aria-roledescription="carousel" aria-label="Paket Langganan NetSaz">
   <div class="wrap">
-    <div class="section-head reveal">
-      <div class="eyebrow"><span class="dot"></span>HARGA</div>
-      <h2>Harga mengikuti jumlah pelanggan Anda</h2>
-      <p>Tanpa biaya setup. Naik atau turun paket kapan saja sesuai pertumbuhan jaringan Anda.</p>
+    <div class="pricing-header-row reveal">
+      <div class="section-head" style="margin-bottom:0;">
+        <div class="eyebrow"><span class="dot"></span>HARGA</div>
+        <h2>Harga mengikuti jumlah pelanggan Anda</h2>
+        <p>Tanpa biaya setup. Geser atau pilih paket yang paling cocok untuk pertumbuhan ISP Anda.</p>
+      </div>
+      <div class="carousel-nav-arrows">
+        <button type="button" class="carousel-arrow-btn prev-btn" aria-label="Paket sebelumnya" title="Paket Sebelumnya">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="carousel-arrow-btn next-btn" aria-label="Paket berikutnya" title="Paket Berikutnya">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
     
-<div class="pricing-carousel-wrapper">
-      <div class="pricing-carousel-track">
-        @foreach (config('pricing_plans') as $plan)
-        <div class="price-card carousel-card {{ $plan['highlight'] ? 'highlight' : '' }}">
+    <div class="pricing-carousel-container">
+      <button type="button" class="carousel-float-arrow float-prev" aria-label="Paket sebelumnya" title="Sebelumnya">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      <div class="pricing-carousel-track" role="region" aria-label="Daftar Paket Langganan">
+        @foreach (config('pricing_plans') as $index => $plan)
+        <div class="price-card carousel-card {{ $plan['highlight'] ? 'highlight' : '' }} {{ ($plan['is_enterprise'] ?? false) ? 'enterprise' : '' }}"
+             data-index="{{ $index }}"
+             role="group"
+             aria-roledescription="slide"
+             aria-label="{{ $index + 1 }} dari {{ count(config('pricing_plans')) }}">
           @if ($plan['badge'])
           <span class="tag">{{ $plan['badge'] }}</span>
           @endif
           <h3>{{ $plan['name'] }}</h3>
           <div class="desc">{{ $plan['description'] }}</div>
           <div class="amount">{{ $plan['price'] }}</div>
-          <div class="per">/tahun, {{ $plan['kuota'] }}</div>
+          <div class="per">{{ ($plan['is_enterprise'] ?? false) ? 'Solusi Kustom' : '/tahun, ' . $plan['kuota'] }}</div>
           <ul>
-            @foreach (array_slice($plan['benefits'], 0, 3) as $benefit)
+            @foreach (array_slice($plan['benefits'], 0, 4) as $benefit)
             <li>{{ $benefit }}</li>
             @endforeach
           </ul>
+          @if($plan['is_enterprise'] ?? false)
+          <a class="btn btn-outline" href="{{ $plan['cta'] }}" target="_blank" rel="noopener">{{ $plan['cta_label'] }}</a>
+          @else
           <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-outline' }}"
-               href="{{ route('price') }}#harga">Lihat Paket</a>
-        </div>
-        @endforeach
-        {{-- Duplicate ALL cards for seamless infinite loop --}}
-        @foreach (config('pricing_plans') as $plan)
-        <div class="price-card carousel-card {{ $plan['highlight'] ? 'highlight' : '' }}">
-          @if ($plan['badge'])
-          <span class="tag">{{ $plan['badge'] }}</span>
+             href="{{ route('register') }}?plan={{ $plan['key'] }}">Pilih Paket</a>
           @endif
-          <h3>{{ $plan['name'] }}</h3>
-          <div class="desc">{{ $plan['description'] }}</div>
-          <div class="amount">{{ $plan['price'] }}</div>
-          <div class="per">/tahun, {{ $plan['kuota'] }}</div>
-          <ul>
-            @foreach (array_slice($plan['benefits'], 0, 3) as $benefit)
-            <li>{{ $benefit }}</li>
-            @endforeach
-          </ul>
-          <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-outline' }}"
-               href="{{ route('price') }}#harga">Lihat Paket</a>
         </div>
         @endforeach
       </div>
+
+      <button type="button" class="carousel-float-arrow float-next" aria-label="Paket berikutnya" title="Berikutnya">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Carousel Dots / Indicators -->
+    <div class="carousel-indicators" role="tablist" aria-label="Indikator Paket">
+      @foreach (config('pricing_plans') as $index => $plan)
+      <button type="button" 
+              role="tab" 
+              class="carousel-dot {{ $index === 0 ? 'active' : '' }}" 
+              data-index="{{ $index }}" 
+              aria-label="Paket {{ $plan['name'] }}"
+              aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
+      </button>
+      @endforeach
     </div>
 
     <div style="text-align:center;margin-top:24px;" class="reveal">
-      <a href="{{ route('price') }}" style="font-size:13px;color:var(--primary);text-decoration:underline;font-weight:500;">Lihat 6 paket lengkap →</a>
+      <a href="{{ route('price') }}" style="font-size:13.5px;color:var(--primary);text-decoration:underline;font-weight:600;">Lihat 6 paket lengkap & perbandingan fitur →</a>
     </div>
   </div>
 </section>

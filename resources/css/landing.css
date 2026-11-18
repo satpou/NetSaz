@@ -728,41 +728,136 @@
 }
 
 .pricing {
-  padding: 110px 0;
+  padding: 100px 0;
   background: var(--bg-alt);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
 
-.pricing-carousel-wrapper {
-  overflow-x: hidden;
-  overflow-y: visible;
+.pricing-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  gap: 24px;
+}
+
+.carousel-nav-arrows {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.carousel-arrow-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--panel-soft, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--line-strong, rgba(255, 255, 255, 0.12));
+  color: var(--ink, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.carousel-arrow-btn:hover {
+  background: var(--primary, #00ff9c);
+  color: #050b14;
+  border-color: var(--primary, #00ff9c);
+  box-shadow: 0 0 16px rgba(0, 255, 156, 0.35);
+  transform: translateY(-2px);
+}
+
+.carousel-arrow-btn:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.pricing-carousel-container {
   position: relative;
   width: 100%;
-  padding-top: 14px;
 }
 
-.pricing-carousel-wrapper:hover .pricing-carousel-track {
-  animation-play-state: paused;
+.carousel-float-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(13, 20, 36, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--line-strong, rgba(255, 255, 255, 0.15));
+  color: var(--ink, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.carousel-float-arrow:hover {
+  background: var(--primary, #00ff9c);
+  color: #050b14;
+  border-color: var(--primary, #00ff9c);
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.45);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-float-arrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.carousel-float-arrow.float-prev {
+  left: -20px;
+}
+
+.carousel-float-arrow.float-next {
+  right: -20px;
+}
+
+@media (max-width: 900px) {
+  .carousel-float-arrow {
+    display: none;
+  }
 }
 
 .pricing-carousel-track {
   display: flex;
-  gap: 22px;
-  width: max-content;
-  animation: carousel-scroll 28s linear infinite;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  padding: 16px 6px 24px 6px;
+  cursor: grab;
+  user-select: none;
 }
 
-@keyframes carousel-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.pricing-carousel-track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.pricing-carousel-track::-webkit-scrollbar {
+  display: none;
 }
 
 .carousel-card {
   width: 320px;
-  flex-shrink: 0;
+  flex: 0 0 320px;
+  scroll-snap-align: center;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -771,6 +866,13 @@
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.carousel-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow);
 }
 
 .carousel-card.highlight {
@@ -797,6 +899,17 @@
   white-space: nowrap;
 }
 
+.carousel-card.enterprise {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--ink-faint);
+  background: var(--bg-alt);
+}
+
+.carousel-card.enterprise:hover {
+  border-color: var(--primary);
+}
+
 .carousel-card h3 {
   font-size: 18px;
   font-weight: 600;
@@ -807,6 +920,7 @@
   font-size: 13.5px;
   color: var(--ink-soft);
   margin-bottom: 22px;
+  min-height: 38px;
 }
 
 .carousel-card .amount {
@@ -814,6 +928,10 @@
   font-size: 32px;
   font-weight: 600;
   margin-bottom: 2px;
+}
+
+.carousel-card.enterprise .amount {
+  font-size: 26px;
 }
 
 .carousel-card .per {
@@ -854,24 +972,35 @@
   text-decoration: none;
 }
 
-.carousel-dots {
+.carousel-indicators {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
 }
 
-.carousel-dots .dot {
+.carousel-dot {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
-  background: var(--line);
-  transition: background .2s;
-  cursor: default;
+  border-radius: 5px;
+  background: var(--line, rgba(255, 255, 255, 0.2));
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
 }
 
-.carousel-dots .dot.active {
-  background: var(--primary);
+.carousel-dot:hover {
+  background: var(--primary, #00ff9c);
+  opacity: 0.8;
+}
+
+.carousel-dot.active {
+  width: 32px;
+  background: var(--primary, #00ff9c);
+  box-shadow: 0 0 12px rgba(0, 255, 156, 0.45);
 }
 
 @media (max-width:900px) {
