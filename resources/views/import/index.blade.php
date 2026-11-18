@@ -99,6 +99,14 @@
         <a href="{{ route('export.data', array_merge(['type' => 'pembayaran'], $ts ? ['tenant_slug' => $ts] : [])) }}" class="btn btn-outline" style="font-size:13px;padding:8px 14px">
             Pembayaran
         </a>
+        <a href="{{ route('export.data', array_merge(['type' => 'pelanggan_beatcom', 'format' => 'beatcom_xls'], $ts ? ['tenant_slug' => $ts] : [])) }}" class="btn" style="font-size:13px;padding:8px 16px;background:rgba(16, 185, 129, 0.15);color:#10B981;border:1px solid #10B981;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Format Beatcom (.xls)
+        </a>
+        <a href="{{ route('export.data', array_merge(['type' => 'pelanggan_beatcom', 'format' => 'beatcom_csv'], $ts ? ['tenant_slug' => $ts] : [])) }}" class="btn" style="font-size:13px;padding:8px 16px;background:rgba(16, 185, 129, 0.15);color:#10B981;border:1px solid #10B981;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Format Beatcom (.csv)
+        </a>
     </div>
 </div>
 
@@ -111,22 +119,29 @@
         Sinkron data dari Beatcom & Aplikasi Billing Lain
     </h3>
 
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px">
-        Pilih satu atau beberapa file ekspor Beatcom / aplikasi lama (<code class="mono" style="color:var(--primary)">.csv</code> / <code class="mono" style="color:var(--primary)">.xls</code> / <code class="mono" style="color:var(--primary)">.txt</code>) sekaligus: <b>Pelanggan, Pelanggan Berhenti, Pelanggan Isolir, Lunas Bayar, Setoran, Pembukuan</b>. Jenis file dikenali dari namanya dan diproses berurutan (Pelanggan &rarr; Berhenti &rarr; Isolir &rarr; Lunas &rarr; Setoran). Pelanggan dicocokkan lewat ID Beatcom &rarr; user PPPoE &rarr; nama/telepon. Semua dipratinjau, hanya mengubah billing &mdash; <b>Mikrotik tidak disentuh</b>.
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px">
+        Pilih satu atau beberapa file ekspor Beatcom / aplikasi lama (<code class="mono" style="color:var(--primary)">.xls</code> / <code class="mono" style="color:var(--primary)">.csv</code> / <code class="mono" style="color:var(--primary)">.html</code> / <code class="mono" style="color:var(--primary)">.txt</code>) sekaligus: <b>Pelanggan, Pelanggan Berhenti, Pelanggan Isolir, Lunas Bayar, Tagihan Belum Bayar</b>.
     </p>
+
+    <div style="background:rgba(16, 185, 129, 0.08);border:1px solid rgba(16, 185, 129, 0.25);border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">✨</span>
+        <div>
+            <b>Kompatibel 100% dengan File Export Beatcom:</b> Cukup unggah langsung file <code class="mono">.xls</code>, <code class="mono">.html</code>, atau <code class="mono">.csv</code> hasil unduhan dari Beatcom. Semua Paket, Area, User PPPoE, Alamat, Tanggal Tagihan, dan Koordinat Lat/Long akan langsung masuk otomatis tanpa perlu edit kolom!
+        </div>
+    </div>
 
     <form method="POST" action="{{ route('import.sync-beatcom', $ts ? ['tenant_slug' => $ts] : []) }}" enctype="multipart/form-data">
         @csrf
         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
             <div style="position:relative;display:inline-block">
-                <input type="file" name="files[]" multiple required class="form-input" style="padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer">
+                <input type="file" name="files[]" multiple required accept=".csv,.xls,.xlsx,.html,.htm,.txt" class="form-input" style="padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer">
             </div>
             <button type="submit" class="btn btn-primary" style="padding:10px 22px;font-size:13.5px;font-weight:600">
                 Simpan semua berurutan
             </button>
         </div>
         <div style="font-size:11.5px;color:var(--ink-faint);margin-top:8px">
-            Mendukung multi-file upload (.csv, .xls, .xlsx, .txt) hingga 10MB per file.
+            Mendukung multi-file upload (.xls, .html, .csv, .xlsx, .txt) hingga 10MB per file.
         </div>
     </form>
 </div>
@@ -137,24 +152,28 @@
         <span style="width:32px;height:32px;border-radius:8px;background:var(--primary-tint);color:var(--primary);display:inline-flex;align-items:center;justify-content:center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         </span>
-        Import pelanggan baru (templat billing)
+        Import pelanggan baru
     </h3>
 
     <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:18px">
-        Unduh templat, isi di Excel, simpan sebagai CSV, lalu unggah. Baris dengan email, telepon, atau user PPPoE yang sudah ada akan otomatis diperbarui tanpa duplikasi data.
+        Unduh templat standar atau templat format Beatcom, isi data, lalu unggah. Baris dengan telepon atau user PPPoE yang sudah ada akan otomatis diperbarui tanpa duplikasi data.
     </p>
 
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
-        <!-- Download Template Button -->
+        <!-- Download Template Buttons -->
         <a href="{{ route('import.template', $ts ? ['tenant_slug' => $ts] : []) }}" class="btn btn-outline" style="padding:10px 18px;font-size:13.5px;display:inline-flex;align-items:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Unduh templat
+            Unduh Templat CSV
+        </a>
+        <a href="{{ route('import.template', array_merge(['format' => 'beatcom'], $ts ? ['tenant_slug' => $ts] : [])) }}" class="btn btn-outline" style="padding:10px 18px;font-size:13.5px;display:inline-flex;align-items:center;gap:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh Format Beatcom (.xls)
         </a>
 
-        <!-- Upload CSV Form -->
+        <!-- Upload CSV/XLS Form -->
         <form method="POST" action="{{ route('import.store', $ts ? ['tenant_slug' => $ts] : []) }}" enctype="multipart/form-data" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
             @csrf
-            <input type="file" name="file" accept=".csv,.txt" required class="form-input" style="padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer">
+            <input type="file" name="file" accept=".csv,.xls,.xlsx,.html,.htm,.txt" required class="form-input" style="padding:9px 12px;font-size:13.5px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer">
             <button type="submit" class="btn btn-primary" style="padding:10px 22px;font-size:13.5px;font-weight:600">
                 Unggah & Proses
             </button>
