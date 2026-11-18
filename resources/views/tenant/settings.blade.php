@@ -135,7 +135,8 @@
     </div>
 
     <!-- Panel 4: Integrasi WhatsApp Gateway (Auto QR Code & Open-WA) -->
-    <div class="panel reveal d4" style="padding:26px 28px;margin-bottom:24px" x-data="whatsappGateway()">
+    <div x-data="whatsappGateway()">
+        <div class="panel reveal d4" style="padding:26px 28px;margin-bottom:24px">
         <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:10px">
             <span style="width:28px;height:28px;border-radius:7px;background:rgba(16, 185, 129, 0.15);color:#10B981;display:inline-flex;align-items:center;justify-content:center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -291,31 +292,43 @@
     </div>
 </form>
 
-<!-- Panel Uji Coba WhatsApp -->
-<div class="panel reveal d5" style="padding:24px 28px;margin-bottom:40px;background:var(--bg-card);border:1px dashed var(--line)">
-    <h4 style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        Uji Coba Pengiriman WhatsApp
-    </h4>
-    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px">
-        Kirim pesan tes ke nomor Anda untuk memastikan koneksi WhatsApp Gateway berfungsi dengan benar.
-    </p>
+    <!-- Panel Uji Coba WhatsApp -->
+    <div class="panel reveal d5" style="padding:24px 28px;margin-bottom:40px;background:var(--bg-card);border:1px dashed var(--line)">
+        <h4 style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:8px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            Uji Coba Pengiriman WhatsApp ({{ $tenant->name }})
+        </h4>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px">
+            Kirim pesan tes ke nomor Anda untuk memastikan koneksi WhatsApp Gateway berfungsi dengan benar.
+        </p>
 
-    <form method="POST" action="{{ route('tenant.settings.test-whatsapp', $ts ? ['tenant_slug' => $ts] : []) }}" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-        @csrf
-        <div style="flex:1;min-width:240px">
-            <label class="form-label" style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink)">Nomor WhatsApp Tujuan</label>
-            <input type="text" name="test_phone" required placeholder="Contoh: 081234567890" value="{{ old('test_phone', $tenant->whatsapp_number) }}" class="form-input" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
+        <form method="POST" action="{{ route('tenant.settings.test-whatsapp', $ts ? ['tenant_slug' => $ts] : []) }}" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+            @csrf
+            <input type="hidden" name="test_provider" :value="provider">
+            <div style="flex:1;min-width:240px">
+                <label class="form-label" style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink)">Nomor WhatsApp Tujuan</label>
+                <input type="text" name="test_phone" required placeholder="Contoh: 081234567890" value="{{ old('test_phone', $tenant->whatsapp_number) }}" class="form-input" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
+            </div>
+            <div style="flex:2;min-width:300px">
+                <label class="form-label" style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink)">Pesan Uji Coba (Opsional)</label>
+                <input type="text" name="test_message" placeholder="Pesan tes otomatis dari NetSaz..." class="form-input" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
+            </div>
+            <button type="submit" class="btn" style="background:#10B981;color:#fff;padding:9px 20px;font-weight:600;font-size:13.5px;border-radius:8px;display:flex;align-items:center;gap:6px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                Kirim Pesan Uji Coba
+            </button>
+        </form>
+
+        <div x-show="provider === 'internal' && status !== 'CONNECTED'" style="margin-top:12px;font-size:12.5px;color:#F59E0B;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>WhatsApp untuk <b>{{ $tenant->name }}</b> belum terhubung. Silakan scan QR Code di atas terlebih dahulu agar pesan dapat terkirim.</span>
         </div>
-        <div style="flex:2;min-width:300px">
-            <label class="form-label" style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--ink)">Pesan Uji Coba (Opsional)</label>
-            <input type="text" name="test_message" placeholder="Pesan tes otomatis dari NetSaz..." class="form-input" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
+
+        <div x-show="provider === 'internal' && status === 'CONNECTED'" style="margin-top:12px;font-size:12.5px;color:#10B981;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>WhatsApp siap! Pesan akan dikirim dari nomor <b x-text="'+' + user?.phone"></b></span>
         </div>
-        <button type="submit" class="btn" style="background:#10B981;color:#fff;padding:9px 20px;font-weight:600;font-size:13.5px;border-radius:8px;display:flex;align-items:center;gap:6px">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            Kirim Pesan Uji Coba
-        </button>
-    </form>
+    </div>
 </div>
 
 <script>

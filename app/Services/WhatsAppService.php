@@ -211,7 +211,7 @@ class WhatsAppService
         } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'message' => 'Gagal terhubung ke Open-WA (' . $baseUrl . '): ' . $e->getMessage(),
+                'message' => 'Gagal terhubung ke Open-WA (' . $baseUrl . '). Jika Anda ingin scan QR langsung di browser, silakan pilih opsi "Gateway Bawaan NetSaz (Scan QR Langsung di Layar)". Detail error: ' . $e->getMessage(),
             ];
         }
 

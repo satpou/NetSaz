@@ -62,13 +62,13 @@ return [
     ],
 
     'open_wa' => [
-        'api_url' => env('OPEN_WA_API_URL', 'http://localhost:2785'),
+        'api_url' => env('OPEN_WA_API_URL', 'http://127.0.0.1:3001'),
         'api_key' => env('OPEN_WA_API_KEY', ''),
         'session_id' => env('OPEN_WA_SESSION_ID', 'default'),
     ],
 
     'wa' => [
-        'default_provider' => env('WA_DEFAULT_PROVIDER', 'open_wa'),
+        'default_provider' => env('WA_DEFAULT_PROVIDER', 'internal'),
     ],
 
 ];

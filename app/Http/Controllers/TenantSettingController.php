@@ -82,10 +82,19 @@ class TenantSettingController extends Controller
         $request->validate([
             'test_phone' => 'required|string|max:25',
             'test_message' => 'nullable|string|max:500',
+            'test_provider' => 'nullable|string|in:internal,open_wa,fonnte,waha,callmebot',
         ]);
 
         $tid = tenantId();
         $tenant = Tenant::findOrFail($tid);
+
+        // If provider is supplied from the UI, persist it to tenant settings
+        if ($request->filled('test_provider')) {
+            $settings = $tenant->settings ?? [];
+            $settings['wa_gateway_provider'] = $request->input('test_provider');
+            $tenant->settings = $settings;
+            $tenant->save();
+        }
 
         $waService = new WhatsAppService($tenant);
         $phone = $request->input('test_phone');
