@@ -75,7 +75,7 @@ class TenantSettingController extends Controller
         $tenant->save();
 
         $slug = $request->route('tenant_slug') ?? session('tenant_slug') ?? $tenant->slug;
-        $redirectUrl = url()->previous() ?: ($slug ? route('tenant.settings.edit', ['tenant_slug' => $slug]) : url('/settings'));
+        $redirectUrl = $slug ? route('tenant.settings.edit', ['tenant_slug' => $slug]) : url('/settings');
 
         return redirect()->to($redirectUrl)
             ->with('success', 'Pengaturan ISP berhasil diperbarui.');
