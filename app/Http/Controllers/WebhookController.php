@@ -257,6 +257,11 @@ class WebhookController extends Controller
 
     public function duitkuCallback(Request $request)
     {
+        // If Duitku sends the POST webhook to this callback URL
+        if ($request->isMethod('post')) {
+            return $this->duitku($request);
+        }
+
         $merchantOrderId = $request->input('merchantOrderId');
         $resultCode = $request->input('resultCode');
 

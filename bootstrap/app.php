@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/webhook/xendit',
             'webhook/duitku',
             'api/webhook/duitku',
+            'duitku-callback',
         ]);
 
         // Tenant middlewares dipasang per-route group, bukan global
