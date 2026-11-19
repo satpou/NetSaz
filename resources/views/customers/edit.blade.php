@@ -125,23 +125,29 @@
                     var map = L.map('map');
                     var marker;
 
-                    function initMap(lat, lng, zoom) {
-                        map.setView([lat, lng], zoom);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap contributors'
-                        }).addTo(map);
-                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                        updateCoord(lat, lng);
+                    var hasCoords = Boolean(existingLat && existingLng);
+                    var initialLat = hasCoords ? parseFloat(existingLat) : -7.7956;
+                    var initialLng = hasCoords ? parseFloat(existingLng) : 110.3695;
 
-                        marker.on('dragend', function (e) {
-                            var pos = e.target.getLatLng();
-                            updateCoord(pos.lat, pos.lng);
-                        });
-                        map.on('click', function (e) {
-                            marker.setLatLng(e.latlng);
-                            updateCoord(e.latlng.lat, e.latlng.lng);
-                        });
+                    map.setView([initialLat, initialLng], hasCoords ? 15 : 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+
+                    if (hasCoords) {
+                        updateCoord(initialLat, initialLng);
                     }
+
+                    marker.on('dragend', function (e) {
+                        var pos = e.target.getLatLng();
+                        updateCoord(pos.lat, pos.lng);
+                    });
+                    map.on('click', function (e) {
+                        marker.setLatLng(e.latlng);
+                        updateCoord(e.latlng.lat, e.latlng.lng);
+                    });
 
                     function updateCoord(lat, lng) {
                         document.getElementById('latitude').value = lat.toFixed(7);
@@ -150,58 +156,55 @@
                         document.getElementById('lng-display').textContent = lng.toFixed(7);
                     }
 
-                    if (existingLat && existingLng) {
-                        var lat = parseFloat(existingLat);
-                        var lng = parseFloat(existingLng);
-                        initMap(lat, lng, 15);
-                    } else if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function (pos) {
-                            initMap(pos.coords.latitude, pos.coords.longitude, 15);
-                        }, function () {
-                            initMap(-7.7956, 110.3695, 13);
-                        }, { enableHighAccuracy: true, timeout: 10000 });
-                    } else {
-                        initMap(-7.7956, 110.3695, 13);
-                    }
+                    function locateMe(zoom = 15, isManual = false) {
+                        if (!navigator.geolocation) {
+                            if (isManual && window.NetSazModal) {
+                                window.NetSazModal.alert({ title: 'GPS', message: 'Browser tidak mendukung geolokasi GPS.', type: 'warning' });
+                            }
+                            return;
+                        }
 
-                    document.getElementById('btn-gps')?.addEventListener('click', function () {
-                        if (navigator.geolocation) {
-                            var btn = this;
+                        var btn = document.getElementById('btn-gps');
+                        if (isManual && btn) {
                             btn.disabled = true;
                             btn.innerHTML = 'Mencari sinyal GPS...';
-                            navigator.geolocation.getCurrentPosition(function (pos) {
+                        }
+
+                        navigator.geolocation.getCurrentPosition(function (pos) {
+                            if (btn) {
                                 btn.disabled = false;
                                 btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Gunakan Lokasi GPS Saya</span>';
-                                var lat = pos.coords.latitude;
-                                var lng = pos.coords.longitude;
-                                map.setView([lat, lng], 17);
-                                if (marker) {
-                                    marker.setLatLng([lat, lng]);
-                                } else {
-                                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-                                    marker.on('dragend', function (e) {
-                                        var p = e.target.getLatLng();
-                                        updateCoord(p.lat, p.lng);
-                                    });
-                                }
-                                updateCoord(lat, lng);
-                            }, function (err) {
+                            }
+                            var lat = pos.coords.latitude;
+                            var lng = pos.coords.longitude;
+                            map.setView([lat, lng], zoom);
+                            marker.setLatLng([lat, lng]);
+                            updateCoord(lat, lng);
+                        }, function (err) {
+                            if (btn) {
                                 btn.disabled = false;
                                 btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Gunakan Lokasi GPS Saya</span>';
+                            }
+                            if (isManual && window.NetSazModal) {
                                 window.NetSazModal.alert({
                                     title: 'Gagal Mengambil Lokasi',
                                     message: 'Tidak dapat mengambil lokasi GPS: ' + err.message,
                                     type: 'warning'
                                 });
-                            }, { enableHighAccuracy: true, timeout: 10000 });
-                        } else {
-                            window.NetSazModal.alert({
-                                title: 'Geolokasi Tidak Didukung',
-                                message: 'Browser Anda tidak mendukung geolokasi GPS.',
-                                type: 'warning'
-                            });
-                        }
+                            }
+                        }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+                    }
+
+                    // Auto locate if customer had no coordinates
+                    if (!hasCoords) {
+                        locateMe(15, false);
+                    }
+
+                    document.getElementById('btn-gps')?.addEventListener('click', function () {
+                        locateMe(17, true);
                     });
+
+                    setTimeout(function() { map.invalidateSize(); }, 300);
                 });
             </script>
             @endpush

@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="{ showDelete: false, deleteAction: '', selectedArea: 'all' }">
-<x-page-header title="Area & Jangkauan Jaringan" subtitle="{{ $areas->count() }} area terdaftar &bull; {{ $customersWithCoords->count() }} titik pelanggan terpetakan">
+<x-page-header title="Area & Jangkauan Jaringan" subtitle="{{ $areas->count() }} area terdaftar · {{ $customersWithCoords->count() }} titik pelanggan terpetakan">
     <a href="{{ route('areas.create') }}" class="btn btn-primary">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
         Tambah Area
@@ -155,6 +155,13 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        // AUTO-LOCATE: If no customer markers yet, auto-center to user's current location
+        if (customers.length === 0 && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                map.setView([pos.coords.latitude, pos.coords.longitude], 14);
+            }, null, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+        }
 
         var markersGroup = L.featureGroup().addTo(map);
 
