@@ -116,6 +116,18 @@
                         @endif
                     </td>
                     <td style="padding:14px 18px">
+                        @if($pkgName === 'enterprise')
+                        <div style="font-weight:700;color:#C084FC;display:inline-flex;align-items:center;gap:4px">
+                            <span>🏢 Enterprise</span>
+                            <span style="font-size:10px;background:rgba(168,85,247,0.18);color:#C084FC;border:1px solid #A855F7;padding:1px 6px;border-radius:10px">KUSTOM</span>
+                        </div>
+                        <div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-top:2px">
+                            Sesuai Penawaran / B2B
+                        </div>
+                        <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px">
+                            Status: <b style="color:#C084FC">Konsultasi Sales</b>
+                        </div>
+                        @else
                         <div style="font-weight:700;color:var(--ink);text-transform:capitalize">{{ $pkgName }} (Tahunan)</div>
                         <div style="font-size:14px;font-weight:700;color:var(--primary);margin-top:2px">
                             Rp {{ number_format($amount, 0, ',', '.') }}
@@ -123,9 +135,14 @@
                         <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px">
                             Metode: <b style="text-transform:capitalize">{{ $method }}</b>
                         </div>
+                        @endif
                     </td>
                     <td style="padding:14px 18px">
-                        @if($proof)
+                        @if($pkgName === 'enterprise')
+                        <span style="font-size:12px;color:#C084FC;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);padding:4px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px">
+                            🤝 Permintaan Enterprise
+                        </span>
+                        @elseif($proof)
                         <div style="display:flex;align-items:center;gap:10px">
                             <a href="{{ asset('storage/' . $proof) }}" target="_blank" rel="noopener">
                                 <img src="{{ asset('storage/' . $proof) }}" alt="Bukti Transfer" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--line)">

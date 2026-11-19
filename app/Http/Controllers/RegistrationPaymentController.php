@@ -28,6 +28,9 @@ class RegistrationPaymentController extends Controller
             ?? SubscriptionPlan::orderBy('sort_order')->first();
 
         $amount = (float) ($settings['payment_amount'] ?? ($plan ? $plan->price : 399000));
+        $isEnterprise = ($plan && $plan->code === 'enterprise')
+            || ($selectedCode === 'enterprise')
+            || ($amount <= 0 && ($plan?->code === 'enterprise' || $selectedCode === 'enterprise'));
 
         // Bank Accounts from Superadmin Platform Settings
         $bankAccounts = PlatformSetting::get('platform_bank_accounts', [
@@ -47,7 +50,7 @@ class RegistrationPaymentController extends Controller
         $midtransService = new MidtransService();
         $isMidtransAvailable = $midtransService->isConfigured();
 
-        if ($isMidtransAvailable && $plan && ($settings['payment_status'] ?? '') !== 'waiting_verification') {
+        if (! $isEnterprise && $isMidtransAvailable && $plan && ($settings['payment_status'] ?? '') !== 'waiting_verification') {
             try {
                 $snapResult = $midtransService->createSubscriptionTransaction($tenant, $plan, $amount);
                 $snapToken = $snapResult['snap_token'] ?? null;
@@ -63,6 +66,7 @@ class RegistrationPaymentController extends Controller
             'tenant',
             'plan',
             'amount',
+            'isEnterprise',
             'bankAccounts',
             'salesWhatsapp',
             'salesName',

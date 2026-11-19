@@ -116,11 +116,21 @@
     <div class="pay-card">
         <div class="pay-header">
             <div>
+                @if($isEnterprise ?? false)
+                <h2 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 4px">Permintaan Layanan Enterprise</h2>
+                <p style="font-size:13px;color:#9CA3AF;margin:0">Permintaan akun Enterprise Anda sedang ditinjau oleh tim konsultan NetSaz.</p>
+                @else
                 <h2 style="font-size:19px;font-weight:700;color:#fff;margin:0 0 4px">Selesaikan Pembayaran Langganan</h2>
                 <p style="font-size:13px;color:#9CA3AF;margin:0">Akun ISP Anda akan aktif setelah pembayaran diverifikasi oleh tim kami.</p>
+                @endif
             </div>
             <div>
-                @if(($settings['payment_status'] ?? '') === 'waiting_verification')
+                @if($isEnterprise ?? false)
+                <span style="background:rgba(168, 85, 247, 0.15);color:#C084FC;border:1px solid rgba(168, 85, 247, 0.3);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#C084FC"></span>
+                    Menunggu Penawaran Kustom
+                </span>
+                @elseif(($settings['payment_status'] ?? '') === 'waiting_verification')
                 <span style="background:rgba(245, 158, 11, 0.15);color:#FBBF24;border:1px solid rgba(245, 158, 11, 0.3);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
                     <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#FBBF24"></span>
                     Menunggu Verifikasi Admin
@@ -157,29 +167,106 @@
                 </div>
                 <div class="summary-item">
                     <span style="color:#9CA3AF">Paket Langganan</span>
-                    <span style="font-weight:600;color:#10B981">{{ $plan ? $plan->name : 'Standar' }} (Tahunan)</span>
+                    <span style="font-weight:600;color:#10B981">
+                        {{ $plan ? $plan->name : 'Standar' }}
+                        @if($isEnterprise ?? false)
+                            <span style="font-size:10.5px;background:rgba(168,85,247,0.18);color:#C084FC;border:1px solid #A855F7;padding:1px 7px;border-radius:10px;margin-left:4px">Kustom</span>
+                        @else
+                            (Tahunan)
+                        @endif
+                    </span>
                 </div>
                 <div class="summary-item">
                     <span style="color:#9CA3AF">Kapasitas</span>
-                    <span style="color:#fff">{{ $plan ? $plan->max_active_customers . ' Pelanggan' : 'Sesuai Paket' }}</span>
+                    <span style="color:#fff">
+                        {{ ($isEnterprise ?? false) ? 'Kustom / Tak Terbatas' : ($plan ? $plan->max_active_customers . ' Pelanggan' : 'Sesuai Paket') }}
+                    </span>
                 </div>
                 <div class="summary-item" style="border-top:1px dashed rgba(255, 255, 255, 0.15);margin-top:12px;padding-top:16px">
                     <span style="font-size:14px;font-weight:600;color:#fff">Total Tagihan (1 Tahun)</span>
+                    @if($isEnterprise ?? false)
+                    <span style="font-size:16px;font-weight:700;color:#C084FC">Sesuai Penawaran Resmi</span>
+                    @else
                     <span style="font-size:20px;font-weight:700;color:#60A5FA">Rp {{ number_format($amount, 0, ',', '.') }}</span>
+                    @endif
                 </div>
 
                 @if(!empty($salesWhatsapp))
                 <div style="margin-top:28px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;font-size:12.5px;color:#9CA3AF">
                     <div style="font-weight:600;color:#fff;margin-bottom:4px">Butuh bantuan pendaftaran?</div>
                     <div>Hubungi Sales Consultant ({{ $salesName }}):</div>
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $salesWhatsapp) }}?text={{ urlencode('Halo Sales NetSaz, saya mendaftar ISP ' . $tenant->name . ' (' . $tenant->slug . ') dan ingin konfirmasi pembayaran.') }}" target="_blank" rel="noopener" style="color:#34D399;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-top:6px;text-decoration:none">
+                    @php
+                        $waPrompt = ($isEnterprise ?? false)
+                            ? 'Halo Sales NetSaz, saya ' . ($settings['pic_name'] ?? $tenant->name) . ' dari ISP ' . $tenant->name . ' (' . $tenant->slug . '). Kami baru saja mendaftar paket Enterprise dan ingin mendiskusikan penawaran harga serta kebutuhan infrastruktur.'
+                            : 'Halo Sales NetSaz, saya mendaftar ISP ' . $tenant->name . ' (' . $tenant->slug . ') dan ingin konfirmasi pembayaran.';
+                    @endphp
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $salesWhatsapp) }}?text={{ urlencode($waPrompt) }}" target="_blank" rel="noopener" style="color:#34D399;font-weight:600;display:inline-flex;align-items:center;gap:4px;margin-top:6px;text-decoration:none">
                         Chat WhatsApp Sales →
                     </a>
                 </div>
                 @endif
             </div>
 
-            {{-- METODE PEMBAYARAN KANAN --}}
+            {{-- METODE PEMBAYARAN ATAU PANEL KONSULTASI ENTERPRISE KANAN --}}
+            @if($isEnterprise ?? false)
+            <div class="pay-methods" style="display:flex;flex-direction:column;justify-content:space-between">
+                <div>
+                    <div style="background:rgba(168, 85, 247, 0.08);border:1px solid rgba(168, 85, 247, 0.25);border-radius:12px;padding:20px;margin-bottom:20px">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                            <span style="width:38px;height:38px;border-radius:10px;background:rgba(168, 85, 247, 0.2);display:inline-flex;align-items:center;justify-content:center;color:#C084FC;font-size:19px">🏢</span>
+                            <div>
+                                <h4 style="margin:0;font-size:15px;font-weight:700;color:#fff">Solusi Kustom NetSaz Enterprise</h4>
+                                <span style="font-size:12px;color:#C084FC">Disesuaikan dengan skala & topologi infrastruktur ISP Anda</span>
+                            </div>
+                        </div>
+                        <p style="font-size:13px;color:#D1D5DB;line-height:1.6;margin:0 0 12px">
+                            Pendaftaran ISP <b>{{ $tenant->name }}</b> telah tercatat di sistem kami. Paket Enterprise tidak menggunakan sistem transfer tarif flat, melainkan melalui penyusunan proposal penawaran dan kontrak SLA resmi yang mencakup:
+                        </p>
+                        <ul style="margin:0 0 8px;padding-left:20px;font-size:12.5px;color:#9CA3AF;line-height:1.7">
+                            <li>Kapasitas router MikroTik & kuota pelanggan tak terbatas</li>
+                            <li>Dukungan arsitektur multi-cabang, OLT management, dan Radius Hub dedicated</li>
+                            <li>Server cloud mandiri / opsi On-Premise deployment</li>
+                            <li>Dedicated Account Manager & Technical Support Prioritas 24/7</li>
+                        </ul>
+                    </div>
+
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;margin-bottom:20px">
+                        <h5 style="margin:0 0 12px;font-size:13px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px">Tahapan Selanjutnya</h5>
+                        <div style="display:flex;gap:12px;margin-bottom:12px">
+                            <span style="width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+                            <div style="font-size:12.5px;color:#D1D5DB">
+                                <b>Konsultasi Kebutuhan:</b> Tim sales/teknis kami akan berdiskusi dengan PIC <b>{{ $settings['pic_name'] ?? $tenant->name }}</b> untuk memetakan jumlah pelanggan, router, dan kebutuhan server.
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-bottom:12px">
+                            <span style="width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+                            <div style="font-size:12.5px;color:#D1D5DB">
+                                <b>Penyusunan Proposal Resmi & Invoice B2B:</b> Penawaran harga dan kontrak SLA disesuaikan lalu dikirimkan secara resmi.
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px">
+                            <span style="width:22px;height:22px;border-radius:50%;background:#2563EB;color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+                            <div style="font-size:12.5px;color:#D1D5DB">
+                                <b>Aktivasi & Onboarding:</b> Akun subdomain <code style="color:#60A5FA;font-family:'JetBrains Mono',monospace">{{ $tenant->slug }}.netsaz.web.id</code> langsung diaktifkan oleh Super Admin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @php
+                    $waEnterpriseText = "Halo Tim Enterprise NetSaz, saya " . ($settings['pic_name'] ?? $tenant->name) . " dari ISP " . $tenant->name . " (" . $tenant->slug . ".netsaz.web.id). Kami baru saja mendaftarkan akun untuk paket Enterprise dan ingin mendiskusikan kebutuhan infrastruktur kustom serta proposal penawaran resmi.";
+                @endphp
+                <div>
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $salesWhatsapp) }}?text={{ urlencode($waEnterpriseText) }}" target="_blank" rel="noopener" style="width:100%;padding:14px 20px;background:#10B981;border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14.5px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(16,185,129,0.3)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                        Hubungi Enterprise Consultant via WhatsApp →
+                    </a>
+                    <div style="font-size:12px;color:#6B7280;text-align:center;margin-top:8px">
+                        Konsultan: {{ $salesName }} ({{ $salesWhatsapp }}) &bull; Respons cepat pada jam kerja
+                    </div>
+                </div>
+            </div>
+            @else
             <div class="pay-methods">
                 <div style="display:flex;gap:10px;margin-bottom:20px">
                     <button type="button" class="tab-btn" :class="{ 'active': tab === 'manual' }" @click="tab = 'manual'">
@@ -266,6 +353,7 @@
                 </div>
                 @endif
             </div>
+            @endif
         </div>
     </div>
 </div>

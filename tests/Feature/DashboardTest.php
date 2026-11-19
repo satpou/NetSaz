@@ -50,4 +50,33 @@ class DashboardTest extends TestCase
             'status' => 'pending_payment',
         ]);
     }
+
+    public function test_enterprise_registration_shows_consultation_panel_instead_of_manual_transfer(): void
+    {
+        $this->seed(SubscriptionPlanSeeder::class);
+
+        $response = $this->post(route('tenant.register.store'), [
+            'company_name' => 'Prima Digital Nusantara',
+            'slug' => 'prima-digital-nusantara',
+            'pic_name' => 'Primanet',
+            'city' => 'Jakarta',
+            'whatsapp_number' => '081234567899',
+            'email' => 'enterprise@primanet.id',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'package' => 'enterprise',
+        ]);
+
+        $response->assertRedirect(route('register.payment', ['slug' => 'prima-digital-nusantara']));
+
+        $payResponse = $this->get(route('register.payment', ['slug' => 'prima-digital-nusantara']));
+        $payResponse->assertOk();
+        $payResponse->assertSee('Permintaan Layanan Enterprise');
+        $payResponse->assertSee('Menunggu Penawaran Kustom');
+        $payResponse->assertSee('Kustom / Tak Terbatas');
+        $payResponse->assertSee('Sesuai Penawaran Resmi');
+        $payResponse->assertSee('Hubungi Enterprise Consultant via WhatsApp');
+        $payResponse->assertDontSee('Silakan transfer tepat sejumlah');
+        $payResponse->assertDontSee('Unggah Bukti Transfer');
+    }
 }

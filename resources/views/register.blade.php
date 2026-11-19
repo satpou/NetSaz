@@ -177,8 +177,9 @@
                     $requestedPlan = request('plan', 'growth');
                     @endphp
                     @foreach (config('pricing_plans') as $plan)
-                    <div class="paket-option">
-                        <input type="radio" name="package" value="{{ $plan['key'] }}" id="paket-{{ $plan['key'] }}" required {{ $requestedPlan === $plan['key'] ? 'checked' : '' }}>
+                    @php $isEnt = ($plan['is_enterprise'] ?? false) || $plan['key'] === 'enterprise'; @endphp
+                    <div class="paket-option {{ $isEnt ? 'paket-enterprise' : '' }}">
+                        <input type="radio" name="package" value="{{ $plan['key'] }}" id="paket-{{ $plan['key'] }}" required {{ $requestedPlan === $plan['key'] ? 'checked' : '' }} onchange="updateEnterpriseNotice(this.value)">
                         <label for="paket-{{ $plan['key'] }}">
                             <div class="paket-radio"><div class="paket-radio-dot"></div></div>
                             <div class="paket-body">
@@ -187,6 +188,9 @@
                                     <span class="paket-nama">{{ $plan['name'] }}</span>
                                     @if ($plan['badge'])
                                     <span class="paket-badge">{{ $plan['badge'] }}</span>
+                                    @endif
+                                    @if ($isEnt)
+                                    <span class="paket-badge" style="background:rgba(168,85,247,0.18);color:#C084FC;border:1px solid #A855F7">KUSTOM</span>
                                     @endif
                                 </div>
                                 <span class="paket-desc">{{ $plan['description'] }}</span>
@@ -200,8 +204,33 @@
                     @endforeach
                 </div>
 
-                <button type="submit" class="reg-submit">Daftar Sekarang →</button>
+                <div id="enterprise-notice" style="display: {{ $requestedPlan === 'enterprise' ? 'block' : 'none' }}; margin-bottom: 20px; padding: 12px 16px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; font-size: 12.5px; color: #E9D5FF; line-height: 1.5;">
+                    <span style="font-weight: 700; color: #C084FC;">ℹ️ Info Paket Enterprise:</span>
+                    Paket Enterprise tidak menggunakan sistem pembayaran online flat. Setelah formulir dikirim, tim Enterprise Consultant NetSaz akan menghubungi PIC untuk menyusun proposal penawaran resmi dan mendiskusikan kebutuhan arsitektur infrastruktur ISP Anda.
+                </div>
+
+                <button type="submit" class="reg-submit">{{ $requestedPlan === 'enterprise' ? 'Daftar & Ajukan Permintaan Enterprise →' : 'Daftar Sekarang →' }}</button>
             </form>
+
+            <script>
+            function updateEnterpriseNotice(val) {
+                var notice = document.getElementById('enterprise-notice');
+                var btn = document.querySelector('.reg-submit');
+                var isEnt = (val === 'enterprise');
+                if (notice) {
+                    notice.style.display = isEnt ? 'block' : 'none';
+                }
+                if (btn) {
+                    btn.textContent = isEnt ? 'Daftar & Ajukan Permintaan Enterprise →' : 'Daftar Sekarang →';
+                }
+            }
+            document.addEventListener('DOMContentLoaded', function () {
+                var checked = document.querySelector('input[name="package"]:checked');
+                if (checked) {
+                    updateEnterpriseNotice(checked.value);
+                }
+            });
+            </script>
 
             <div class="reg-back">
                 <a href="{{ route('dashboard') }}">
