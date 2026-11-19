@@ -111,10 +111,62 @@ $tenantManagementRoutes = function () {
     Route::get('/import/template', [ImportController::class, 'downloadTemplate'])->name('import.template');
     Route::get('/export/data', [ImportController::class, 'exportData'])->name('export.data');
 
-    // Router MikroTik
+    // Router MikroTik & Device Management
     Route::resource('routers', \App\Http\Controllers\RouterController::class);
     Route::post('routers/{router}/test', [\App\Http\Controllers\RouterController::class, 'testConnection'])->name('routers.test');
     Route::post('routers/{router}/sync-secrets', [\App\Http\Controllers\RouterController::class, 'syncSecrets'])->name('routers.sync-secrets');
+
+    // Devices: FastRADIUS Hub, OLT, GenieACS
+    Route::prefix('devices')->name('devices.')->group(function () {
+        Route::get('/radius', [\App\Http\Controllers\DeviceModuleController::class, 'radius'])->name('radius');
+        Route::post('/radius', [\App\Http\Controllers\DeviceModuleController::class, 'radiusStore'])->name('radius.store');
+        Route::post('/radius/member', [\App\Http\Controllers\DeviceModuleController::class, 'radiusMemberAdd'])->name('radius.member.add');
+        Route::delete('/radius/member/{member}', [\App\Http\Controllers\DeviceModuleController::class, 'radiusMemberRemove'])->name('radius.member.remove');
+
+        Route::get('/olt', [\App\Http\Controllers\DeviceModuleController::class, 'olt'])->name('olt');
+        Route::post('/olt', [\App\Http\Controllers\DeviceModuleController::class, 'oltStore'])->name('olt.store');
+        Route::delete('/olt/{device}', [\App\Http\Controllers\DeviceModuleController::class, 'oltDestroy'])->name('olt.destroy');
+        Route::post('/olt/{device}/onu', [\App\Http\Controllers\DeviceModuleController::class, 'onuStore'])->name('olt.onu.store');
+
+        Route::get('/genieacs', [\App\Http\Controllers\DeviceModuleController::class, 'genieacs'])->name('genieacs');
+        Route::put('/genieacs', [\App\Http\Controllers\DeviceModuleController::class, 'genieacsUpdate'])->name('genieacs.update');
+    });
+
+    // Network Modules
+    Route::prefix('network')->name('network.')->group(function () {
+        Route::get('/monitoring', [\App\Http\Controllers\NetworkModuleController::class, 'monitoring'])->name('monitoring');
+        Route::get('/ip-management', [\App\Http\Controllers\NetworkModuleController::class, 'ipManagement'])->name('ip');
+        Route::get('/logs', [\App\Http\Controllers\NetworkModuleController::class, 'logs'])->name('logs');
+        Route::get('/bandwidth', [\App\Http\Controllers\NetworkModuleController::class, 'bandwidth'])->name('bandwidth');
+        Route::get('/fault-detection', [\App\Http\Controllers\NetworkModuleController::class, 'faultDetection'])->name('fault');
+    });
+
+    // Auto Isolir
+    Route::prefix('billing/auto-isolir')->name('billing.auto-isolir')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AutoIsolirController::class, 'index']);
+        Route::put('/settings', [\App\Http\Controllers\AutoIsolirController::class, 'updateSettings'])->name('.settings');
+        Route::post('/{customer}/toggle', [\App\Http\Controllers\AutoIsolirController::class, 'toggle'])->name('.toggle');
+    });
+
+    // Operasional: Staff, Export
+    Route::prefix('operasional')->name('operasional.')->group(function () {
+        Route::get('/staff', [\App\Http\Controllers\OperasionalModuleController::class, 'staff'])->name('staff');
+        Route::post('/staff', [\App\Http\Controllers\OperasionalModuleController::class, 'staffStore'])->name('staff.store');
+        Route::delete('/staff/{user}', [\App\Http\Controllers\OperasionalModuleController::class, 'staffDestroy'])->name('staff.destroy');
+        Route::get('/export', [\App\Http\Controllers\OperasionalModuleController::class, 'export'])->name('export');
+        Route::get('/export/download/{type}', [\App\Http\Controllers\OperasionalModuleController::class, 'downloadData'])->name('export.download');
+    });
+
+    // Deployment Center
+    Route::get('/deployment', [\App\Http\Controllers\DeploymentController::class, 'index'])->name('deployment.index');
+
+    // WhatsApp Modules
+    Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+        Route::get('/templates', [\App\Http\Controllers\WhatsAppModuleController::class, 'templates'])->name('templates');
+        Route::put('/templates', [\App\Http\Controllers\WhatsAppModuleController::class, 'templatesUpdate'])->name('templates.update');
+        Route::get('/broadcast', [\App\Http\Controllers\WhatsAppModuleController::class, 'broadcast'])->name('broadcast');
+        Route::post('/broadcast', [\App\Http\Controllers\WhatsAppModuleController::class, 'broadcastSend'])->name('broadcast.send');
+    });
 
     // Tenant Settings
     Route::get('/settings', [\App\Http\Controllers\TenantSettingController::class, 'edit'])->name('tenant.settings.edit');

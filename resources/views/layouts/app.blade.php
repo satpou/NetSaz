@@ -88,11 +88,46 @@
             @if($isTenantMode)
             <div class="section-label">MANAJEMEN</div>
 
-            {{-- Pelanggan & Billing --}}
-            <div x-data="{ open: {{ request()->routeIs('packages*') || request()->routeIs('customers*') || request()->routeIs('areas*') || request()->routeIs('invoices*') || request()->routeIs('payments*') ? 'true' : 'false' }} }" class="nav-group">
-                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('packages*') || request()->routeIs('customers*') || request()->routeIs('areas*') || request()->routeIs('invoices*') || request()->routeIs('payments*') ? 'active' : '' }}" title="Pelanggan & Billing">
+            {{-- 1. Router --}}
+            <div x-data="{ open: {{ request()->routeIs('routers*') || request()->routeIs('devices.*') ? 'true' : 'false' }} }" class="nav-group">
+                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('routers*') || request()->routeIs('devices.*') ? 'active' : '' }}" title="Router">
                     <span class="nav-group-label">
-                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/></svg></span>
+                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="2" ry="2"/><rect x="4" y="4" width="2" height="4"/><rect x="18" y="4" width="2" height="4"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="10" y1="12" x2="10.01" y2="12"/><line x1="14" y1="12" x2="14.01" y2="12"/></svg></span>
+                        <span class="nav-label">Router</span>
+                    </span>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div x-show="open && !sidebarCollapsed" x-collapse class="nav-sub">
+                    <a href="{{ route('routers.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('routers*') ? 'active' : '' }}">My Mikrotik</a>
+                    <a href="{{ route('devices.radius', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('devices.radius*') ? 'active' : '' }}">FastRADIUS Hub</a>
+                    <a href="{{ route('devices.olt', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('devices.olt*') ? 'active' : '' }}">OLT</a>
+                    <a href="{{ route('devices.genieacs', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('devices.genieacs*') ? 'active' : '' }}">GenieACS</a>
+                </div>
+            </div>
+
+            {{-- 2. Network --}}
+            <div x-data="{ open: {{ request()->routeIs('network.*') ? 'true' : 'false' }} }" class="nav-group">
+                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('network.*') ? 'active' : '' }}" title="Network">
+                    <span class="nav-group-label">
+                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+                        <span class="nav-label">Network</span>
+                    </span>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div x-show="open && !sidebarCollapsed" x-collapse class="nav-sub">
+                    <a href="{{ route('network.monitoring', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('network.monitoring') ? 'active' : '' }}">Monitoring</a>
+                    <a href="{{ route('network.ip', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('network.ip') ? 'active' : '' }}">IP Management</a>
+                    <a href="{{ route('network.logs', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('network.logs') ? 'active' : '' }}">Logs</a>
+                    <a href="{{ route('network.bandwidth', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('network.bandwidth') ? 'active' : '' }}">Bandwidth</a>
+                    <a href="{{ route('network.fault', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('network.fault') ? 'active' : '' }}">Fault Detection</a>
+                </div>
+            </div>
+
+            {{-- 3. Pelanggan & Billing --}}
+            <div x-data="{ open: {{ request()->routeIs('customers*') || request()->routeIs('areas*') || request()->routeIs('packages*') || request()->routeIs('invoices*') || request()->routeIs('payments*') || request()->routeIs('billing.auto-isolir*') || request()->routeIs('partners*') || request()->routeIs('tickets*') ? 'true' : 'false' }} }" class="nav-group">
+                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('customers*') || request()->routeIs('areas*') || request()->routeIs('packages*') || request()->routeIs('invoices*') || request()->routeIs('payments*') || request()->routeIs('billing.auto-isolir*') || request()->routeIs('partners*') || request()->routeIs('tickets*') ? 'active' : '' }}" title="Pelanggan & Billing">
+                    <span class="nav-group-label">
+                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
                         <span class="nav-label">Pelanggan &amp; Billing</span>
                     </span>
                     <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -103,46 +138,50 @@
                     <a href="{{ route('packages.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('packages*') ? 'active' : '' }}">Paket</a>
                     <a href="{{ route('invoices.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('invoices*') ? 'active' : '' }}">Invoice</a>
                     <a href="{{ route('payments.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('payments*') ? 'active' : '' }}">Pembayaran</a>
+                    <a href="{{ route('billing.auto-isolir', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('billing.auto-isolir*') ? 'active' : '' }}">Auto Isolir</a>
+                    <a href="{{ route('partners.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('partners*') ? 'active' : '' }}">Mitra</a>
+                    <a href="{{ route('tickets.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('tickets*') ? 'active' : '' }}">Tiket</a>
                 </div>
             </div>
 
-            {{-- Mitra / Reseller --}}
-            <a class="nav-item {{ request()->routeIs('partners*') ? 'active' : '' }}" href="{{ route('partners.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Mitra / Reseller">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-                <span class="nav-label">Mitra / Reseller</span>
+            {{-- 4. Operasional --}}
+            <div x-data="{ open: {{ request()->routeIs('operasional.*') || request()->routeIs('import*') || request()->routeIs('reports*') ? 'true' : 'false' }} }" class="nav-group">
+                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('operasional.*') || request()->routeIs('import*') || request()->routeIs('reports*') ? 'active' : '' }}" title="Operasional">
+                    <span class="nav-group-label">
+                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="m9 14 2 2 4-4"/></svg></span>
+                        <span class="nav-label">Operasional</span>
+                    </span>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div x-show="open && !sidebarCollapsed" x-collapse class="nav-sub">
+                    <a href="{{ route('operasional.staff', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('operasional.staff*') ? 'active' : '' }}">Staff</a>
+                    <a href="{{ route('import.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('import*') ? 'active' : '' }}">Import</a>
+                    <a href="{{ route('operasional.export', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('operasional.export*') ? 'active' : '' }}">Export</a>
+                    <a href="{{ route('reports.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('reports*') ? 'active' : '' }}">Laporan</a>
+                </div>
+            </div>
+
+            {{-- 5. Deployment Center --}}
+            <a class="nav-item {{ request()->routeIs('deployment.*') ? 'active' : '' }}" href="{{ route('deployment.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Deployment Center">
+                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                <span class="nav-label">Deployment Center</span>
             </a>
 
-            {{-- Tiket Gangguan --}}
-            <a class="nav-item {{ request()->routeIs('tickets*') ? 'active' : '' }}" href="{{ route('tickets.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Tiket Gangguan">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
-                <span class="nav-label">Tiket Gangguan</span>
-            </a>
-
-            {{-- Laporan --}}
-            <a class="nav-item {{ request()->routeIs('reports*') ? 'active' : '' }}" href="{{ route('reports.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Laporan">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                <span class="nav-label">Laporan</span>
-            </a>
-
-            {{-- Export & Import --}}
-            <a class="nav-item {{ request()->routeIs('import*') ? 'active' : '' }}" href="{{ route('import.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Export & Import">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
-                <span class="nav-label">Export &amp; Import</span>
-            </a>
-
-            <div class="section-label">JARINGAN & INTEGRASI</div>
-
-            {{-- Router MikroTik --}}
-            <a class="nav-item {{ request()->routeIs('routers*') ? 'active' : '' }}" href="{{ route('routers.index', $ts ? ['tenant_slug' => $ts] : []) }}" title="Router MikroTik">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></span>
-                <span class="nav-label">Router MikroTik</span>
-            </a>
-
-            {{-- Pengaturan ISP --}}
-            <a class="nav-item {{ request()->routeIs('tenant.settings*') ? 'active' : '' }}" href="{{ route('tenant.settings.edit', $ts ? ['tenant_slug' => $ts] : []) }}" title="Pengaturan ISP">
-                <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-                <span class="nav-label">Pengaturan ISP</span>
-            </a>
+            {{-- 6. WhatsApp --}}
+            <div x-data="{ open: {{ request()->routeIs('whatsapp.*') || request()->routeIs('tenant.settings*') ? 'true' : 'false' }} }" class="nav-group">
+                <button @click="open = !open" class="nav-group-toggle {{ request()->routeIs('whatsapp.*') || request()->routeIs('tenant.settings*') ? 'active' : '' }}" title="WhatsApp">
+                    <span class="nav-group-label">
+                        <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
+                        <span class="nav-label">WhatsApp</span>
+                    </span>
+                    <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" :class="{ 'rotate-180': open }"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div x-show="open && !sidebarCollapsed" x-collapse class="nav-sub">
+                    <a href="{{ route('tenant.settings.edit', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('tenant.settings*') ? 'active' : '' }}">Pengaturan</a>
+                    <a href="{{ route('whatsapp.templates', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('whatsapp.templates*') ? 'active' : '' }}">Template</a>
+                    <a href="{{ route('whatsapp.broadcast', $ts ? ['tenant_slug' => $ts] : []) }}" class="nav-sub-item {{ request()->routeIs('whatsapp.broadcast*') ? 'active' : '' }}">Broadcast</a>
+                </div>
+            </div>
             @endif
         </nav>
         <div class="sidebar-bottom">
