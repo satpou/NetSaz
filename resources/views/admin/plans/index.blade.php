@@ -93,7 +93,11 @@
                         <td style="padding:16px 24px 16px 16px;text-align:right">
                             <div style="display:inline-flex;gap:6px">
                                 <a href="{{ route('admin.plans.edit', $plan) }}" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px">Edit</a>
-                                <form method="POST" action="{{ route('admin.plans.destroy', $plan) }}" style="display:inline" onsubmit="return confirm('Hapus paket {{ $plan->name }}?')">
+                                <form method="POST" action="{{ route('admin.plans.destroy', $plan) }}" style="display:inline"
+                                      data-confirm="Hapus paket langganan '{{ $plan->name }}'?"
+                                      data-confirm-title="Hapus Paket Langganan"
+                                      data-confirm-type="danger"
+                                      data-confirm-text="Ya, Hapus Paket">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12.5px;color:var(--red);border-color:var(--red-tint)">Hapus</button>

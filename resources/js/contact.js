@@ -5,7 +5,15 @@ document.querySelector('.ct-form').addEventListener('submit', function(e) {
   var subject = document.getElementById('subject').value;
   var message = document.getElementById('message').value;
   if (!name || !email || !subject || !message) {
-    alert('Mohon isi semua kolom');
+    if (window.NetSazModal) {
+      window.NetSazModal.alert({
+        title: 'Form Belum Lengkap',
+        message: 'Mohon isi semua kolom pesan sebelum mengirim.',
+        type: 'warning'
+      });
+    } else {
+      alert('Mohon isi semua kolom');
+    }
     return;
   }
   var pesanLengkap = "Halo, saya " + name + " (" + email + ")\n\n" +

@@ -379,7 +379,14 @@ function whatsappGateway() {
         },
 
         async logout() {
-            if (!confirm('Apakah Anda yakin ingin memutuskan sesi WhatsApp ini dan membuat QR Code baru?')) return;
+            const confirmed = await window.NetSazModal.confirm({
+                title: 'Putuskan Sesi WhatsApp',
+                message: 'Apakah Anda yakin ingin memutuskan sesi WhatsApp ini dan membuat QR Code baru?',
+                type: 'warning',
+                confirmText: 'Ya, Putuskan Sesi',
+                cancelText: 'Batal'
+            });
+            if (!confirmed) return;
             try {
                 await fetch('{{ route('tenant.settings.whatsapp-logout', $ts ? ['tenant_slug' => $ts] : []) }}', {
                     method: 'POST',
@@ -392,7 +399,11 @@ function whatsappGateway() {
                 this.qr = null;
                 setTimeout(() => this.fetchStatus(), 1500);
             } catch (e) {
-                alert('Gagal memutuskan sesi: ' + e.message);
+                window.NetSazModal.alert({
+                    title: 'Gagal Memutuskan Sesi',
+                    message: 'Gagal memutuskan sesi: ' + e.message,
+                    type: 'danger'
+                });
             }
         }
     }

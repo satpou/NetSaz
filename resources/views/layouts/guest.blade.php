@@ -89,6 +89,8 @@
     </footer>
     @endif
 
+    <x-confirm-modal />
+
     <!-- Page-specific scripts -->
     @stack('scripts')
 </body>

@@ -122,7 +122,11 @@
                                     Edit
                                 </a>
                                 @if($sub->status !== 'cancelled')
-                                    <form method="POST" action="{{ route('admin.subscriptions.destroy', $sub) }}" style="display:inline" onsubmit="return confirm('Batalkan subscription ini?')">
+                                    <form method="POST" action="{{ route('admin.subscriptions.destroy', $sub) }}" style="display:inline"
+                                          data-confirm="Apakah Anda yakin ingin membatalkan langganan tenant '{{ $sub->tenant->name ?? '' }}'?"
+                                          data-confirm-title="Batalkan Langganan"
+                                          data-confirm-type="danger"
+                                          data-confirm-text="Ya, Batalkan">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--red);border-color:var(--red-tint)">

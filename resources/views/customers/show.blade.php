@@ -92,7 +92,11 @@
                     <button type="submit" class="btn btn-outline">Reset Password</button>
                 </form>
 
-                <form action="{{ route('customers.pppoe.delete', $customer->id) }}" method="POST" onsubmit="return confirm('Hapus akun PPPoE pelanggan ini?')">
+                <form action="{{ route('customers.pppoe.delete', $customer->id) }}" method="POST"
+                      data-confirm="Hapus akun PPPoE pelanggan {{ $customer->name }}? Akses internet pelanggan di router MikroTik akan terputus."
+                      data-confirm-title="Hapus Akun PPPoE"
+                      data-confirm-type="danger"
+                      data-confirm-text="Ya, Hapus Akun">
                     @csrf
                     <button type="submit" class="btn btn-outline" style="color:var(--red)">Hapus Akun</button>
                 </form>

@@ -123,7 +123,11 @@
                                             Pulihkan
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ route('admin.tenants.force-delete', $tenant->id) }}" style="display:inline" onsubmit="return confirm('Hapus permanen tenant \'{{ $tenant->name }}\'? Seluruh data akan dihapus selamanya!')">
+                                    <form method="POST" action="{{ route('admin.tenants.force-delete', $tenant->id) }}" style="display:inline"
+                                          data-confirm="Hapus permanen tenant '{{ $tenant->name }}'? Seluruh data akan dihapus selamanya!"
+                                          data-confirm-title="Hapus Tenant Permanen"
+                                          data-confirm-type="danger"
+                                          data-confirm-text="Ya, Hapus Selamanya">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:12px;color:var(--red);border-color:var(--red-tint)">
@@ -138,7 +142,11 @@
                                         Edit
                                     </a>
                                     <!-- Toggle Status Form -->
-                                    <form method="POST" action="{{ route('admin.tenants.toggle-status', $tenant) }}" style="display:inline" onsubmit="return confirm('Ubah status tenant ini?')">
+                                    <form method="POST" action="{{ route('admin.tenants.toggle-status', $tenant) }}" style="display:inline"
+                                          data-confirm="Ubah status tenant '{{ $tenant->name }}' menjadi {{ $tenant->status === 'active' ? 'SUSPENDED' : 'ACTIVE' }}?"
+                                          data-confirm-title="Konfirmasi Status Tenant"
+                                          data-confirm-type="warning"
+                                          data-confirm-text="Ya, Ubah Status">
                                         @csrf
                                         @if($tenant->status === 'active')
                                             <input type="hidden" name="status" value="suspended">
@@ -153,7 +161,11 @@
                                         @endif
                                     </form>
                                     <!-- Delete Tenant Form -->
-                                    <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tenant \'{{ $tenant->name }}\'? Tenant akan dipindahkan ke kotak sampah (Trash).')">
+                                    <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline"
+                                          data-confirm="Apakah Anda yakin ingin menghapus tenant '{{ $tenant->name }}'? Tenant akan dipindahkan ke kotak sampah (Trash)."
+                                          data-confirm-title="Pindahkan ke Kotak Sampah"
+                                          data-confirm-type="danger"
+                                          data-confirm-text="Ya, Pindahkan">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--red);border-color:var(--red-tint)" title="Hapus Tenant">

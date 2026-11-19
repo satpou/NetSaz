@@ -88,7 +88,11 @@
                                 </form>
 
                                 <!-- Sync Secrets Button -->
-                                <form method="POST" action="{{ route('routers.sync-secrets', array_merge(['router' => $router->id], $ts ? ['tenant_slug' => $ts] : [])) }}" style="display:inline" onsubmit="return confirm('Kirim semua data PPPoE pelanggan ke MikroTik ini?')">
+                                <form method="POST" action="{{ route('routers.sync-secrets', array_merge(['router' => $router->id], $ts ? ['tenant_slug' => $ts] : [])) }}" style="display:inline"
+                                      data-confirm="Kirim semua data akun PPPoE pelanggan ke MikroTik '{{ $router->name }}'?"
+                                      data-confirm-title="Sinkronisasi ke MikroTik"
+                                      data-confirm-type="primary"
+                                      data-confirm-text="Ya, Sinkronkan">
                                     @csrf
                                     <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px;color:var(--primary)" title="Sinkronkan Secret PPPoE">
                                         Sync PPPoE
@@ -99,7 +103,11 @@
                                     Edit
                                 </a>
 
-                                <form method="POST" action="{{ route('routers.destroy', array_merge(['router' => $router->id], $ts ? ['tenant_slug' => $ts] : [])) }}" style="display:inline" onsubmit="return confirm('Hapus router {{ $router->name }}?')">
+                                <form method="POST" action="{{ route('routers.destroy', array_merge(['router' => $router->id], $ts ? ['tenant_slug' => $ts] : [])) }}" style="display:inline"
+                                      data-confirm="Apakah Anda yakin ingin menghapus router '{{ $router->name }}'?"
+                                      data-confirm-title="Hapus Router MikroTik"
+                                      data-confirm-type="danger"
+                                      data-confirm-text="Ya, Hapus Router">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12.5px;color:var(--red);border-color:var(--red-tint)">

@@ -301,7 +301,7 @@
                                 <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:#60A5FA;letter-spacing:1px">{{ $acc['account_number'] }}</div>
                                 <div style="font-size:12.5px;color:#9CA3AF">a/n {{ $acc['account_name'] }}</div>
                             </div>
-                            <button type="button" onclick="navigator.clipboard.writeText('{{ $acc['account_number'] }}'); alert('Nomor rekening disalin!');" style="background:rgba(255,255,255,0.08);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ $acc['account_number'] }}'); window.NetSazToast.success('Nomor rekening {{ $acc['bank_name'] }} berhasil disalin!');" style="background:rgba(255,255,255,0.08);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">
                                 Salin
                             </button>
                         </div>
@@ -375,7 +375,11 @@ document.getElementById('pay-button')?.addEventListener('click', function () {
             window.location.reload();
         },
         onError: function(result) {
-            alert('Pembayaran gagal atau dibatalkan.');
+            window.NetSazModal.alert({
+                title: 'Pembayaran Dibatalkan',
+                message: 'Pembayaran gagal atau dibatalkan oleh pengguna.',
+                type: 'warning'
+            });
         }
     });
 });

@@ -35,7 +35,11 @@
             if (this.banks.length > 1) {
                 this.banks.splice(index, 1);
             } else {
-                alert('Minimal harus ada satu rekening bank.');
+                window.NetSazModal.alert({
+                    title: 'Rekening Bank',
+                    message: 'Minimal harus ada satu rekening bank aktif.',
+                    type: 'warning'
+                });
             }
         }
     }">

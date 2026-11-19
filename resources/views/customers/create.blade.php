@@ -170,10 +170,18 @@
                             }, function (err) {
                                 btn.disabled = false;
                                 btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Gunakan Lokasi GPS Saya</span>';
-                                alert('Tidak dapat mengambil lokasi GPS: ' + err.message);
+                                window.NetSazModal.alert({
+                                    title: 'Gagal Mengambil Lokasi',
+                                    message: 'Tidak dapat mengambil lokasi GPS: ' + err.message,
+                                    type: 'warning'
+                                });
                             }, { enableHighAccuracy: true, timeout: 10000 });
                         } else {
-                            alert('Browser Anda tidak mendukung geolokasi GPS.');
+                            window.NetSazModal.alert({
+                                title: 'Geolokasi Tidak Didukung',
+                                message: 'Browser Anda tidak mendukung geolokasi GPS.',
+                                type: 'warning'
+                            });
                         }
                     });
                 });

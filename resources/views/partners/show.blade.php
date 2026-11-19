@@ -6,7 +6,11 @@
 <x-page-header :title="$partner->name" subtitle="Detail informasi mitra">
     <div style="display:flex;gap:10px">
         <a href="{{ route('partners.edit', ['tenant_slug' => request()->route('tenant_slug'), 'partner' => $partner->id]) }}" class="btn btn-primary">Edit</a>
-        <form action="{{ route('partners.destroy', ['tenant_slug' => request()->route('tenant_slug'), 'partner' => $partner->id]) }}" method="POST" onsubmit="return confirm('Hapus mitra ini?')">
+        <form action="{{ route('partners.destroy', ['tenant_slug' => request()->route('tenant_slug'), 'partner' => $partner->id]) }}" method="POST"
+              data-confirm="Apakah Anda yakin ingin menghapus data mitra '{{ $partner->name }}'?"
+              data-confirm-title="Hapus Data Mitra"
+              data-confirm-type="danger"
+              data-confirm-text="Ya, Hapus Mitra">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-outline" style="color:var(--red)">Hapus</button>

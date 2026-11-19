@@ -22,5 +22,7 @@
 </head>
 <body class="antialiased">
     @yield('content')
+    <x-confirm-modal />
+    @stack('scripts')
 </body>
 </html>

@@ -17,7 +17,11 @@
         <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-primary">
             Edit Tenant
         </a>
-        <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tenant \'{{ $tenant->name }}\'? Tenant akan dipindahkan ke kotak sampah (Trash).')">
+        <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline"
+              data-confirm="Apakah Anda yakin ingin menghapus tenant '{{ $tenant->name }}'? Tenant akan dipindahkan ke kotak sampah (Trash)."
+              data-confirm-title="Pindahkan ke Kotak Sampah"
+              data-confirm-type="danger"
+              data-confirm-text="Ya, Pindahkan">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-outline" style="color:var(--red);border-color:var(--red-tint)">

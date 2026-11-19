@@ -6,7 +6,11 @@
 <x-page-header :title="$ticket->subject" :subtitle="$ticket->ticket_number">
     <div style="display:flex;gap:10px">
         <a href="{{ route('tickets.edit', ['tenant_slug' => request()->route('tenant_slug'), 'ticket' => $ticket->id]) }}" class="btn btn-primary">Edit</a>
-        <form action="{{ route('tickets.destroy', ['tenant_slug' => request()->route('tenant_slug'), 'ticket' => $ticket->id]) }}" method="POST" onsubmit="return confirm('Hapus tiket ini?')">
+        <form action="{{ route('tickets.destroy', ['tenant_slug' => request()->route('tenant_slug'), 'ticket' => $ticket->id]) }}" method="POST"
+              data-confirm="Apakah Anda yakin ingin menghapus tiket gangguan '{{ $ticket->subject }}'?"
+              data-confirm-title="Hapus Tiket Gangguan"
+              data-confirm-type="danger"
+              data-confirm-text="Ya, Hapus Tiket">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-outline" style="color:var(--red)">Hapus</button>

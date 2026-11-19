@@ -187,7 +187,11 @@
                         @if($t->status === 'pending_payment' || $t->status === 'rejected')
                         <div style="display:inline-flex;gap:8px">
                             {{-- ACCEPT BUTTON --}}
-                            <form method="POST" action="{{ route('admin.verifications.accept', $t->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin MENERIMA dan MENGAKTIFKAN tenant \'{{ $t->name }}\' selama 1 tahun?');">
+                            <form method="POST" action="{{ route('admin.verifications.accept', $t->id) }}"
+                                  data-confirm="Apakah Anda yakin ingin MENERIMA dan MENGAKTIFKAN tenant '{{ $t->name }}' selama 1 tahun?"
+                                  data-confirm-title="Konfirmasi Aktivasi Tenant"
+                                  data-confirm-type="success"
+                                  data-confirm-text="Ya, Terima & Aktifkan">
                                 @csrf
                                 <button type="submit" class="btn" style="background:#10B981;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
@@ -197,7 +201,7 @@
 
                             @if($t->status !== 'rejected')
                             {{-- REJECT BUTTON --}}
-                            <button type="button" onclick="const r = prompt('Masukkan alasan penolakan untuk tenant ini:'); if(r){ document.getElementById('reject-reason-{{ $t->id }}').value = r; document.getElementById('reject-form-{{ $t->id }}').submit(); }" class="btn" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid #EF4444;padding:7px 12px;border-radius:6px;font-size:12.5px;font-weight:600">
+                            <button type="button" onclick="NetSazModal.prompt({ title: 'Tolak Pembayaran Tenant', message: 'Masukkan alasan penolakan untuk tenant \'{{ $t->name }}\':', placeholder: 'Contoh: Bukti transfer tidak valid / nominal tidak cocok', type: 'danger', confirmText: 'Tolak Tenant' }).then(r => { if(r !== null && r.trim() !== '') { document.getElementById('reject-reason-{{ $t->id }}').value = r; document.getElementById('reject-form-{{ $t->id }}').submit(); } })" class="btn" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid #EF4444;padding:7px 12px;border-radius:6px;font-size:12.5px;font-weight:600">
                                 Tolak
                             </button>
                             <form id="reject-form-{{ $t->id }}" method="POST" action="{{ route('admin.verifications.reject', $t->id) }}" style="display:none">

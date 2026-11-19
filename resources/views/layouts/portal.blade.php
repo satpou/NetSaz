@@ -56,6 +56,8 @@
         @yield('content')
     </main>
 
+    <x-confirm-modal />
+
     @stack('scripts')
 </body>
 </html>
