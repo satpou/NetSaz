@@ -132,6 +132,27 @@
             <input type="checkbox" name="midtrans_is_production" value="1" id="midtrans_prod" {{ old('midtrans_is_production', $settings['midtrans_is_production'] ?? false) ? 'checked' : '' }} style="accent-color:var(--primary);width:18px;height:18px">
             <label for="midtrans_prod" style="font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer">Mode Production / Live (Bukan Sandbox)</label>
         </div>
+
+        <div style="margin-top:18px;padding:14px 16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:12.5px">
+            <div style="font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>URL Konfigurasi di Dashboard Midtrans (Settings &gt; Configuration):</span>
+            </div>
+            <div style="margin-bottom:10px">
+                <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>1. Payment Notification URL (Webhook):</b></span>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/api/webhook/midtrans</code>
+                    <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/api/webhook/midtrans'); window.NetSazToast.success('URL Notification disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                </div>
+            </div>
+            <div>
+                <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>2. Finish / Unfinish / Error Redirect URL (Callback Browser):</b></span>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:#60A5FA;font-family:'JetBrains Mono',monospace">https://netsaz.web.id/midtrans-callback</code>
+                    <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/midtrans-callback'); window.NetSazToast.success('URL Callback disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Panel 4: Integrasi WhatsApp Gateway (Auto QR Code & Open-WA) -->
