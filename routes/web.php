@@ -60,6 +60,8 @@ Route::group([], function () {
 
     Route::post('/webhook/midtrans/{tenant_code}', [WebhookController::class, 'midtrans'])->name('webhook.midtrans');
     Route::get('/midtrans-callback', [WebhookController::class, 'midtransCallback'])->name('midtrans.callback');
+    Route::post('/webhook/duitku', [WebhookController::class, 'duitku'])->name('webhook.duitku');
+    Route::get('/duitku-callback', [WebhookController::class, 'duitkuCallback'])->name('duitku.callback');
 
     Route::get('/forgot-password', [\App\Http\Controllers\ForgotPasswordController::class, 'showForm'])->name('password.request');
     Route::post('/forgot-password', [\App\Http\Controllers\ForgotPasswordController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:3,1');

@@ -204,4 +204,88 @@ class WebhookController extends Controller
 
         return response()->json(['status' => 'ok']);
     }
+
+    public function duitku(Request $request)
+    {
+        $payload = $request->all();
+        $merchantOrderId = $payload['merchantOrderId'] ?? null;
+        $signature = $payload['signature'] ?? null;
+
+        Log::info('Duitku callback received', $payload);
+
+        if (!$merchantOrderId) {
+            return response('Bad Request: Missing merchantOrderId', 400);
+        }
+
+        $payment = Payment::withoutGlobalScopes()
+            ->where('payment_number', $merchantOrderId)
+            ->first();
+
+        if (!$payment) {
+            Log::warning('Duitku payment not found for order', ['order_id' => $merchantOrderId]);
+            return response('Payment not found', 404);
+        }
+
+        $tenant = \App\Models\Tenant::find($payment->tenant_id);
+        if (!$tenant) {
+            return response('Tenant not found', 404);
+        }
+
+        $duitkuService = new \App\Services\DuitkuService($tenant->getDecryptedSettings());
+        $isValid = $duitkuService->verifyWebhook($payload, $signature);
+
+        PaymentGatewayLog::create([
+            'tenant_id' => $tenant->id,
+            'provider' => 'duitku',
+            'payload' => $payload,
+            'signature_valid' => $isValid,
+            'processed' => $isValid,
+        ]);
+
+        if (!$isValid) {
+            Log::warning('Invalid Duitku signature', [
+                'tenant_id' => $tenant->id,
+                'merchantOrderId' => $merchantOrderId,
+            ]);
+            return response('Bad Signature', 400);
+        }
+
+        $duitkuService->processWebhookPayload($payload);
+
+        return response('SUCCESS', 200);
+    }
+
+    public function duitkuCallback(Request $request)
+    {
+        $merchantOrderId = $request->input('merchantOrderId');
+        $resultCode = $request->input('resultCode');
+
+        if (!$merchantOrderId) {
+            return redirect('/')->with('error', 'Order ID tidak ditemukan.');
+        }
+
+        $payment = Payment::withoutGlobalScopes()
+            ->where('payment_number', $merchantOrderId)
+            ->first();
+
+        if (!$payment) {
+            return redirect('/')->with('error', 'Pembayaran tidak ditemukan.');
+        }
+
+        $tenant = \App\Models\Tenant::find($payment->tenant_id);
+
+        if ($tenant?->slug) {
+            $scheme = parse_url(config('app.url'), PHP_URL_SCHEME) ?: 'https';
+            $tenantDomain = config('app.tenant_domain', config('app.main_domain'));
+            $url = "{$scheme}://{$tenant->slug}.{$tenantDomain}/portal/invoices/{$payment->invoice_id}";
+
+            if ($resultCode === '00' || $payment->status === 'success') {
+                return redirect()->away($url)->with('success', 'Pembayaran via Duitku berhasil! Terima kasih.');
+            }
+
+            return redirect()->away($url)->with('error', 'Pembayaran belum diselesaikan atau dibatalkan.');
+        }
+
+        return redirect('/')->with('error', 'Pembayaran tidak dapat ditampilkan.');
+    }
 }

@@ -104,52 +104,115 @@
         </div>
     </div>
 
-    <!-- Panel 3: Integrasi Payment Gateway (Midtrans) -->
-    <div class="panel reveal d3" style="padding:26px 28px;margin-bottom:24px">
-        <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:10px">
-            <span style="width:28px;height:28px;border-radius:7px;background:var(--primary-tint);color:var(--primary);display:inline-flex;align-items:center;justify-content:center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            </span>
-            Integrasi Midtrans (Pembayaran Otomatis QRIS & VA Bank)
-        </h3>
-        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">
-            Dapatkan Server Key dan Client Key dari dashboard Midtrans akun Anda di menu <b>Settings &rarr; Access Keys</b>. Sistem akan mengenkripsi kunci rahasia secara aman.
-        </p>
+    <!-- Panel 3: Integrasi Payment Gateway (Duitku & Midtrans) -->
+    <div x-data="{ pg: '{{ old('payment_gateway_provider', $settings['payment_gateway_provider'] ?? ($tenant->getSecretSetting('duitku_api_key') || !empty($settings['duitku_merchant_code']) ? 'duitku' : 'midtrans')) }}' }" class="panel reveal d3" style="padding:26px 28px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+            <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:10px">
+                <span style="width:28px;height:28px;border-radius:7px;background:var(--primary-tint);color:var(--primary);display:inline-flex;align-items:center;justify-content:center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </span>
+                Integrasi Payment Gateway (Otomatis QRIS, VA Bank &amp; E-Wallet)
+            </h3>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-            <div>
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Midtrans Server Key</label>
-                <input type="password" name="midtrans_server_key" value="{{ old('midtrans_server_key', $tenant->getSecretSetting('midtrans_server_key')) }}" placeholder="SB-Mid-server-..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
-            </div>
-
-            <div>
-                <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Midtrans Client Key</label>
-                <input type="text" name="midtrans_client_key" value="{{ old('midtrans_client_key', $tenant->getSecretSetting('midtrans_client_key')) }}" placeholder="SB-Mid-client-..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+            <!-- Switcher Tabs -->
+            <div style="display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px">
+                <button type="button" @click="pg = 'duitku'" :style="pg === 'duitku' ? 'background:var(--primary);color:#05131c;font-weight:700' : 'background:transparent;color:var(--ink-soft)'" style="border:none;padding:6px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;transition:all .15s">
+                    Duitku
+                </button>
+                <button type="button" @click="pg = 'midtrans'" :style="pg === 'midtrans' ? 'background:var(--primary);color:#05131c;font-weight:700' : 'background:transparent;color:var(--ink-soft)'" style="border:none;padding:6px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;transition:all .15s">
+                    Midtrans
+                </button>
             </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:10px">
-            <input type="checkbox" name="midtrans_is_production" value="1" id="midtrans_prod" {{ old('midtrans_is_production', $settings['midtrans_is_production'] ?? false) ? 'checked' : '' }} style="accent-color:var(--primary);width:18px;height:18px">
-            <label for="midtrans_prod" style="font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer">Mode Production / Live (Bukan Sandbox)</label>
-        </div>
+        <input type="hidden" name="payment_gateway_provider" :value="pg">
 
-        <div style="margin-top:18px;padding:14px 16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:12.5px">
-            <div style="font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <span>URL Konfigurasi di Dashboard Midtrans (Settings &gt; Configuration):</span>
-            </div>
-            <div style="margin-bottom:10px">
-                <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>1. Payment Notification URL (Webhook):</b></span>
-                <div style="display:flex;align-items:center;gap:8px">
-                    <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/api/webhook/midtrans</code>
-                    <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/api/webhook/midtrans'); window.NetSazToast.success('URL Notification disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+        <!-- Duitku Section -->
+        <div x-show="pg === 'duitku'" x-cloak>
+            <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">
+                Dapatkan <b>Merchant Code</b> dan <b>API Key</b> dari dashboard akun Duitku Anda di <b>merchant.duitku.com</b> (menu My Project). Sistem akan mengenkripsi kunci rahasia secara aman.
+            </p>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <div>
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Duitku Merchant Code</label>
+                    <input type="text" name="duitku_merchant_code" value="{{ old('duitku_merchant_code', $settings['duitku_merchant_code'] ?? '') }}" placeholder="Contoh: D1234 atau DXXXX" class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-family:'JetBrains Mono',monospace">
+                </div>
+
+                <div>
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Duitku API Key (Secret)</label>
+                    <input type="password" name="duitku_api_key" value="{{ old('duitku_api_key', $tenant->getSecretSetting('duitku_api_key')) }}" placeholder="Masukkan Duitku API Key..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
                 </div>
             </div>
-            <div>
-                <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>2. Finish / Unfinish / Error Redirect URL (Callback Browser):</b></span>
-                <div style="display:flex;align-items:center;gap:8px">
-                    <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:#60A5FA;font-family:'JetBrains Mono',monospace">https://netsaz.web.id/midtrans-callback</code>
-                    <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/midtrans-callback'); window.NetSazToast.success('URL Callback disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+
+            <div style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" name="duitku_is_production" value="1" id="duitku_prod" {{ old('duitku_is_production', $settings['duitku_is_production'] ?? false) ? 'checked' : '' }} style="accent-color:var(--primary);width:18px;height:18px">
+                <label for="duitku_prod" style="font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer">Mode Production / Live (Bukan Sandbox)</label>
+            </div>
+
+            <div style="margin-top:18px;padding:14px 16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:12.5px">
+                <div style="font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span>URL Konfigurasi di Dashboard Duitku (merchant.duitku.com &gt; My Project):</span>
+                </div>
+                <div style="margin-bottom:10px">
+                    <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>1. Callback URL (Webhook Notifikasi Otomatis):</b></span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/api/webhook/duitku</code>
+                        <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/api/webhook/duitku'); window.NetSazToast.success('URL Callback Duitku disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                    </div>
+                </div>
+                <div>
+                    <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>2. Return URL (Redirect Pelanggan Setelah Bayar):</b></span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:#60A5FA;font-family:'JetBrains Mono',monospace">https://netsaz.web.id/duitku-callback</code>
+                        <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/duitku-callback'); window.NetSazToast.success('URL Return Duitku disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Midtrans Section -->
+        <div x-show="pg === 'midtrans'" x-cloak>
+            <p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">
+                Dapatkan Server Key dan Client Key dari dashboard Midtrans akun Anda di menu <b>Settings &rarr; Access Keys</b>. Sistem akan mengenkripsi kunci rahasia secara aman.
+            </p>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <div>
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Midtrans Server Key</label>
+                    <input type="password" name="midtrans_server_key" value="{{ old('midtrans_server_key', $tenant->getSecretSetting('midtrans_server_key')) }}" placeholder="SB-Mid-server-..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                </div>
+
+                <div>
+                    <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Midtrans Client Key</label>
+                    <input type="text" name="midtrans_client_key" value="{{ old('midtrans_client_key', $tenant->getSecretSetting('midtrans_client_key')) }}" placeholder="SB-Mid-client-..." class="form-input" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px">
+                <input type="checkbox" name="midtrans_is_production" value="1" id="midtrans_prod" {{ old('midtrans_is_production', $settings['midtrans_is_production'] ?? false) ? 'checked' : '' }} style="accent-color:var(--primary);width:18px;height:18px">
+                <label for="midtrans_prod" style="font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer">Mode Production / Live (Bukan Sandbox)</label>
+            </div>
+
+            <div style="margin-top:18px;padding:14px 16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:12.5px">
+                <div style="font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span>URL Konfigurasi di Dashboard Midtrans (Settings &gt; Configuration):</span>
+                </div>
+                <div style="margin-bottom:10px">
+                    <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>1. Payment Notification URL (Webhook):</b></span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/api/webhook/midtrans</code>
+                        <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/api/webhook/midtrans'); window.NetSazToast.success('URL Notification disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                    </div>
+                </div>
+                <div>
+                    <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>2. Finish / Unfinish / Error Redirect URL (Callback Browser):</b></span>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <code style="background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:#60A5FA;font-family:'JetBrains Mono',monospace">https://netsaz.web.id/midtrans-callback</code>
+                        <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/midtrans-callback'); window.NetSazToast.success('URL Callback disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -148,14 +148,19 @@ class CustomerPortalController extends Controller
 
         try {
             $tenant = $invoice->tenant;
-        $tenantSettings = $tenant ? $tenant->getDecryptedSettings() : [];
+            $tenantSettings = $tenant ? $tenant->getDecryptedSettings() : [];
 
-            $useXendit = ! empty($tenantSettings['xendit_api_key'] ?? '')
-                && empty($tenantSettings['midtrans_server_key'] ?? '');
+            $provider = $tenantSettings['payment_gateway_provider'] ?? null;
+            $useDuitku = ($provider === 'duitku') || (!empty($tenantSettings['duitku_merchant_code']) && !empty($tenantSettings['duitku_api_key']) && empty($tenantSettings['midtrans_server_key']));
+            $useXendit = ($provider === 'xendit') || (!empty($tenantSettings['xendit_api_key']) && empty($tenantSettings['midtrans_server_key']) && !$useDuitku);
 
-            $result = $useXendit
-                ? (new XenditService($tenantSettings))->createTransaction($invoice)
-                : (new MidtransService($tenantSettings))->createTransaction($invoice);
+            if ($useDuitku) {
+                $result = (new \App\Services\DuitkuService($tenantSettings))->createTransaction($invoice);
+            } elseif ($useXendit) {
+                $result = (new XenditService($tenantSettings))->createTransaction($invoice);
+            } else {
+                $result = (new MidtransService($tenantSettings))->createTransaction($invoice);
+            }
 
             if ($result['success'] && ! empty($result['redirect_url'])) {
                 return redirect()->away($result['redirect_url']);

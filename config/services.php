@@ -47,6 +47,12 @@ return [
         'is_production' => env('XENDIT_IS_PRODUCTION', false),
     ],
 
+    'duitku' => [
+        'merchant_code' => env('DUITKU_MERCHANT_CODE'),
+        'api_key' => env('DUITKU_API_KEY'),
+        'is_production' => env('DUITKU_IS_PRODUCTION', false),
+    ],
+
     'commission' => [
         'per_verification' => env('STAFF_COMMISSION_PER_VERIFICATION', 5000),
     ],

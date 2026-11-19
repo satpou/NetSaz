@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhook/midtrans-subscription',
             'api/webhook/midtrans',
             'api/webhook/xendit',
+            'webhook/duitku',
+            'api/webhook/duitku',
         ]);
 
         // Tenant middlewares dipasang per-route group, bukan global

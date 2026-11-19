@@ -31,6 +31,11 @@ class TenantSettingController extends Controller
             'midtrans_server_key' => 'nullable|string|max:255',
             'midtrans_client_key' => 'nullable|string|max:255',
             'midtrans_is_production' => 'nullable|boolean',
+            // Duitku
+            'duitku_merchant_code' => 'nullable|string|max:100',
+            'duitku_api_key' => 'nullable|string|max:255',
+            'duitku_is_production' => 'nullable|boolean',
+            'payment_gateway_provider' => 'nullable|string|in:midtrans,duitku,xendit',
             // WhatsApp Gateway
             'wa_gateway_provider' => 'nullable|string|max:50',
             'wa_api_url' => 'nullable|string|max:255',
@@ -56,6 +61,9 @@ class TenantSettingController extends Controller
         if (isset($validated['midtrans_client_key'])) {
             $tenant->setSecretSetting('midtrans_client_key', $validated['midtrans_client_key']);
         }
+        if (isset($validated['duitku_api_key'])) {
+            $tenant->setSecretSetting('duitku_api_key', $validated['duitku_api_key']);
+        }
         if (isset($validated['wa_api_token'])) {
             $tenant->setSecretSetting('wa_api_token', $validated['wa_api_token']);
         }
@@ -63,6 +71,9 @@ class TenantSettingController extends Controller
         // Save public settings
         $settings = $tenant->settings ?? [];
         $settings['midtrans_is_production'] = $request->boolean('midtrans_is_production', false);
+        $settings['duitku_merchant_code'] = $validated['duitku_merchant_code'] ?? ($settings['duitku_merchant_code'] ?? null);
+        $settings['duitku_is_production'] = $request->boolean('duitku_is_production', false);
+        $settings['payment_gateway_provider'] = $validated['payment_gateway_provider'] ?? ($settings['payment_gateway_provider'] ?? 'midtrans');
         $settings['slogan'] = $validated['slogan'] ?? ($settings['slogan'] ?? null);
         $settings['wa_gateway_provider'] = $validated['wa_gateway_provider'] ?? 'internal';
         $settings['wa_api_url'] = $validated['wa_api_url'] ?? ($settings['wa_api_url'] ?? 'http://127.0.0.1:3001');
