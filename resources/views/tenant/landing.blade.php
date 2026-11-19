@@ -76,7 +76,9 @@
                     <h3 style="font-size:17px;font-weight:700;margin:0 0 4px">{{ $package->name }}</h3>
                     <p style="font-size:12.5px;color:var(--ink-faint);margin:0">{{ Str::limit($package->description ?? 'Paket internet rumahan', 46) }}</p>
                 </div>
-                <div style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:{{ $brandColor }}">{{ $package->speed }} <span style="font-size:13px;font-weight:600;color:var(--ink-faint)">Mbps</span></div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:{{ $brandColor }}">
+                    {{ preg_match('/(mbps|kbps|gbps)/i', $package->speed ?? '') ? $package->speed : ($package->speed ? $package->speed . ' Mbps' : '-') }}
+                </div>
                 <div style="margin:14px 0 20px;padding-top:14px;border-top:1px dashed var(--line)">
                     <span style="font-size:22px;font-weight:700">Rp {{ number_format($package->price, 0, ',', '.') }}</span>
                     <span style="font-size:12.5px;color:var(--ink-faint)">/bulan</span>

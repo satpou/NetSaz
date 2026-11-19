@@ -110,7 +110,8 @@ class CustomerController extends Controller
             $nas = NasServer::where('status', 'online')->orderBy('id')->first();
 
             if (! $nas) {
-                return redirect()->route('customers.index')
+                $ts = request()->route('tenant_slug');
+                return redirect()->route('customers.index', $ts ? ['tenant_slug' => $ts] : [])
                     ->with('warning', 'Pelanggan tersimpan, tetapi PPPoE belum diproses karena tidak ada router NAS online.');
             }
 
@@ -132,7 +133,8 @@ class CustomerController extends Controller
             }
         }
 
-        return redirect()->route('customers.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('customers.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', $message);
     }
 
@@ -236,7 +238,8 @@ class CustomerController extends Controller
             }
         }
 
-        return redirect()->route('customers.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('customers.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', $message);
     }
 
@@ -244,7 +247,8 @@ class CustomerController extends Controller
     {
         $customer->delete();
 
-        return redirect()->route('customers.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('customers.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Pelanggan berhasil dihapus.');
     }
 

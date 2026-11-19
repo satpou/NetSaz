@@ -25,8 +25,9 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
+        $ts = $user->tenant?->slug ?? request()->route('tenant_slug');
         $route = $user->tenant_id ? 'tenant.profile.show' : 'profile.show';
-        return redirect()->route($route)
+        return redirect()->route($route, $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Profil berhasil diperbarui.');
     }
 
@@ -43,8 +44,9 @@ class ProfileController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        $ts = $user->tenant?->slug ?? request()->route('tenant_slug');
         $route = $user->tenant_id ? 'tenant.profile.show' : 'profile.show';
-        return redirect()->route($route)
+        return redirect()->route($route, $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Password berhasil diubah.');
     }
 }

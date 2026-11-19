@@ -30,25 +30,29 @@ class PartnerController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['tenant_id'] = session('active_tenant_id');
+        $validated['tenant_id'] = tenantId();
         Partner::create($validated);
 
-        return redirect()->route('partners.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('partners.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Mitra berhasil ditambahkan.');
     }
 
     public function show(Partner $partner)
     {
+        abort_unless($partner->tenant_id === tenantId(), 403);
         return view('partners.show', compact('partner'));
     }
 
     public function edit(Partner $partner)
     {
+        abort_unless($partner->tenant_id === tenantId(), 403);
         return view('partners.edit', compact('partner'));
     }
 
     public function update(Request $request, Partner $partner)
     {
+        abort_unless($partner->tenant_id === tenantId(), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
@@ -61,15 +65,18 @@ class PartnerController extends Controller
 
         $partner->update($validated);
 
-        return redirect()->route('partners.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('partners.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Mitra berhasil diperbarui.');
     }
 
     public function destroy(Partner $partner)
     {
+        abort_unless($partner->tenant_id === tenantId(), 403);
         $partner->delete();
 
-        return redirect()->route('partners.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('partners.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Mitra berhasil dihapus.');
     }
 }

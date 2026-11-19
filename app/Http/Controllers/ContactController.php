@@ -44,8 +44,11 @@ class ContactController extends Controller
         }
         // -----------------------------------------------------------------
 
-        return redirect()->back()
-            ->with('success', 'Pesan Anda berhasil terkirim. Tim kami akan merespon via WhatsApp.');
+        $feedback = str_starts_with($contact->message, '[BUG')
+            ? 'Laporan bug Anda berhasil dikirim! Tim teknis kami akan segera meninjaunya.'
+            : 'Pesan Anda berhasil terkirim. Tim kami akan merespon via WhatsApp.';
+
+        return redirect()->back()->with('success', $feedback);
     }
 }
 

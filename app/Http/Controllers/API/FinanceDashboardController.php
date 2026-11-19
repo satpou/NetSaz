@@ -19,7 +19,7 @@ class FinanceDashboardController extends Controller
 
     public function dashboard(Request $request)
     {
-        $tenantId = session('active_tenant_id');
+        $tenantId = tenantId();
 
         $dateRange = [
             'start' => Carbon::now()->startOfMonth()->format('Y-m-d'),

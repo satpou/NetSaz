@@ -28,6 +28,27 @@ class InvoiceController extends Controller
             $query->where('customer_id', $request->customer_id);
         }
 
+        if ($request->filled('month')) {
+            try {
+                $monthDate = Carbon::createFromFormat('Y-m', $request->month);
+                $query->whereYear('due_date', $monthDate->year)
+                    ->whereMonth('due_date', $monthDate->month);
+            } catch (\Exception $e) {
+                // Ignore invalid format
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         if ($request->filled('date_from')) {
             $query->where('due_date', '>=', $request->date_from);
         }
@@ -36,7 +57,7 @@ class InvoiceController extends Controller
             $query->where('due_date', '<=', $request->date_to);
         }
 
-        $invoices = $query->orderBy('due_date')->paginate(20);
+        $invoices = $query->orderBy('due_date')->paginate(20)->withQueryString();
 
         return view('invoices.index', compact('invoices'));
     }

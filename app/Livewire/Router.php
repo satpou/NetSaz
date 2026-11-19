@@ -28,7 +28,7 @@ class Router extends Component
             'newDbServerHost' => 'required|string|max:255',
         ]);
 
-        $tenantId = session('active_tenant_id');
+        $tenantId = tenantId();
 
         RadiusHub::create([
             'tenant_id' => $tenantId,
@@ -50,7 +50,7 @@ class Router extends Component
             'selectedNasId' => 'required|exists:nas_servers,id',
         ]);
 
-        $tenantId = session('active_tenant_id');
+        $tenantId = tenantId();
         $hub = RadiusHub::where('tenant_id', $tenantId)->latest()->first();
 
         if (! $hub) {

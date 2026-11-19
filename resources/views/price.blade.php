@@ -34,10 +34,15 @@
           <li>{{ $benefit }}</li>
           @endforeach
         </ul>
-        <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-outline' }}"
+        @if($plan['is_enterprise'] ?? false)
+        <a class="btn btn-outline"
            href="{{ $plan['cta'] }}"
            target="_blank"
            rel="noopener">{{ $plan['cta_label'] }}</a>
+        @else
+        <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-outline' }}"
+           href="{{ route('register') }}?plan={{ $plan['key'] }}">{{ $plan['cta_label'] ?? 'Pilih Paket' }}</a>
+        @endif
       </div>
       @endforeach
     </div>

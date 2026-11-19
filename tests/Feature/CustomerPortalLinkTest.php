@@ -75,7 +75,7 @@ class CustomerPortalLinkTest extends TestCase
 
     public function test_send_portal_link_posts_to_whatsapp_bridge(): void
     {
-        Http::fake(['*' => Http::response(['status' => 'sent'])]);
+        Http::fake(['*' => Http::response(['success' => true, 'message' => 'sent'])]);
 
         $customer = $this->makeCustomer();
         $portalUrl = $customer->portalUrl();
@@ -90,13 +90,13 @@ class CustomerPortalLinkTest extends TestCase
         $this->assertTrue(strlen((string) $customer->portal_pin) > 20);
 
         Http::assertSent(function ($request) use ($customer, $portalUrl) {
-            $apiUrl = config('services.wa_notification.api_url');
-            parse_str(parse_url($request->url(), PHP_URL_QUERY) ?? '', $query);
-            $text = $query['text'] ?? '';
+            $data = $request->data();
+            $text = $data['message'] ?? '';
+            $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
 
-            return $request->method() === 'GET'
-                && str_starts_with($request->url(), $apiUrl)
-                && ($query['phone'] ?? null) === $customer->phone
+            return $request->method() === 'POST'
+                && str_starts_with($request->url(), "{$baseUrl}/send")
+                && ($data['to'] ?? null) === '62' . substr($customer->phone, 1)
                 && str_contains($text, $portalUrl)
                 && str_contains($text, '/portal/auth/')
                 && preg_match('/PIN: \*\d{6}\*/', $text) === 1;
@@ -105,7 +105,7 @@ class CustomerPortalLinkTest extends TestCase
 
     public function test_send_welcome_message_posts_to_whatsapp_bridge(): void
     {
-        Http::fake(['*' => Http::response(['status' => 'sent'])]);
+        Http::fake(['*' => Http::response(['success' => true, 'message' => 'sent'])]);
 
         $customer = $this->makeCustomer();
         $portalUrl = $customer->portalUrl();
@@ -117,13 +117,13 @@ class CustomerPortalLinkTest extends TestCase
         $response->assertSessionHas('success');
 
         Http::assertSent(function ($request) use ($customer, $portalUrl) {
-            $apiUrl = config('services.wa_notification.api_url');
-            parse_str(parse_url($request->url(), PHP_URL_QUERY) ?? '', $query);
-            $text = $query['text'] ?? '';
+            $data = $request->data();
+            $text = $data['message'] ?? '';
+            $baseUrl = config('app.whatsapp_bridge_url', 'http://127.0.0.1:3001');
 
-            return $request->method() === 'GET'
-                && str_starts_with($request->url(), $apiUrl)
-                && ($query['phone'] ?? null) === $customer->phone
+            return $request->method() === 'POST'
+                && str_starts_with($request->url(), "{$baseUrl}/send")
+                && ($data['to'] ?? null) === '62' . substr($customer->phone, 1)
                 && str_contains($text, 'Selamat datang')
                 && str_contains($text, $portalUrl)
                 && str_contains($text, '/portal/auth/')

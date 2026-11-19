@@ -28,7 +28,8 @@ class AreaController extends Controller
         $validated['tenant_id'] = tenantId();
         Area::create($validated);
 
-        return redirect()->route('areas.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('areas.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Area berhasil ditambahkan.');
     }
 
@@ -49,7 +50,8 @@ class AreaController extends Controller
 
         $area->update($validated);
 
-        return redirect()->route('areas.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('areas.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Area berhasil diperbarui.');
     }
 
@@ -59,7 +61,8 @@ class AreaController extends Controller
 
         $area->delete();
 
-        return redirect()->route('areas.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('areas.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Area berhasil dihapus.');
     }
 }

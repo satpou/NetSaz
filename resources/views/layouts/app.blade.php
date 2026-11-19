@@ -162,23 +162,26 @@
                 <p style="font-size:13px;color:var(--ink-faint);margin-top:4px">Jelaskan bug yang Anda temukan.</p>
             </div>
             <div class="modal-body">
-                <form action="mailto:bugs@netsaz.id" method="post" enctype="text/plain">
-                    <input type="hidden" name="subject" value="[BUG] Laporan dari {{ Auth::user()->name ?? 'User' }}">
+                <form action="{{ route('contact.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="name" value="{{ Auth::user()->name ?? 'User NetSaz' }}">
+                    <input type="hidden" name="email" value="{{ Auth::user()->email ?? 'user@netsaz.web.id' }}">
                     <div class="form-field">
                         <label>Judul Bug</label>
-                        <input type="text" name="title" required class="form-input" placeholder="Contoh: Tombol bayar tidak berfungsi">
+                        <input type="text" name="bug_title" required class="form-input" placeholder="Contoh: Tombol bayar tidak berfungsi" id="bug_title">
                     </div>
                     <div class="form-field">
                         <label>Halaman / Lokasi</label>
-                        <input type="text" name="page" class="form-input" placeholder="Contoh: Dashboard, Invoice" value="{{ request()->path() }}">
+                        <input type="text" name="bug_page" class="form-input" placeholder="Contoh: Dashboard, Invoice" value="{{ request()->path() }}" id="bug_page">
                     </div>
                     <div class="form-field">
-                        <label>Deskripsi</label>
-                        <textarea name="body" rows="3" required class="form-input" placeholder="Jelaskan langkah-langkah mereproduksi..." style="resize:vertical"></textarea>
+                        <label>Deskripsi Masalah</label>
+                        <textarea name="bug_desc" rows="3" required class="form-input" placeholder="Jelaskan langkah-langkah mereproduksi..." style="resize:vertical" id="bug_desc"></textarea>
                     </div>
+                    <input type="hidden" name="message" id="bug_combined_message">
                     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
                         <button type="button" @click="showBugModal = false" class="btn-outline" style="padding:10px 20px">Batal</button>
-                        <button type="submit" class="btn-save" style="width:auto;padding:10px 20px;margin-top:0">Kirim</button>
+                        <button type="submit" class="btn-save" style="width:auto;padding:10px 20px;margin-top:0" onclick="document.getElementById('bug_combined_message').value = '[BUG REPORT] ' + document.getElementById('bug_title').value + ' (Lokasi: ' + document.getElementById('bug_page').value + ')\n\n' + document.getElementById('bug_desc').value;">Kirim Laporan</button>
                     </div>
                 </form>
             </div>
@@ -187,9 +190,17 @@
 
     <div class="main" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
         <div class="topbar">
-            <form action="{{ $isTenantDomain && $ts ? route('customers.index', ['tenant_slug' => $ts]) : ($isTenantMode ? route('customers.index', $ts ? ['tenant_slug' => $ts] : []) : '#') }}" method="GET" class="search">
+            @php
+                $searchAction = $isTenantDomain && $ts 
+                    ? route('customers.index', ['tenant_slug' => $ts]) 
+                    : ($isTenantMode 
+                        ? route('customers.index', $ts ? ['tenant_slug' => $ts] : []) 
+                        : route('admin.tenants.index'));
+                $searchPlaceholder = $isTenantMode ? 'Cari pelanggan, invoice...' : 'Cari ISP, tenant, email...';
+            @endphp
+            <form action="{{ $searchAction }}" method="GET" class="search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" name="search" placeholder="Cari pelanggan, invoice..." value="{{ request('search') }}" autocomplete="off" style="border:none;background:transparent;flex:1;outline:none;font-size:13.5px;color:var(--ink);font-family:inherit">
+                <input type="text" name="search" placeholder="{{ $searchPlaceholder }}" value="{{ request('search') }}" autocomplete="off" style="border:none;background:transparent;flex:1;outline:none;font-size:13.5px;color:var(--ink);font-family:inherit">
             </form>
             <div class="topbar-right">
                 <div class="user" @click.outside="showUserMenu = false" style="position:relative;cursor:pointer" @click="showUserMenu = !showUserMenu">

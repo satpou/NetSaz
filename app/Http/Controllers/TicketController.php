@@ -53,12 +53,14 @@ class TicketController extends Controller
 
         Ticket::create($validated);
 
-        return redirect()->route('tickets.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('tickets.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Tiket berhasil dibuat.');
     }
 
     public function show(Ticket $ticket)
     {
+        abort_unless($ticket->tenant_id === tenantId(), 403);
         $ticket->load(['customer', 'assignee']);
 
         return view('tickets.show', compact('ticket'));
@@ -66,6 +68,7 @@ class TicketController extends Controller
 
     public function edit(Ticket $ticket)
     {
+        abort_unless($ticket->tenant_id === tenantId(), 403);
         $tid = tenantId();
         $customers = Customer::where('tenant_id', $tid)->orderBy('name')->get();
         $staff = User::where('tenant_id', $tid)->where('is_active', true)->orderBy('name')->get();
@@ -75,6 +78,7 @@ class TicketController extends Controller
 
     public function update(Request $request, Ticket $ticket)
     {
+        abort_unless($ticket->tenant_id === tenantId(), 403);
         $tid = tenantId();
 
         $validated = $request->validate([
@@ -99,12 +103,14 @@ class TicketController extends Controller
 
         $ticket->update($validated);
 
-        return redirect()->route('tickets.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('tickets.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Tiket berhasil diperbarui.');
     }
 
     public function updateStatus(Request $request, Ticket $ticket)
     {
+        abort_unless($ticket->tenant_id === tenantId(), 403);
         $validated = $request->validate([
             'status' => 'required|in:open,in_progress,resolved,closed',
             'resolution_notes' => 'nullable|string',
@@ -127,9 +133,11 @@ class TicketController extends Controller
 
     public function destroy(Ticket $ticket)
     {
+        abort_unless($ticket->tenant_id === tenantId(), 403);
         $ticket->delete();
 
-        return redirect()->route('tickets.index', ['tenant_slug' => request()->route('tenant_slug')])
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('tickets.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Tiket berhasil dihapus.');
     }
 }

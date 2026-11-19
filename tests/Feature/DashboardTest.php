@@ -39,15 +39,15 @@ class DashboardTest extends TestCase
             'name' => 'NetCity Nusantara',
             'slug' => 'netcity-nusantara',
             'email' => 'owner@netcity.id',
-            'status' => 'active',
+            'status' => 'pending_payment',
         ]);
         $this->assertDatabaseHas('users', [
             'email' => 'owner@netcity.id',
             'role' => 'super_admin',
-            'is_active' => true,
+            'is_active' => false,
         ]);
         $this->assertDatabaseHas('tenant_subscriptions', [
-            'status' => 'trial',
+            'status' => 'pending_payment',
         ]);
     }
 }

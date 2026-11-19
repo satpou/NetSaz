@@ -23,15 +23,15 @@
 </div>
 
 <div class="quick-actions reveal d1">
-    <a class="qa primary" href="{{ $ts ? route('customers.create', ['tenant_slug' => $ts]) : '#' }}">
+    <a class="qa primary" href="{{ route('customers.create', $ts ? ['tenant_slug' => $ts] : []) }}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         Tambah Pelanggan
     </a>
-    <a class="qa" href="{{ $ts ? route('invoices.create', ['tenant_slug' => $ts]) : '#' }}">
+    <a class="qa" href="{{ route('invoices.create', $ts ? ['tenant_slug' => $ts] : []) }}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h10M4 17h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Tambah Invoice
     </a>
-    <a class="qa" href="{{ $ts ? route('payments.index', ['tenant_slug' => $ts]) : '#' }}">
+    <a class="qa" href="{{ route('payments.index', $ts ? ['tenant_slug' => $ts] : []) }}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
         Verifikasi Pembayaran
     </a>
@@ -113,7 +113,7 @@
     <div class="panel reveal d2">
         <div class="panel-head">
             <h3>Top Revenue Customer</h3>
-            <a href="{{ $ts ? route('customers.index', ['tenant_slug' => $ts]) : '#' }}" class="panel-link">Lihat semua →</a>
+            <a href="{{ route('customers.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="panel-link">Lihat semua →</a>
         </div>
         <div class="panel-sub">Pelanggan dengan kontribusi pendapatan terbesar.</div>
         <table class="rekap-table">
@@ -173,7 +173,7 @@
     <div class="panel reveal d2">
         <div class="panel-head">
             <h3>Invoice Terbaru</h3>
-            <a href="{{ $ts ? route('invoices.index', ['tenant_slug' => $ts]) : '#' }}" class="panel-link">Lihat semua →</a>
+            <a href="{{ route('invoices.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="panel-link">Lihat semua →</a>
         </div>
         <div class="panel-sub">5 invoice paling baru.</div>
         <table class="rekap-table">
@@ -205,7 +205,7 @@
     <div class="panel reveal d3">
         <div class="panel-head">
             <h3>Pembayaran Terbaru</h3>
-            <a href="{{ $ts ? route('payments.index', ['tenant_slug' => $ts]) : '#' }}" class="panel-link">Lihat semua →</a>
+            <a href="{{ route('payments.index', $ts ? ['tenant_slug' => $ts] : []) }}" class="panel-link">Lihat semua →</a>
         </div>
         <div class="panel-sub">5 pembayaran paling baru.</div>
         <table class="rekap-table">

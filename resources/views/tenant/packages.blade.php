@@ -27,7 +27,9 @@
                 </div>
 
                 <div style="margin:18px 0;padding-top:18px;border-top:1px dashed var(--line)">
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:{{ $brandColor }}">{{ $package->speed }} <span style="font-size:12px;color:var(--ink-faint)">Mbps</span></div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:{{ $brandColor }}">
+                        {{ preg_match('/(mbps|kbps|gbps)/i', $package->speed ?? '') ? $package->speed : ($package->speed ? $package->speed . ' Mbps' : '-') }}
+                    </div>
                 </div>
 
                 <ul style="list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--ink-soft)">

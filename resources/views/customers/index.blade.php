@@ -12,7 +12,7 @@
 </x-page-header>
 
 <div class="panel" style="padding:24px;margin-bottom:24px">
-    <form method="GET" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
+    <form method="GET" action="{{ request()->url() }}" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
         <div style="flex:1;min-width:220px">
             <label class="form-label">Cari Pelanggan</label>
             <input type="text" name="search" placeholder="Nama, email, atau telepon..." value="{{ request('search') }}" class="form-input" autocomplete="off">

@@ -11,8 +11,9 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['invoice', 'invoice.customer'])
-            ->where('tenant_id', session('active_tenant_id'));
+        $tid = tenantId();
+        $query = Payment::with(['invoice', 'invoice.customer', 'customer'])
+            ->where('tenant_id', $tid);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -22,13 +23,31 @@ class PaymentController extends Controller
             $query->where('invoice_id', $request->invoice_id);
         }
 
-        $payments = $query->orderByDesc('created_at')->paginate(20);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('payment_number', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%")
+                    ->orWhereHas('invoice', function ($iq) use ($search) {
+                        $iq->where('invoice_number', 'like', "%{$search}%")
+                            ->orWhereHas('customer', function ($cq) use ($search) {
+                                $cq->where('name', 'like', "%{$search}%");
+                            });
+                    })
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $payments = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
         return view('payments.index', compact('payments'));
     }
 
     public function store(Request $request)
     {
+        $tid = tenantId();
         $request->validate([
             'invoice_id' => 'required|exists:invoices,id',
             'amount' => 'required|numeric|min:0.01',
@@ -41,7 +60,7 @@ class PaymentController extends Controller
         ]);
 
         $invoice = Invoice::with('customer')
-            ->where('tenant_id', session('active_tenant_id'))
+            ->where('tenant_id', $tid)
             ->findOrFail($request->invoice_id);
 
         if (!$this->isStaffOrAdmin()) {
@@ -57,11 +76,11 @@ class PaymentController extends Controller
         $proofPath = null;
         if ($request->hasFile('proof_of_payment')) {
             $proofPath = $request->file('proof_of_payment')
-                ->store('payments/' . session('active_tenant_id'), 'public');
+                ->store('payments/' . $tid, 'public');
         }
 
         $payment = Payment::create([
-            'tenant_id' => session('active_tenant_id'),
+            'tenant_id' => $tid,
             'invoice_id' => $invoice->id,
             'customer_id' => $invoice->customer_id,
             'amount' => $request->amount,
@@ -78,7 +97,7 @@ class PaymentController extends Controller
 
     public function show(Payment $payment)
     {
-        abort_unless($payment->tenant_id === session('active_tenant_id'), 403);
+        abort_unless($payment->tenant_id === tenantId(), 403);
 
         $payment->load(['invoice.customer', 'customer', 'verifiedBy']);
 
@@ -87,7 +106,7 @@ class PaymentController extends Controller
 
     public function receipt(Payment $payment)
     {
-        abort_unless($payment->tenant_id === session('active_tenant_id'), 403);
+        abort_unless($payment->tenant_id === tenantId(), 403);
 
         $payment->load(['invoice.customer', 'invoice.package', 'customer']);
 
@@ -97,7 +116,7 @@ class PaymentController extends Controller
 
     public function verify(Payment $payment)
     {
-        abort_unless($payment->tenant_id === session('active_tenant_id'), 403);
+        abort_unless($payment->tenant_id === tenantId(), 403);
 
         $payment->update([
             'status' => 'success',
@@ -113,7 +132,7 @@ class PaymentController extends Controller
 
     public function reject(Request $request, Payment $payment)
     {
-        abort_unless($payment->tenant_id === session('active_tenant_id'), 403);
+        abort_unless($payment->tenant_id === tenantId(), 403);
 
         $request->validate([
             'reason' => 'required|string|max:65535',

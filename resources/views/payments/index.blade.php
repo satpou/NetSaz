@@ -1,17 +1,20 @@
+@php
+    $ts = request()->route('tenant_slug') ?? (Auth::user()?->tenant?->slug);
+@endphp
 @extends('layouts.app')
 
 @section('title', 'Pembayaran')
 
 @section('content')
 <x-page-header title="Pembayaran" subtitle="{{ $payments->total() }} transaksi">
-    <a href="{{ route('payments.create') }}" class="btn btn-primary">
+    <a href="{{ route('payments.create', $ts ? ['tenant_slug' => $ts] : []) }}" class="btn btn-primary">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
         Catat Pembayaran
     </a>
 </x-page-header>
 
 <div class="panel" style="padding:24px;margin-bottom:24px">
-    <form method="GET" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
+    <form method="GET" action="{{ request()->url() }}" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px">
         <div style="flex:1;min-width:200px">
             <label class="form-label">Cari Pembayaran</label>
             <input type="text" name="search" placeholder="No. invoice atau pelanggan..." value="{{ request('search') }}" class="form-input" autocomplete="off">
@@ -28,7 +31,7 @@
         <div style="display:flex;gap:10px">
             <button type="submit" class="btn btn-outline">Filter</button>
             @if(request()->has('search') || request()->has('status'))
-                <a href="{{ route('payments.index') }}" class="btn btn-outline">Reset</a>
+                <a href="{{ request()->url() }}" class="btn btn-outline">Reset</a>
             @endif
         </div>
     </form>

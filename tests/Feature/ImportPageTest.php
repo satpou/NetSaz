@@ -53,7 +53,7 @@ class ImportPageTest extends TestCase
             ->get(route('import.index', ['tenant_slug' => $tenant->slug]));
 
         $response->assertOk();
-        $response->assertSee('Import Cepat (Deteksi Otomatis)');
-        $response->assertSee('Import Manual (CSV)');
+        $response->assertSee('Sinkron data dari Beatcom');
+        $response->assertSee('Import pelanggan baru');
     }
 }

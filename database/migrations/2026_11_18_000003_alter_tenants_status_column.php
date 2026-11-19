@@ -12,7 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE tenants MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'pending_payment'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE tenants MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'pending_payment'");
+        } else {
+            Schema::table('tenants', function (Blueprint $table) {
+                $table->string('status', 50)->default('pending_payment')->change();
+            });
+        }
     }
 
     /**
@@ -20,6 +26,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE tenants MODIFY COLUMN status ENUM('trial','active','suspended') NOT NULL DEFAULT 'trial'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE tenants MODIFY COLUMN status ENUM('trial','active','suspended') NOT NULL DEFAULT 'trial'");
+        } else {
+            Schema::table('tenants', function (Blueprint $table) {
+                $table->string('status', 50)->default('trial')->change();
+            });
+        }
     }
 };

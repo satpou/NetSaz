@@ -7,9 +7,20 @@ use Illuminate\Http\Request;
 
 class PackageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $packages = Package::all();
+        $query = Package::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('speed', 'like', "%{$search}%");
+            });
+        }
+
+        $packages = $query->get();
         return view('packages.index', compact('packages'));
     }
 
@@ -31,23 +42,27 @@ class PackageController extends Controller
         $validated['is_taxable'] = $request->boolean('is_taxable');
         Package::create($validated);
 
-        return redirect()->route('packages.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('packages.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Paket berhasil ditambahkan.');
     }
 
     public function show(Package $package)
     {
+        abort_unless($package->tenant_id === tenantId(), 403);
         $package->load('customers');
         return view('packages.show', compact('package'));
     }
 
     public function edit(Package $package)
     {
+        abort_unless($package->tenant_id === tenantId(), 403);
         return view('packages.edit', compact('package'));
     }
 
     public function update(Request $request, Package $package)
     {
+        abort_unless($package->tenant_id === tenantId(), 403);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -59,20 +74,23 @@ class PackageController extends Controller
         $validated['is_taxable'] = $request->boolean('is_taxable');
         $package->update($validated);
 
-        return redirect()->route('packages.index')
+        $ts = request()->route('tenant_slug');
+        return redirect()->route('packages.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Paket berhasil diperbarui.');
     }
 
     public function destroy(Package $package)
     {
+        abort_unless($package->tenant_id === tenantId(), 403);
+        $ts = request()->route('tenant_slug');
         if ($package->customers()->count() > 0 || $package->invoices()->count() > 0) {
-            return redirect()->route('packages.index')
+            return redirect()->route('packages.index', $ts ? ['tenant_slug' => $ts] : [])
                 ->with('error', 'Tidak dapat menghapus paket yang sudah digunakan pelanggan atau memiliki riwayat invoice.');
         }
 
         $package->delete();
 
-        return redirect()->route('packages.index')
+        return redirect()->route('packages.index', $ts ? ['tenant_slug' => $ts] : [])
             ->with('success', 'Paket berhasil dihapus.');
     }
 }
