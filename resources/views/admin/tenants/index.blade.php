@@ -43,6 +43,34 @@
     </a>
 </div>
 
+@if($status === 'trashed')
+<div style="background:rgba(239, 68, 68, 0.08);border:1px solid rgba(239, 68, 68, 0.25);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(239,68,68,0.18);display:flex;align-items:center;justify-content:center;color:#ef4444;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </div>
+        <div>
+            <div style="font-weight:700;font-size:14px;color:var(--ink)">Masa Simpan Kotak Sampah: Maksimal 30 Hari</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px">Tenant di kotak sampah hanya bertahan selama 30 hari. Sistem akan otomatis menghapus permanen seluruh data setelah melewati 30 hari.</div>
+        </div>
+    </div>
+    @if($counts['trashed'] > 0)
+    <form method="POST" action="{{ route('admin.tenants.empty-trash') }}"
+          data-confirm="Apakah Anda yakin ingin MENGOSONGKAN SELURUH kotak sampah? Sebanyak {{ $counts['trashed'] }} tenant akan dihapus permanen selamanya!"
+          data-confirm-title="Kosongkan Kotak Sampah"
+          data-confirm-type="danger"
+          data-confirm-text="Ya, Kosongkan Semua">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline" style="color:var(--red);border-color:var(--red-tint);padding:8px 16px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Kosongkan Kotak Sampah
+        </button>
+    </form>
+    @endif
+</div>
+@endif
+
 <!-- Filter Panel -->
 <div class="panel" style="padding:20px;margin-bottom:24px">
     <form method="GET" action="{{ route('admin.tenants.index') }}" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px">
@@ -65,12 +93,17 @@
         <table class="data-table" style="width:100%;border-collapse:collapse;text-align:left;font-size:13.5px">
             <thead>
                 <tr style="border-bottom:1px solid var(--line);background:var(--bg-alt);color:var(--ink-soft);font-size:12px;text-transform:uppercase;letter-spacing:.04em">
-                    <th style="padding:16px 20px 14px 24px">Nama ISP & Subdomain</th>
+                    <th style="padding:16px 20px 14px 24px">Nama ISP &amp; Subdomain</th>
                     <th style="padding:16px 16px 14px">Kontak</th>
                     <th style="padding:16px 16px 14px;text-align:center">Pelanggan</th>
                     <th style="padding:16px 16px 14px;text-align:center">Staff</th>
-                    <th style="padding:16px 16px 14px">Paket Aktif</th>
-                    <th style="padding:16px 16px 14px">Status</th>
+                    @if($status === 'trashed')
+                        <th style="padding:16px 16px 14px">Dihapus Pada</th>
+                        <th style="padding:16px 16px 14px">Masa Simpan</th>
+                    @else
+                        <th style="padding:16px 16px 14px">Paket Aktif</th>
+                        <th style="padding:16px 16px 14px">Status</th>
+                    @endif
                     <th style="padding:16px 24px 14px;text-align:right">Aksi</th>
                 </tr>
             </thead>
@@ -95,25 +128,45 @@
                         <td style="padding:16px 16px;text-align:center">
                             <span class="mono" style="font-weight:600;font-size:14px">{{ $tenant->users_count }}</span>
                         </td>
-                        <td style="padding:16px 16px">
-                            @if($tenant->activeSubscription && $tenant->activeSubscription->plan)
-                                <span style="font-weight:600;color:var(--primary)">{{ $tenant->activeSubscription->plan->name }}</span>
-                                <div style="font-size:11.5px;color:var(--ink-faint)">Rp{{ number_format($tenant->activeSubscription->plan->price, 0, ',', '.') }}/bln</div>
-                            @else
-                                <span style="color:var(--ink-faint);font-style:italic">Tidak ada paket</span>
-                            @endif
-                        </td>
-                        <td style="padding:16px 16px">
-                            @if($tenant->trashed())
-                                <span class="status-pill danger" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#ef4444"></span>Terhapus</span>
-                            @elseif($tenant->status === 'active')
-                                <span class="status-pill ok" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:var(--primary)"></span>Aktif</span>
-                            @elseif($tenant->status === 'trial')
-                                <span class="status-pill warn" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#f59e0b"></span>Trial</span>
-                            @else
-                                <span class="status-pill danger" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#ef4444"></span>Suspend</span>
-                            @endif
-                        </td>
+                        @if($status === 'trashed')
+                            <td style="padding:16px 16px">
+                                <div style="color:var(--ink);font-weight:600">{{ $tenant->deleted_at ? $tenant->deleted_at->format('d M Y H:i') : '-' }}</div>
+                                <div style="font-size:11.5px;color:var(--ink-faint)">{{ $tenant->deleted_at ? $tenant->deleted_at->diffForHumans() : '' }}</div>
+                            </td>
+                            <td style="padding:16px 16px">
+                                @php
+                                    $daysInTrash = $tenant->deleted_at ? (int) $tenant->deleted_at->diffInDays(now()) : 0;
+                                    $daysLeft = max(0, 30 - $daysInTrash);
+                                @endphp
+                                @if($daysLeft <= 3)
+                                    <span class="status-pill danger" style="padding:4px 10px;font-size:11px">
+                                        <span class="dot" style="background:#ef4444"></span>Tersisa {{ $daysLeft }} hari lagi
+                                    </span>
+                                @else
+                                    <span class="status-pill warn" style="padding:4px 10px;font-size:11px">
+                                        <span class="dot" style="background:#f59e0b"></span>Tersisa {{ $daysLeft }} hari lagi
+                                    </span>
+                                @endif
+                            </td>
+                        @else
+                            <td style="padding:16px 16px">
+                                @if($tenant->activeSubscription && $tenant->activeSubscription->plan)
+                                    <span style="font-weight:600;color:var(--primary)">{{ $tenant->activeSubscription->plan->name }}</span>
+                                    <div style="font-size:11.5px;color:var(--ink-faint)">Rp{{ number_format($tenant->activeSubscription->plan->price, 0, ',', '.') }}/bln</div>
+                                @else
+                                    <span style="color:var(--ink-faint);font-style:italic">Tidak ada paket</span>
+                                @endif
+                            </td>
+                            <td style="padding:16px 16px">
+                                @if($tenant->status === 'active')
+                                    <span class="status-pill ok" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:var(--primary)"></span>Aktif</span>
+                                @elseif($tenant->status === 'trial')
+                                    <span class="status-pill warn" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#f59e0b"></span>Trial</span>
+                                @else
+                                    <span class="status-pill danger" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#ef4444"></span>Suspend</span>
+                                @endif
+                            </td>
+                        @endif
                         <td style="padding:16px 24px 16px 16px;text-align:right">
                             <div style="display:inline-flex;align-items:center;gap:6px">
                                 @if($tenant->trashed())

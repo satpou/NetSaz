@@ -133,10 +133,95 @@ class TenantController extends Controller
         $tenant = Tenant::withTrashed()->findOrFail($id);
         $name = $tenant->name;
 
-        \App\Models\User::where('tenant_id', $tenant->id)->delete();
-        $tenant->forceDelete();
+        self::purgeTenantData($tenant);
 
         return redirect()->route('admin.tenants.index', ['status' => 'trashed'])
             ->with('success', "Tenant ISP '{$name}' telah dihapus permanen beserta seluruh datanya.");
+    }
+
+    public function emptyTrash()
+    {
+        $trashed = Tenant::onlyTrashed()->get();
+        $count = $trashed->count();
+
+        foreach ($trashed as $t) {
+            self::purgeTenantData($t);
+        }
+
+        return redirect()->route('admin.tenants.index', ['status' => 'trashed'])
+            ->with('success', "Kotak sampah berhasil dikosongkan. {$count} tenant telah dihapus permanen.");
+    }
+
+    /**
+     * Safely and permanently deletes all tenant data in reverse-dependency order.
+     */
+    public static function purgeTenantData(Tenant $tenant): void
+    {
+        $tenantId = $tenant->id;
+        $driver = \Illuminate\Support\Facades\DB::getDriverName();
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($tenant, $tenantId, $driver) {
+            if ($driver === 'mysql') {
+                \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            } elseif ($driver === 'sqlite') {
+                \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = OFF;');
+            }
+
+            try {
+                // Payments & gateway logs
+                \Illuminate\Support\Facades\DB::table('payments')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('payment_gateway_logs')->where('tenant_id', $tenantId)->delete();
+
+                // Invoice items & reminders & invoices
+                \Illuminate\Support\Facades\DB::table('invoice_items')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('invoice_reminders')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('invoices')->where('tenant_id', $tenantId)->delete();
+
+                // Customer OTPs, accounts, customers
+                \Illuminate\Support\Facades\DB::table('customer_otps')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('mikrotik_accounts')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('customers')->where('tenant_id', $tenantId)->delete();
+
+                // Packages & Areas
+                \Illuminate\Support\Facades\DB::table('packages')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('areas')->where('tenant_id', $tenantId)->delete();
+
+                // Tickets & Partners
+                \Illuminate\Support\Facades\DB::table('tickets')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('partners')->where('tenant_id', $tenantId)->delete();
+
+                // Router agent & commands
+                \Illuminate\Support\Facades\DB::table('router_agent_commands')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('router_agents')->where('tenant_id', $tenantId)->delete();
+
+                // OLT & GenieACS
+                \Illuminate\Support\Facades\DB::table('olt_onus')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('olt_devices')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('genieacs_configs')->where('tenant_id', $tenantId)->delete();
+
+                // RADIUS
+                $hubIds = \Illuminate\Support\Facades\DB::table('radius_hubs')->where('tenant_id', $tenantId)->pluck('id');
+                if ($hubIds->isNotEmpty()) {
+                    \Illuminate\Support\Facades\DB::table('radius_hub_members')->whereIn('radius_hub_id', $hubIds)->delete();
+                }
+                \Illuminate\Support\Facades\DB::table('radius_hubs')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('nas_servers')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('nas')->where('tenant_id', $tenantId)->delete();
+
+                // Subscriptions, audits, users
+                \Illuminate\Support\Facades\DB::table('tenant_subscriptions')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('audit_logs')->where('tenant_id', $tenantId)->delete();
+                \Illuminate\Support\Facades\DB::table('users')->where('tenant_id', $tenantId)->delete();
+
+                // Delete tenant record
+                $tenant->forceDelete();
+            } finally {
+                if ($driver === 'mysql') {
+                    \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                } elseif ($driver === 'sqlite') {
+                    \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = ON;');
+                }
+            }
+        });
     }
 }

@@ -49,3 +49,24 @@ Schedule::command('invoices:send-reminders')
     ->withoutOverlapping()
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/invoice-reminders.log'));
+
+// Auto-prune trashed tenants older than 30 days
+Artisan::command('tenants:prune-trashed', function () {
+    $cutoff = now()->subDays(30);
+    $trashedTenants = \App\Models\Tenant::onlyTrashed()
+        ->where('deleted_at', '<=', $cutoff)
+        ->get();
+
+    $count = $trashedTenants->count();
+    foreach ($trashedTenants as $tenant) {
+        \App\Http\Controllers\Admin\TenantController::purgeTenantData($tenant);
+    }
+
+    $this->info("Berhasil membersihkan {$count} tenant dari kotak sampah (kedaluwarsa > 30 hari).");
+})->purpose('Hapus permanen tenant di kotak sampah yang telah melewati masa simpan 30 hari');
+
+Schedule::command('tenants:prune-trashed')
+    ->dailyAt('03:30')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/tenant-prune.log'));

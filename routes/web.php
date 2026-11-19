@@ -159,6 +159,7 @@ if ($isSubdomainCapable) {
 // Admin routes (Platform Super Admin only)
 Route::middleware(['auth', 'platform.superadmin'])->prefix('admin')->name('admin.')->group(function () {
     // Tenants
+    Route::delete('tenants/empty-trash', [\App\Http\Controllers\Admin\TenantController::class, 'emptyTrash'])->name('tenants.empty-trash');
     Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
     Route::post('tenants/{tenant}/toggle-status', [\App\Http\Controllers\Admin\TenantController::class, 'toggleStatus'])->name('tenants.toggle-status');
     Route::post('tenants/{id}/restore', [\App\Http\Controllers\Admin\TenantController::class, 'restore'])->name('tenants.restore');
