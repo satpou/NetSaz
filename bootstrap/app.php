@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/webhook/xendit',
             'webhook/duitku',
             'api/webhook/duitku',
+            'webhook/duitku-subscription',
+            'api/webhook/duitku-subscription',
             'duitku-callback',
         ]);
 

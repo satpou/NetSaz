@@ -205,6 +205,73 @@ class WebhookController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    public function subscriptionDuitku(Request $request)
+    {
+        $payload = $request->all();
+        $merchantOrderId = $payload['merchantOrderId'] ?? null;
+        $signature = $payload['signature'] ?? null;
+        $resultCode = $payload['resultCode'] ?? null;
+
+        Log::info('Platform Subscription Duitku webhook received', $payload);
+
+        if (!$merchantOrderId) {
+            return response('Bad Request: Missing merchantOrderId', 400);
+        }
+
+        $duitkuService = new \App\Services\DuitkuService();
+        $isValid = $duitkuService->verifyWebhook($payload, $signature);
+
+        if (!$isValid) {
+            Log::warning('Invalid Duitku signature for platform subscription', [
+                'merchantOrderId' => $merchantOrderId,
+                'payload' => $payload,
+            ]);
+            return response('Bad Signature', 400);
+        }
+
+        if (preg_match('/^SUB-(\d+)-/', $merchantOrderId, $matches)) {
+            $tenantId = (int) $matches[1];
+            $tenant = \App\Models\Tenant::find($tenantId);
+
+            if ($tenant && $resultCode === '00') {
+                \Illuminate\Support\Facades\DB::transaction(function () use ($tenant, $payload) {
+                    $settings = $tenant->settings ?? [];
+                    $settings['payment_method'] = 'duitku';
+                    $settings['payment_status'] = 'paid';
+                    $settings['paid_at'] = now()->toDateTimeString();
+                    $settings['duitku_reference'] = $payload['reference'] ?? null;
+                    $settings['duitku_payment_code'] = $payload['paymentCode'] ?? null;
+
+                    $tenant->update([
+                        'status' => 'active',
+                        'settings' => $settings,
+                    ]);
+
+                    \App\Models\User::where('tenant_id', $tenant->id)->update([
+                        'is_active' => true,
+                    ]);
+
+                    $sub = \App\Models\TenantSubscription::where('tenant_id', $tenant->id)->latest()->first();
+                    $now = \Carbon\Carbon::now();
+                    $end = (clone $now)->addYear();
+
+                    if ($sub) {
+                        $sub->update([
+                            'status' => 'active',
+                            'started_at' => $now,
+                            'current_period_start' => $now,
+                            'current_period_end' => $end,
+                        ]);
+                    }
+                });
+
+                Log::info("Tenant {$tenant->id} ({$tenant->slug}) activated via Duitku subscription payment.");
+            }
+        }
+
+        return response('SUCCESS', 200);
+    }
+
     public function duitku(Request $request)
     {
         $payload = $request->all();
@@ -257,16 +324,38 @@ class WebhookController extends Controller
 
     public function duitkuCallback(Request $request)
     {
+        $merchantOrderId = $request->input('merchantOrderId');
+
         // If Duitku sends the POST webhook to this callback URL
         if ($request->isMethod('post')) {
+            if ($merchantOrderId && str_starts_with($merchantOrderId, 'SUB-')) {
+                return $this->subscriptionDuitku($request);
+            }
             return $this->duitku($request);
         }
 
-        $merchantOrderId = $request->input('merchantOrderId');
         $resultCode = $request->input('resultCode');
 
         if (!$merchantOrderId) {
             return redirect('/')->with('error', 'Order ID tidak ditemukan.');
+        }
+
+        // Platform subscription payment return
+        if (preg_match('/^SUB-(\d+)-/', $merchantOrderId, $matches)) {
+            $tenantId = (int) $matches[1];
+            $tenant = \App\Models\Tenant::find($tenantId);
+            if ($tenant) {
+                $tenantDomain = config('app.tenant_domain', config('app.main_domain'));
+                $scheme = parse_url(config('app.url'), PHP_URL_SCHEME) ?: 'https';
+
+                if ($resultCode === '00' || $tenant->status === 'active') {
+                    return redirect("{$scheme}://{$tenant->slug}.{$tenantDomain}/login")
+                        ->with('success', 'Pembayaran langganan tahunan berhasil! Akun ISP Anda sudah aktif.');
+                }
+
+                return redirect()->route('register.payment', ['slug' => $tenant->slug])
+                    ->with('info', 'Status pembayaran Duitku: ' . ($resultCode === '00' ? 'Berhasil' : 'Menunggu / Belum Selesai'));
+            }
         }
 
         $payment = Payment::withoutGlobalScopes()

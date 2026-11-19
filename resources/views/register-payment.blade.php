@@ -277,7 +277,7 @@
                     <button type="button" class="tab-btn" :class="{ 'active': tab === 'manual' }" @click="tab = 'manual'">
                         Transfer Bank Manual
                     </button>
-                    @if($isMidtransAvailable && $snapToken)
+                    @if(($isDuitkuAvailable && $duitkuPaymentUrl) || ($isMidtransAvailable && $snapToken))
                     <button type="button" class="tab-btn" :class="{ 'active': tab === 'online' }" @click="tab = 'online'">
                         Bayar Online (QRIS / VA)
                     </button>
@@ -301,7 +301,7 @@
                                 <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:#60A5FA;letter-spacing:1px">{{ $acc['account_number'] }}</div>
                                 <div style="font-size:12.5px;color:#9CA3AF">a/n {{ $acc['account_name'] }}</div>
                             </div>
-                            <button type="button" onclick="navigator.clipboard.writeText('{{ $acc['account_number'] }}'); window.NetSazToast.success('Nomor rekening {{ $acc['bank_name'] }} berhasil disalin!');" style="background:rgba(255,255,255,0.08);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">
+                            <button type="button" onclick="navigator.clipboard.writeText('{{ $acc['account_number'] }}'); window.NetSazToast.success('Nomor rekening {{ $acc['bank'] }} berhasil disalin!');" style="background:rgba(255,255,255,0.08);border:none;color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer">
                                 Salin
                             </button>
                         </div>
@@ -344,17 +344,33 @@
                     </div>
                 </div>
 
-                {{-- TAB 2: MIDTRANS ONLINE --}}
-                @if($isMidtransAvailable && $snapToken)
+                {{-- TAB 2: ONLINE GATEWAY (DUITKU / MIDTRANS) --}}
+                @if(($isDuitkuAvailable && $duitkuPaymentUrl) || ($isMidtransAvailable && $snapToken))
                 <div x-show="tab === 'online'">
                     <p style="font-size:13px;color:#9CA3AF;line-height:1.6;margin-bottom:16px">
-                        Bayar otomatis melalui gateway Midtrans. Mendukung QRIS (GoPay, OVO, Dana, ShopeePay), BCA Virtual Account, Mandiri, BRI, dan BNI. Akun langsung aktif otomatis setelah berhasil!
+                        Bayar otomatis melalui gateway pembayaran resmi NetSaz. Mendukung QRIS (GoPay, OVO, Dana, ShopeePay), Virtual Account BCA, Mandiri, BRI, BNI, dan lainnya. Akun langsung aktif otomatis seketika setelah pembayaran berhasil!
                     </p>
 
-                    <button type="button" id="pay-button" style="width:100%;padding:14px;background:#10B981;border:none;border-radius:8px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        Bayar Sekarang Rp {{ number_format($amount, 0, ',', '.') }}
-                    </button>
+                    @if($isDuitkuAvailable && $duitkuPaymentUrl)
+                    <div style="margin-bottom:14px">
+                        <a href="{{ $duitkuPaymentUrl }}" style="width:100%;padding:14px;background:#10B981;border:none;border-radius:8px;color:#fff;font-weight:700;font-size:15px;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(16,185,129,0.25)">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            Bayar via Duitku (Rp {{ number_format($amount, 0, ',', '.') }})
+                        </a>
+                        <span style="display:block;font-size:11.5px;color:#9CA3AF;text-align:center;margin-top:6px">
+                            Anda akan dialihkan ke halaman pembayaran aman Duitku
+                        </span>
+                    </div>
+                    @endif
+
+                    @if($isMidtransAvailable && $snapToken)
+                    <div style="margin-top:{{ ($isDuitkuAvailable && $duitkuPaymentUrl) ? '12px' : '0' }}">
+                        <button type="button" id="pay-button" style="width:100%;padding:14px;background:#2563EB;border:none;border-radius:8px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(37,99,235,0.25)">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            Bayar via Midtrans (Rp {{ number_format($amount, 0, ',', '.') }})
+                        </button>
+                    </div>
+                    @endif
                 </div>
                 @endif
             </div>

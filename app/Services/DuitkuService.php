@@ -21,9 +21,10 @@ class DuitkuService
             $this->apiKey = $tenantSettings['duitku_api_key'] ?? '';
             $this->isProduction = !empty($tenantSettings['duitku_is_production']);
         } else {
-            $this->merchantCode = (string) config('services.duitku.merchant_code', '');
-            $this->apiKey = (string) config('services.duitku.api_key', '');
-            $this->isProduction = (bool) config('services.duitku.is_production', false);
+            $this->merchantCode = (string) (\App\Models\PlatformSetting::get('duitku_merchant_code') ?: config('services.duitku.merchant_code', ''));
+            $this->apiKey = (string) (\App\Models\PlatformSetting::get('duitku_api_key') ?: config('services.duitku.api_key', ''));
+            $isProd = \App\Models\PlatformSetting::get('duitku_is_production');
+            $this->isProduction = $isProd !== null ? (bool) $isProd : (bool) config('services.duitku.is_production', false);
         }
 
         $this->baseUrl = $this->isProduction
@@ -34,6 +35,73 @@ class DuitkuService
     public function isConfigured(): bool
     {
         return !empty($this->merchantCode) && !empty($this->apiKey);
+    }
+
+    public function createSubscriptionTransaction(\App\Models\Tenant $tenant, \App\Models\SubscriptionPlan $plan, float $amount): array
+    {
+        if (!$this->isConfigured()) {
+            throw new \Exception('Payment gateway Duitku platform belum dikonfigurasi.');
+        }
+
+        $orderId = 'SUB-' . $tenant->id . '-' . date('YmdHis');
+        $intAmount = (int) round($amount);
+
+        // Duitku signature formula: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
+        $signature = md5($this->merchantCode . $orderId . $intAmount . $this->apiKey);
+
+        $customerEmail = !empty($tenant->email) ? $tenant->email : 'admin@netsaz.web.id';
+        $customerPhone = $tenant->whatsapp_number ?: ($tenant->phone ?: '081234567890');
+        $customerName = substr($tenant->name, 0, 30);
+
+        $payload = [
+            'merchantCode' => $this->merchantCode,
+            'paymentAmount' => $intAmount,
+            'merchantOrderId' => $orderId,
+            'productDetails' => 'Langganan NetSaz ' . $plan->name . ' (1 Tahun)',
+            'email' => $customerEmail,
+            'phoneNumber' => $customerPhone,
+            'additionalParam' => (string) $tenant->id,
+            'customerVaName' => $customerName,
+            'callbackUrl' => url('/webhook/duitku-subscription'),
+            'returnUrl' => url('/duitku-callback'),
+            'signature' => $signature,
+            'expiryPeriod' => 1440, // 24 hours
+        ];
+
+        try {
+            $response = Http::asJson()
+                ->timeout(15)
+                ->post($this->baseUrl, $payload);
+
+            if (!$response->successful()) {
+                Log::error('Duitku Subscription API Error', [
+                    'tenant_id' => $tenant->id,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                throw new \Exception('Gagal membuat transaksi di Duitku: ' . $response->body());
+            }
+
+            $data = $response->json();
+
+            if (isset($data['statusCode']) && $data['statusCode'] !== '00') {
+                $err = $data['statusMessage'] ?? 'Terjadi kesalahan pada gateway Duitku';
+                Log::error('Duitku rejected subscription transaction', ['response' => $data]);
+                throw new \Exception('Duitku Error: ' . $err);
+            }
+
+            $paymentUrl = $data['paymentUrl'] ?? null;
+            $reference = $data['reference'] ?? null;
+
+            return [
+                'redirect_url' => $paymentUrl,
+                'order_id' => $orderId,
+                'reference' => $reference,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Duitku Subscription Exception', ['message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 
     public function createTransaction(Invoice $invoice, ?float $amount = null): array

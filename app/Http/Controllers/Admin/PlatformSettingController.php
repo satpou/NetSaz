@@ -18,6 +18,11 @@ class PlatformSettingController extends Controller
             ],
         ]);
 
+        $platformPaymentGateway = PlatformSetting::get('platform_payment_gateway', 'duitku');
+        $duitkuMerchantCode = PlatformSetting::get('duitku_merchant_code', '');
+        $duitkuApiKey = PlatformSetting::get('duitku_api_key', '');
+        $duitkuIsProduction = (bool) PlatformSetting::get('duitku_is_production', false);
+
         $midtransServerKey = PlatformSetting::get('midtrans_server_key', '');
         $midtransClientKey = PlatformSetting::get('midtrans_client_key', '');
         $midtransIsProduction = (bool) PlatformSetting::get('midtrans_is_production', false);
@@ -27,6 +32,10 @@ class PlatformSettingController extends Controller
 
         return view('admin.settings.index', compact(
             'bankAccounts',
+            'platformPaymentGateway',
+            'duitkuMerchantCode',
+            'duitkuApiKey',
+            'duitkuIsProduction',
             'midtransServerKey',
             'midtransClientKey',
             'midtransIsProduction',
@@ -41,6 +50,10 @@ class PlatformSettingController extends Controller
         $validated = $request->validate([
             'sales_whatsapp' => 'nullable|string|max:30',
             'sales_name' => 'nullable|string|max:100',
+            'platform_payment_gateway' => 'nullable|string|in:duitku,midtrans',
+            'duitku_merchant_code' => 'nullable|string|max:100',
+            'duitku_api_key' => 'nullable|string|max:255',
+            'duitku_is_production' => 'nullable|boolean',
             'midtrans_server_key' => 'nullable|string|max:255',
             'midtrans_client_key' => 'nullable|string|max:255',
             'midtrans_is_production' => 'nullable|boolean',
@@ -68,6 +81,12 @@ class PlatformSettingController extends Controller
         PlatformSetting::set('platform_bank_accounts', $banks);
         PlatformSetting::set('sales_whatsapp', $validated['sales_whatsapp'] ?? '083162238930');
         PlatformSetting::set('sales_name', $validated['sales_name'] ?? 'Ahmad Zidnan');
+        PlatformSetting::set('platform_payment_gateway', $validated['platform_payment_gateway'] ?? 'duitku');
+        PlatformSetting::set('duitku_merchant_code', trim($validated['duitku_merchant_code'] ?? ''));
+        if (isset($validated['duitku_api_key'])) {
+            PlatformSetting::set('duitku_api_key', trim($validated['duitku_api_key']));
+        }
+        PlatformSetting::set('duitku_is_production', (bool) ($request->has('duitku_is_production')));
         PlatformSetting::set('midtrans_server_key', trim($validated['midtrans_server_key'] ?? ''));
         PlatformSetting::set('midtrans_client_key', trim($validated['midtrans_client_key'] ?? ''));
         PlatformSetting::set('midtrans_is_production', (bool) ($request->has('midtrans_is_production')));

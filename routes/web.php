@@ -48,6 +48,7 @@ Route::group([], function () {
     Route::get('/register/payment/{slug}', [\App\Http\Controllers\RegistrationPaymentController::class, 'show'])->name('register.payment');
     Route::post('/register/payment/{slug}/manual', [\App\Http\Controllers\RegistrationPaymentController::class, 'submitManual'])->name('register.payment.manual');
     Route::post('/webhook/midtrans-subscription', [\App\Http\Controllers\WebhookController::class, 'subscriptionMidtrans'])->name('webhook.midtrans.subscription');
+    Route::post('/webhook/duitku-subscription', [\App\Http\Controllers\WebhookController::class, 'subscriptionDuitku'])->name('webhook.duitku.subscription');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

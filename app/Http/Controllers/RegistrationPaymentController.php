@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PlatformSetting;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Services\DuitkuService;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,7 @@ class RegistrationPaymentController extends Controller
         $salesWhatsapp = PlatformSetting::get('sales_whatsapp', '083162238930');
         $salesName = PlatformSetting::get('sales_name', 'Ahmad Zidnan');
         $paymentInstructions = PlatformSetting::get('payment_instructions', '');
+        $platformPaymentGateway = PlatformSetting::get('platform_payment_gateway', 'duitku');
 
         // Midtrans Snap Token if configured
         $snapToken = null;
@@ -62,6 +64,20 @@ class RegistrationPaymentController extends Controller
         $snapScriptUrl = $midtransService->getSnapUrl();
         $midtransClientKey = $midtransService->getClientKey();
 
+        // Duitku Payment URL if configured
+        $duitkuService = new DuitkuService();
+        $isDuitkuAvailable = $duitkuService->isConfigured();
+        $duitkuPaymentUrl = null;
+
+        if (! $isEnterprise && $isDuitkuAvailable && $plan && ($settings['payment_status'] ?? '') !== 'waiting_verification') {
+            try {
+                $duitkuResult = $duitkuService->createSubscriptionTransaction($tenant, $plan, $amount);
+                $duitkuPaymentUrl = $duitkuResult['redirect_url'] ?? null;
+            } catch (\Throwable $e) {
+                Log::warning("Gagal membuat transaksi Duitku registrasi tenant {$tenant->slug}: " . $e->getMessage());
+            }
+        }
+
         return view('register-payment', compact(
             'tenant',
             'plan',
@@ -71,10 +87,13 @@ class RegistrationPaymentController extends Controller
             'salesWhatsapp',
             'salesName',
             'paymentInstructions',
+            'platformPaymentGateway',
             'isMidtransAvailable',
             'snapToken',
             'snapScriptUrl',
             'midtransClientKey',
+            'isDuitkuAvailable',
+            'duitkuPaymentUrl',
             'settings'
         ));
     }

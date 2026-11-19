@@ -125,6 +125,7 @@ Route::post('/webhook/xendit', function (Request $request) {
 
 Route::post('/webhook/github-deploy', [WebhookController::class, 'githubDeploy'])->middleware('throttle:30,1');
 Route::post('/webhook/duitku', [\App\Http\Controllers\WebhookController::class, 'duitku'])->name('api.webhook.duitku');
+Route::post('/webhook/duitku-subscription', [\App\Http\Controllers\WebhookController::class, 'subscriptionDuitku']);
 
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::get('/customers/{customer}/invoices/unpaid', [BillingController::class, 'unpaidInvoices']);

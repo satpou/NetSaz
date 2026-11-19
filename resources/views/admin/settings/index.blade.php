@@ -2,6 +2,66 @@
 
 @section('title', 'Pengaturan Platform & Rekening Bank')
 
+@push('styles')
+<style>
+.pg-choice-card {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.pg-choice-card:hover {
+    border-color: rgba(255,255,255,0.25);
+    background: var(--bg-alt);
+}
+.pg-choice-card.pg-card-active {
+    border-color: var(--primary);
+    background: rgba(16, 185, 129, 0.06);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+.pg-badge-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-alt);
+    color: var(--ink-soft);
+    transition: all 0.2s;
+}
+.pg-badge-icon.active {
+    background: var(--primary);
+    color: #fff;
+}
+.pg-radio-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.pg-radio-circle.selected {
+    border-color: var(--primary);
+}
+.pg-radio-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.2s;
+}
+.pg-radio-circle.selected .pg-radio-dot {
+    background: var(--primary);
+}
+</style>
+@endpush
+
 @section('content')
 <div class="breadcrumb reveal">
     <a href="{{ route('dashboard.app') }}" style="color:inherit;text-decoration:none">Home</a> &gt;
@@ -28,6 +88,7 @@
 
     <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:24px" x-data="{
         banks: {{ json_encode($bankAccounts) }},
+        pg: '{{ old('platform_payment_gateway', $platformPaymentGateway) }}',
         addBank() {
             this.banks.push({ bank: '', account_number: '', account_name: '' });
         },
@@ -92,36 +153,139 @@
             </div>
         </div>
 
-        {{-- KOLOM KANAN: MIDTRANS GATEWAY & SALES CONTACT --}}
+        {{-- KOLOM KANAN: PAYMENT GATEWAYS (DUITKU & MIDTRANS) & SALES CONTACT --}}
         <div>
-            {{-- MIDTRANS GATEWAY PLATFORM --}}
+            {{-- PAYMENT GATEWAY PLATFORM --}}
             <div class="panel" style="padding:24px;margin-bottom:24px">
                 <div style="margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:12px">
-                    <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px">Payment Gateway Midtrans (Otomatis)</h3>
-                    <p style="font-size:12.5px;color:var(--ink-soft);margin:0">Jika diisi, calon tenant bisa langsung bayar otomatis via QRIS / Virtual Account dan akun aktif seketika.</p>
+                    <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px">Payment Gateway Otomatis (Platform NetSaz)</h3>
+                    <p style="font-size:12.5px;color:var(--ink-soft);margin:0">Pilih gateway yang digunakan calon ISP/tenant untuk membayar biaya langganan secara online.</p>
                 </div>
 
-                <div style="margin-bottom:14px">
-                    <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Midtrans Server Key</label>
-                    <input type="text" name="midtrans_server_key" value="{{ old('midtrans_server_key', $midtransServerKey) }}" placeholder="SB-Mid-server-..." class="form-input" style="width:100%;font-size:13px;padding:8px 12px;font-family:'JetBrains Mono',monospace">
+                {{-- Hidden input for platform_payment_gateway --}}
+                <input type="hidden" name="platform_payment_gateway" :value="pg">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+                    <!-- Duitku Option Card -->
+                    <div @click="pg = 'duitku'"
+                         :class="{ 'pg-card-active': pg === 'duitku' }"
+                         class="pg-choice-card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div class="pg-badge-icon" :class="{ 'active': pg === 'duitku' }">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-weight:700;font-size:14.5px;color:var(--ink)">Duitku</div>
+                                    <div style="font-size:11px;color:var(--ink-faint)">duitku.com</div>
+                                </div>
+                            </div>
+                            <div class="pg-radio-circle" :class="{ 'selected': pg === 'duitku' }">
+                                <div class="pg-radio-dot"></div>
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:var(--ink-soft);margin:0;line-height:1.4">
+                            QRIS realtime, Virtual Account multi-bank, E-Wallet & Gerai Retail.
+                        </p>
+                    </div>
+
+                    <!-- Midtrans Option Card -->
+                    <div @click="pg = 'midtrans'"
+                         :class="{ 'pg-card-active': pg === 'midtrans' }"
+                         class="pg-choice-card">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div class="pg-badge-icon" :class="{ 'active': pg === 'midtrans' }">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-weight:700;font-size:14.5px;color:var(--ink)">Midtrans</div>
+                                    <div style="font-size:11px;color:var(--ink-faint)">midtrans.com</div>
+                                </div>
+                            </div>
+                            <div class="pg-radio-circle" :class="{ 'selected': pg === 'midtrans' }">
+                                <div class="pg-radio-dot"></div>
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:var(--ink-soft);margin:0;line-height:1.4">
+                            Midtrans Snap popup, QRIS, Virtual Account, dan Kartu Kredit.
+                        </p>
+                    </div>
                 </div>
 
-                <div style="margin-bottom:14px">
-                    <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Midtrans Client Key</label>
-                    <input type="text" name="midtrans_client_key" value="{{ old('midtrans_client_key', $midtransClientKey) }}" placeholder="SB-Mid-client-..." class="form-input" style="width:100%;font-size:13px;padding:8px 12px;font-family:'JetBrains Mono',monospace">
+                <!-- Duitku Section -->
+                <div x-show="pg === 'duitku'" x-cloak>
+                    <div style="margin-bottom:14px">
+                        <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Duitku Merchant Code</label>
+                        <input type="text" name="duitku_merchant_code" value="{{ old('duitku_merchant_code', $duitkuMerchantCode) }}" placeholder="Contoh: D1234 atau DXXXX" class="form-input" style="width:100%;font-size:13px;padding:8px 12px;font-family:'JetBrains Mono',monospace">
+                    </div>
+
+                    <div style="margin-bottom:14px">
+                        <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Duitku API Key (Secret)</label>
+                        <input type="password" name="duitku_api_key" value="{{ old('duitku_api_key', $duitkuApiKey) }}" placeholder="Masukkan Duitku API Key platform..." class="form-input" style="width:100%;font-size:13px;padding:8px 12px">
+                    </div>
+
+                    <div style="margin-bottom:16px;background:var(--bg-alt);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
+                        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);cursor:pointer">
+                            <input type="checkbox" name="duitku_is_production" value="1" {{ $duitkuIsProduction ? 'checked' : '' }} style="width:16px;height:16px">
+                            <span>Gunakan Mode <b>Production</b> (Bukan Sandbox)</span>
+                        </label>
+                    </div>
+
+                    <div style="padding:14px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;font-size:12px">
+                        <div style="font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            <span>URL Konfigurasi di Dashboard Duitku (merchant.duitku.com &gt; My Project):</span>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>1. Callback URL (Webhook Notifikasi Langganan):</b></span>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <code style="background:var(--bg);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/webhook/duitku-subscription</code>
+                                <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/webhook/duitku-subscription'); window.NetSazToast.success('URL Webhook Langganan disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                            </div>
+                        </div>
+                        <div>
+                            <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>2. Return URL (Redirect Calon Tenant Setelah Bayar):</b></span>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <code style="background:var(--bg);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:#60A5FA;font-family:'JetBrains Mono',monospace">https://netsaz.web.id/duitku-callback</code>
+                                <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/duitku-callback'); window.NetSazToast.success('URL Return disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="margin-bottom:14px;background:var(--bg-alt);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
-                    <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);cursor:pointer">
-                        <input type="checkbox" name="midtrans_is_production" value="1" {{ $midtransIsProduction ? 'checked' : '' }} style="width:16px;height:16px">
-                        <span>Gunakan Mode <b>Production</b> (Bukan Sandbox)</span>
-                    </label>
-                </div>
+                <!-- Midtrans Section -->
+                <div x-show="pg === 'midtrans'" x-cloak>
+                    <div style="margin-bottom:14px">
+                        <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Midtrans Server Key</label>
+                        <input type="text" name="midtrans_server_key" value="{{ old('midtrans_server_key', $midtransServerKey) }}" placeholder="SB-Mid-server-..." class="form-input" style="width:100%;font-size:13px;padding:8px 12px;font-family:'JetBrains Mono',monospace">
+                    </div>
 
-                <div style="font-size:12px;color:var(--ink-faint);line-height:1.5">
-                    <b>URL Webhook Subscription:</b><br>
-                    <code style="background:var(--bg);padding:4px 8px;border-radius:4px;display:block;margin-top:4px;word-break:break-all">https://netsaz.web.id/webhook/midtrans-subscription</code>
-                    <span style="font-size:11px;color:var(--ink-faint);display:block;margin-top:2px">Daftarkan URL ini di Dashboard Midtrans &gt; Settings &gt; Configuration.</span>
+                    <div style="margin-bottom:14px">
+                        <label style="display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px">Midtrans Client Key</label>
+                        <input type="text" name="midtrans_client_key" value="{{ old('midtrans_client_key', $midtransClientKey) }}" placeholder="SB-Mid-client-..." class="form-input" style="width:100%;font-size:13px;padding:8px 12px;font-family:'JetBrains Mono',monospace">
+                    </div>
+
+                    <div style="margin-bottom:16px;background:var(--bg-alt);border:1px solid var(--line);border-radius:8px;padding:10px 14px">
+                        <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink);cursor:pointer">
+                            <input type="checkbox" name="midtrans_is_production" value="1" {{ $midtransIsProduction ? 'checked' : '' }} style="width:16px;height:16px">
+                            <span>Gunakan Mode <b>Production</b> (Bukan Sandbox)</span>
+                        </label>
+                    </div>
+
+                    <div style="padding:14px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;font-size:12px">
+                        <div style="font-weight:600;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            <span>URL Konfigurasi di Dashboard Midtrans (Settings &gt; Configuration):</span>
+                        </div>
+                        <div>
+                            <span style="color:var(--ink-soft);display:block;margin-bottom:3px"><b>Payment Notification URL (Webhook Langganan):</b></span>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <code style="background:var(--bg);padding:6px 10px;border-radius:6px;flex:1;word-break:break-all;color:var(--primary);font-family:'JetBrains Mono',monospace">https://netsaz.web.id/webhook/midtrans-subscription</code>
+                                <button type="button" onclick="navigator.clipboard.writeText('https://netsaz.web.id/webhook/midtrans-subscription'); window.NetSazToast.success('URL Webhook disalin!');" class="btn btn-outline" style="padding:4px 10px;font-size:11.5px">Salin</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
