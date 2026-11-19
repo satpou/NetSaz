@@ -102,7 +102,7 @@ class TenantVerificationController extends Controller
                 $loginUrl = "https://{$tenant->slug}.netsaz.web.id/login";
                 $isEnt = ($tenant->settings['selected_package'] ?? '') === 'enterprise';
                 $planDesc = $isEnt ? 'layanan Enterprise Kustom' : 'langganan tahunan NetSaz';
-                $message = "Halo *{$picName}*,\n\nAkun ISP *{$tenant->name}* untuk {$planDesc} telah BERHASIL diaktifkan oleh Tim NetSaz! 🎉\n\nAkun ISP Anda kini sudah AKTIF. Silakan login ke dashboard Anda melalui tautan berikut:\n👉 {$loginUrl}\n\nEmail Login: {$tenant->email}\n\nTerima kasih telah mempercayai NetSaz!";
+                $message = "Halo *{$picName}*,\n\nAkun ISP *{$tenant->name}* untuk {$planDesc} telah BERHASIL diaktifkan oleh Tim NetSaz.\n\nAkun ISP Anda kini sudah AKTIF. Silakan login ke dashboard Anda melalui tautan berikut:\n{$loginUrl}\n\nEmail Login: {$tenant->email}\n\nTerima kasih telah mempercayai NetSaz.";
                 $wa->sendMessage($tenant->whatsapp_number, $message);
             }
         } catch (\Throwable $e) {

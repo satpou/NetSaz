@@ -205,7 +205,10 @@
                 </div>
 
                 <div id="enterprise-notice" style="display: {{ $requestedPlan === 'enterprise' ? 'block' : 'none' }}; margin-bottom: 20px; padding: 12px 16px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; font-size: 12.5px; color: #E9D5FF; line-height: 1.5;">
-                    <span style="font-weight: 700; color: #C084FC;">ℹ️ Info Paket Enterprise:</span>
+                    <span style="font-weight: 700; color: #C084FC; display: inline-flex; align-items: center; gap: 6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Info Paket Enterprise:
+                    </span>
                     Paket Enterprise tidak menggunakan sistem pembayaran online flat. Setelah formulir dikirim, tim Enterprise Consultant NetSaz akan menghubungi PIC untuk menyusun proposal penawaran resmi dan mendiskusikan kebutuhan arsitektur infrastruktur ISP Anda.
                 </div>
 

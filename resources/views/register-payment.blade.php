@@ -89,7 +89,10 @@
             <img src="{{ asset('images/netsaz/NetSaz_logo_white.png') }}" alt="NetSaz" style="height:44px;margin:0 auto;display:inline-block">
         </a>
         <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;color:#9CA3AF">
-            <span style="color:#10B981;font-weight:600">✓ 1. Pendaftaran Data ISP</span>
+            <span style="color:#10B981;font-weight:600;display:inline-flex;align-items:center;gap:4px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                1. Pendaftaran Data ISP
+            </span>
             <span>→</span>
             <span style="color:#60A5FA;font-weight:700">2. Pembayaran & Aktivasi Akun</span>
         </div>
@@ -213,7 +216,9 @@
                 <div>
                     <div style="background:rgba(168, 85, 247, 0.08);border:1px solid rgba(168, 85, 247, 0.25);border-radius:12px;padding:20px;margin-bottom:20px">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                            <span style="width:38px;height:38px;border-radius:10px;background:rgba(168, 85, 247, 0.2);display:inline-flex;align-items:center;justify-content:center;color:#C084FC;font-size:19px">🏢</span>
+                            <span style="width:38px;height:38px;border-radius:10px;background:rgba(168, 85, 247, 0.2);display:inline-flex;align-items:center;justify-content:center;color:#C084FC">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </span>
                             <div>
                                 <h4 style="margin:0;font-size:15px;font-weight:700;color:#fff">Solusi Kustom NetSaz Enterprise</h4>
                                 <span style="font-size:12px;color:#C084FC">Disesuaikan dengan skala & topologi infrastruktur ISP Anda</span>
