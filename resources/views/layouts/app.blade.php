@@ -241,6 +241,39 @@
         </div>
 
         <div class="content">
+            @php
+                $activeTenant = Auth::user()?->tenant;
+                $activeSub = $activeTenant ? $activeTenant->currentSubscription : null;
+                $subDaysLeft = ($activeSub && $activeSub->current_period_end) 
+                    ? (int) now()->startOfDay()->diffInDays($activeSub->current_period_end->startOfDay(), false) 
+                    : null;
+            @endphp
+
+            @if($isTenantMode && $subDaysLeft !== null && $subDaysLeft <= 30)
+                <div style="background:{{ $subDaysLeft <= 7 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)' }};border:1px solid {{ $subDaysLeft <= 7 ? '#EF4444' : '#F59E0B' }};border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                    <div style="display:flex;align-items:center;gap:10px;color:{{ $subDaysLeft <= 7 ? '#F87171' : '#FBBF24' }};font-size:13.5px">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>
+                            @if($subDaysLeft < 0)
+                                <b>Masa langganan tahunan NetSaz telah berakhir.</b> Segera lakukan perpanjangan agar sistem tetap aktif.
+                            @elseif($subDaysLeft === 0)
+                                <b>Masa langganan tahunan NetSaz berakhir HARI INI.</b> Lakukan perpanjangan segera.
+                            @else
+                                Masa langganan tahunan ISP Anda tersisa <b>{{ $subDaysLeft }} hari lagi</b> (berakhir pada {{ $activeSub->current_period_end->format('d M Y') }}).
+                            @endif
+                        </span>
+                    </div>
+                    @php
+                        $salesWa = \App\Models\PlatformSetting::get('sales_whatsapp', '083162238930');
+                        $renewText = "Halo Sales NetSaz, saya ingin melakukan perpanjangan langganan tahunan untuk ISP " . ($activeTenant->name ?? 'kami') . " (" . ($activeTenant->slug ?? '') . ".netsaz.web.id).";
+                    @endphp
+                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $salesWa) }}?text={{ urlencode($renewText) }}" target="_blank" rel="noopener" class="btn" style="background:{{ $subDaysLeft <= 7 ? '#EF4444' : '#F59E0B' }};color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        Perpanjang Sekarang
+                    </a>
+                </div>
+            @endif
+
             @if(session('success'))
             <div style="background:var(--green-tint);border:1px solid var(--green);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--green)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4 10-10"/></svg>

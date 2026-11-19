@@ -133,7 +133,7 @@
                 @if($customer->latitude && $customer->longitude)
                 <div class="summary-row">
                     <span class="summary-label">Koordinat</span>
-                    <span class="summary-value">{{ $customer->latitude }}, {{ $customer->longitude }}</span>
+                    <span class="summary-value mono">{{ $customer->latitude }}, {{ $customer->longitude }}</span>
                 </div>
                 @endif
                 <div class="summary-row">
@@ -176,6 +176,104 @@
                 <div style="text-align:center;padding:24px 0;color:var(--ink-faint);font-size:13.5px">Belum ada invoice</div>
             @endif
         </div>
+    </div>
+
+    {{-- DOKUMEN & FOTO RUMAH PELANGGAN --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-top:20px">
+        <div class="panel" style="padding:24px">
+            <div class="panel-head" style="margin-bottom:14px">
+                <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Foto Rumah Pelanggan
+                </h3>
+            </div>
+            @if($customer->house_image)
+                <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line)">
+                    <img src="{{ asset('storage/' . $customer->house_image) }}" alt="Foto Rumah {{ $customer->name }}" style="width:100%;height:220px;object-fit:cover;display:block">
+                    <div style="padding:10px 14px;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:12px;color:var(--ink-soft)">Tampak Depan Rumah</span>
+                        <a href="{{ asset('storage/' . $customer->house_image) }}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:4px 10px;font-size:12px">
+                            Lihat Penuh ↗
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div style="padding:36px 16px;text-align:center;color:var(--ink-faint);background:var(--bg);border-radius:10px;border:1px dashed var(--line);font-size:13px">
+                    Foto rumah belum diunggah. <a href="{{ route('customers.edit', $customer->id) }}" style="color:var(--primary);font-weight:600">Unggah foto sekarang</a>
+                </div>
+            @endif
+        </div>
+
+        <div class="panel" style="padding:24px">
+            <div class="panel-head" style="margin-bottom:14px">
+                <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Scan / Foto KTP
+                </h3>
+            </div>
+            @if($customer->ktp_image)
+                <div style="position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line)">
+                    <img src="{{ asset('storage/' . $customer->ktp_image) }}" alt="KTP {{ $customer->name }}" style="width:100%;height:220px;object-fit:cover;display:block">
+                    <div style="padding:10px 14px;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:12px;color:var(--ink-soft)">No: {{ $customer->ktp_id ?: 'Tercatat' }}</span>
+                        <a href="{{ asset('storage/' . $customer->ktp_image) }}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:4px 10px;font-size:12px">
+                            Lihat Penuh ↗
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div style="padding:36px 16px;text-align:center;color:var(--ink-faint);background:var(--bg);border-radius:10px;border:1px dashed var(--line);font-size:13px">
+                    Scan KTP belum diunggah. <a href="{{ route('customers.edit', $customer->id) }}" style="color:var(--primary);font-weight:600">Unggah KTP</a>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- PETA LOKASI RUMAH PELANGGAN --}}
+    @if($customer->latitude && $customer->longitude)
+    <div class="panel" style="padding:24px;margin-top:20px">
+        <div class="panel-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+            <div>
+                <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Peta Lokasi Pemasangan Pelanggan
+                </h3>
+                <p style="font-size:13px;color:var(--ink-soft);margin:2px 0 0">Koordinat: <span class="mono">{{ $customer->latitude }}, {{ $customer->longitude }}</span></p>
+            </div>
+            <div style="display:flex;gap:8px">
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $customer->latitude }},{{ $customer->longitude }}" target="_blank" rel="noopener" class="btn btn-primary" style="padding:7px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                    Petunjuk Arah (Navigasi GPS)
+                </a>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ $customer->latitude }},{{ $customer->longitude }}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:7px 14px;font-size:12.5px">
+                    Buka Google Maps ↗
+                </a>
+            </div>
+        </div>
+        <div style="height:280px;border-radius:10px;overflow:hidden;border:1px solid var(--line)" id="customer-map"></div>
+    </div>
+
+    @push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    @endpush
+
+    @push('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var lat = {{ $customer->latitude }};
+            var lng = {{ $customer->longitude }};
+            var map = L.map('customer-map').setView([lat, lng], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('<b>{{ $customer->name }}</b><br>{{ $customer->address }}')
+                .openPopup();
+        });
+    </script>
+    @endpush
+    @endif
     </div>
 </div>
 @endsection

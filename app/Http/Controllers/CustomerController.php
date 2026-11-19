@@ -70,6 +70,7 @@ class CustomerController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'ktp_id' => 'nullable|string|max:50',
             'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'house_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'package_id' => [
                 'required',
                 Rule::exists('packages', 'id')->where(fn ($q) => $q->where('tenant_id', $tid)),
@@ -91,6 +92,10 @@ class CustomerController extends Controller
 
         if ($request->hasFile('ktp_image')) {
             $validated['ktp_image'] = $request->file('ktp_image')->store('ktp', 'public');
+        }
+
+        if ($request->hasFile('house_image')) {
+            $validated['house_image'] = $request->file('house_image')->store('customers/houses', 'public');
         }
 
         $customer = Customer::create($validated);
@@ -174,6 +179,7 @@ class CustomerController extends Controller
             'longitude' => 'nullable|numeric|between:-180,180',
             'ktp_id' => 'nullable|string|max:50',
             'ktp_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'house_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'package_id' => [
                 'required',
                 Rule::exists('packages', 'id')->where(fn ($q) => $q->where('tenant_id', $tid)),
@@ -188,6 +194,10 @@ class CustomerController extends Controller
 
         if ($request->hasFile('ktp_image')) {
             $validated['ktp_image'] = $request->file('ktp_image')->store('ktp', 'public');
+        }
+
+        if ($request->hasFile('house_image')) {
+            $validated['house_image'] = $request->file('house_image')->store('customers/houses', 'public');
         }
 
         $customer->update($validated);

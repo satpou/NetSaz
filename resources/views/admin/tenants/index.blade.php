@@ -24,21 +24,31 @@
     </div>
 @endif
 
+<!-- Filter Tabs -->
+<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <a href="{{ route('admin.tenants.index') }}" class="btn {{ empty($status) ? 'btn-primary' : 'btn-outline' }}" style="padding:7px 16px;font-size:13px;border-radius:20px">
+        Semua ({{ $counts['total'] }})
+    </a>
+    <a href="{{ route('admin.tenants.index', ['status' => 'active']) }}" class="btn {{ $status === 'active' ? 'btn-primary' : 'btn-outline' }}" style="padding:7px 16px;font-size:13px;border-radius:20px">
+        Aktif ({{ $counts['active'] }})
+    </a>
+    <a href="{{ route('admin.tenants.index', ['status' => 'trial']) }}" class="btn {{ $status === 'trial' ? 'btn-primary' : 'btn-outline' }}" style="padding:7px 16px;font-size:13px;border-radius:20px">
+        Trial ({{ $counts['trial'] }})
+    </a>
+    <a href="{{ route('admin.tenants.index', ['status' => 'suspended']) }}" class="btn {{ $status === 'suspended' ? 'btn-primary' : 'btn-outline' }}" style="padding:7px 16px;font-size:13px;border-radius:20px">
+        Suspend ({{ $counts['suspended'] }})
+    </a>
+    <a href="{{ route('admin.tenants.index', ['status' => 'trashed']) }}" class="btn {{ $status === 'trashed' ? 'btn-primary' : 'btn-outline' }}" style="padding:7px 16px;font-size:13px;border-radius:20px;color:{{ $status === 'trashed' ? '#fff' : 'var(--red)' }};border-color:var(--red-tint)">
+        Kotak Sampah ({{ $counts['trashed'] }})
+    </a>
+</div>
+
 <!-- Filter Panel -->
 <div class="panel" style="padding:20px;margin-bottom:24px">
     <form method="GET" action="{{ route('admin.tenants.index') }}" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px">
         <div style="flex:1;min-width:240px">
             <label class="form-label" style="font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;display:block">Cari Tenant</label>
             <input type="text" name="search" placeholder="Nama ISP, slug, email, atau no. WA..." value="{{ request('search') }}" class="form-input" autocomplete="off" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
-        </div>
-        <div style="flex-shrink:0;min-width:160px">
-            <label class="form-label" style="font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;display:block">Status</label>
-            <select name="status" class="form-input" style="width:100%;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px">
-                <option value="">Semua Status</option>
-                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
-                <option value="trial" {{ request('status') == 'trial' ? 'selected' : '' }}>Trial</option>
-                <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspend</option>
-            </select>
         </div>
         <div style="display:flex;gap:8px">
             <button type="submit" class="btn btn-outline" style="padding:9px 18px;border-radius:8px;font-size:13.5px">Filter</button>
@@ -94,7 +104,9 @@
                             @endif
                         </td>
                         <td style="padding:16px 16px">
-                            @if($tenant->status === 'active')
+                            @if($tenant->trashed())
+                                <span class="status-pill danger" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#ef4444"></span>Terhapus</span>
+                            @elseif($tenant->status === 'active')
                                 <span class="status-pill ok" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:var(--primary)"></span>Aktif</span>
                             @elseif($tenant->status === 'trial')
                                 <span class="status-pill warn" style="padding:4px 10px;font-size:11px"><span class="dot" style="background:#f59e0b"></span>Trial</span>
@@ -104,27 +116,51 @@
                         </td>
                         <td style="padding:16px 24px 16px 16px;text-align:right">
                             <div style="display:inline-flex;align-items:center;gap:6px">
-                                <a href="{{ route('admin.tenants.show', $tenant) }}" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px" title="Detail Tenant">
-                                    Detail
-                                </a>
-                                <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px" title="Edit Tenant">
-                                    Edit
-                                </a>
-                                <!-- Toggle Status Form -->
-                                <form method="POST" action="{{ route('admin.tenants.toggle-status', $tenant) }}" style="display:inline" onsubmit="return confirm('Ubah status tenant ini?')">
-                                    @csrf
-                                    @if($tenant->status === 'active')
-                                        <input type="hidden" name="status" value="suspended">
-                                        <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--red);border-color:var(--red-tint)" title="Suspend ISP">
-                                            Suspend
+                                @if($tenant->trashed())
+                                    <form method="POST" action="{{ route('admin.tenants.restore', $tenant->id) }}" style="display:inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:12px;color:var(--green);border-color:var(--green)">
+                                            Pulihkan
                                         </button>
-                                    @else
-                                        <input type="hidden" name="status" value="active">
-                                        <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--primary);border-color:var(--primary-tint)" title="Aktifkan ISP">
-                                            Aktifkan
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.tenants.force-delete', $tenant->id) }}" style="display:inline" onsubmit="return confirm('Hapus permanen tenant \'{{ $tenant->name }}\'? Seluruh data akan dihapus selamanya!')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline" style="padding:6px 12px;font-size:12px;color:var(--red);border-color:var(--red-tint)">
+                                            Hapus Permanen
                                         </button>
-                                    @endif
-                                </form>
+                                    </form>
+                                @else
+                                    <a href="{{ route('admin.tenants.show', $tenant) }}" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px" title="Detail Tenant">
+                                        Detail
+                                    </a>
+                                    <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px" title="Edit Tenant">
+                                        Edit
+                                    </a>
+                                    <!-- Toggle Status Form -->
+                                    <form method="POST" action="{{ route('admin.tenants.toggle-status', $tenant) }}" style="display:inline" onsubmit="return confirm('Ubah status tenant ini?')">
+                                        @csrf
+                                        @if($tenant->status === 'active')
+                                            <input type="hidden" name="status" value="suspended">
+                                            <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--red);border-color:var(--red-tint)" title="Suspend ISP">
+                                                Suspend
+                                            </button>
+                                        @else
+                                            <input type="hidden" name="status" value="active">
+                                            <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--primary);border-color:var(--primary-tint)" title="Aktifkan ISP">
+                                                Aktifkan
+                                            </button>
+                                        @endif
+                                    </form>
+                                    <!-- Delete Tenant Form -->
+                                    <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tenant \'{{ $tenant->name }}\'? Tenant akan dipindahkan ke kotak sampah (Trash).')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline" style="padding:6px 10px;font-size:12px;color:var(--red);border-color:var(--red-tint)" title="Hapus Tenant">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

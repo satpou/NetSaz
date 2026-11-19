@@ -38,6 +38,35 @@
                 <input type="text" name="ktp_id" value="{{ old('ktp_id', $customer->ktp_id) }}" class="form-input" placeholder="Nomor KTP">
             </div>
 
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+                <div>
+                    <label class="form-label">Upload Scan KTP <span style="color:var(--ink-faint);font-weight:400">(opsional)</span></label>
+                    @if($customer->ktp_image)
+                    <div style="margin-bottom:8px">
+                        <a href="{{ asset('storage/' . $customer->ktp_image) }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--primary)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>Lihat Scan KTP Tersimpan</span>
+                        </a>
+                    </div>
+                    @endif
+                    <input type="file" name="ktp_image" accept="image/jpeg,image/png" class="form-input" style="padding:10px 14px">
+                    <p style="font-size:12px;color:var(--ink-faint);margin-top:6px">Format JPG/PNG, maks. 2MB</p>
+                </div>
+                <div>
+                    <label class="form-label">Foto Rumah Pelanggan <span style="color:var(--ink-faint);font-weight:400">(opsional)</span></label>
+                    @if($customer->house_image)
+                    <div style="margin-bottom:8px">
+                        <a href="{{ asset('storage/' . $customer->house_image) }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--primary)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>Lihat Foto Rumah Tersimpan</span>
+                        </a>
+                    </div>
+                    @endif
+                    <input type="file" name="house_image" accept="image/jpeg,image/png,image/webp" class="form-input" style="padding:10px 14px">
+                    <p style="font-size:12px;color:var(--ink-faint);margin-top:6px">Tampak depan rumah / tiang ODP (maks. 5MB)</p>
+                </div>
+            </div>
+
             <div style="margin-bottom:20px">
                 <label class="form-label">Alamat <span style="color:var(--red)">*</span></label>
                 <textarea name="address" rows="3" required class="form-input" placeholder="Alamat lengkap">{{ old('address', $customer->address) }}</textarea>
@@ -59,16 +88,26 @@
             </div>
 
             <div style="margin-bottom:24px">
-                <label class="form-label">Titik Koordinat Pemasangan</label>
-                <p style="font-size:12px;color:var(--ink-faint);margin-bottom:10px">Geser pin ke lokasi pemasangan pelanggan</p>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div>
+                        <label class="form-label" style="margin-bottom:2px">Titik Koordinat Pemasangan</label>
+                        <p style="font-size:12px;color:var(--ink-faint);margin:0">Klik peta atau geser pin ke lokasi rumah pelanggan</p>
+                    </div>
+                    <button type="button" id="btn-gps" class="btn btn-outline" style="padding:6px 12px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                        <span>Gunakan Lokasi GPS Saya</span>
+                    </button>
+                </div>
                 <div style="height:320px;border-radius:12px;overflow:hidden;border:1px solid var(--line);position:relative" id="map-container">
                     <div id="map" style="height:100%;width:100%"></div>
                 </div>
                 <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $customer->latitude) }}">
                 <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $customer->longitude) }}">
-                <div style="display:flex;gap:16px;margin-top:10px">
-                    <span style="font-size:13px;color:var(--ink-soft)">Lat: <span id="lat-display">{{ old('latitude', $customer->latitude) ?? '-' }}</span></span>
-                    <span style="font-size:13px;color:var(--ink-soft)">Lng: <span id="lng-display">{{ old('longitude', $customer->longitude) ?? '-' }}</span></span>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+                    <div style="display:flex;gap:16px">
+                        <span style="font-size:13px;color:var(--ink-soft)">Lat: <span id="lat-display" class="mono">{{ old('latitude', $customer->latitude) ?? '-' }}</span></span>
+                        <span style="font-size:13px;color:var(--ink-soft)">Lng: <span id="lng-display" class="mono">{{ old('longitude', $customer->longitude) ?? '-' }}</span></span>
+                    </div>
                 </div>
             </div>
 
@@ -124,6 +163,37 @@
                     } else {
                         initMap(-7.7956, 110.3695, 13);
                     }
+
+                    document.getElementById('btn-gps')?.addEventListener('click', function () {
+                        if (navigator.geolocation) {
+                            var btn = this;
+                            btn.disabled = true;
+                            btn.innerHTML = 'Mencari sinyal GPS...';
+                            navigator.geolocation.getCurrentPosition(function (pos) {
+                                btn.disabled = false;
+                                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Gunakan Lokasi GPS Saya</span>';
+                                var lat = pos.coords.latitude;
+                                var lng = pos.coords.longitude;
+                                map.setView([lat, lng], 17);
+                                if (marker) {
+                                    marker.setLatLng([lat, lng]);
+                                } else {
+                                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                                    marker.on('dragend', function (e) {
+                                        var p = e.target.getLatLng();
+                                        updateCoord(p.lat, p.lng);
+                                    });
+                                }
+                                updateCoord(lat, lng);
+                            }, function (err) {
+                                btn.disabled = false;
+                                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Gunakan Lokasi GPS Saya</span>';
+                                alert('Tidak dapat mengambil lokasi GPS: ' + err.message);
+                            }, { enableHighAccuracy: true, timeout: 10000 });
+                        } else {
+                            alert('Browser Anda tidak mendukung geolokasi GPS.');
+                        }
+                    });
                 });
             </script>
             @endpush

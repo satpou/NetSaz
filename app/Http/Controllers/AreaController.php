@@ -3,14 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class AreaController extends Controller
 {
     public function index()
     {
-        $areas = Area::where('tenant_id', tenantId())->get();
-        return view('areas.index', compact('areas'));
+        $tid = tenantId();
+        $areas = Area::where('tenant_id', $tid)->withCount('customers')->get();
+        $customersWithCoords = Customer::where('tenant_id', $tid)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->with('package:id,name')
+            ->select('id', 'name', 'phone', 'address', 'area', 'package_id', 'latitude', 'longitude', 'status', 'house_image')
+            ->get();
+
+        return view('areas.index', compact('areas', 'customersWithCoords'));
     }
 
     public function create()
@@ -23,6 +32,8 @@ class AreaController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $validated['tenant_id'] = tenantId();
@@ -46,6 +57,8 @@ class AreaController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $area->update($validated);

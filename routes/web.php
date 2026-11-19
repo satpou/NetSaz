@@ -158,6 +158,8 @@ Route::middleware(['auth', 'platform.superadmin'])->prefix('admin')->name('admin
     // Tenants
     Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class);
     Route::post('tenants/{tenant}/toggle-status', [\App\Http\Controllers\Admin\TenantController::class, 'toggleStatus'])->name('tenants.toggle-status');
+    Route::post('tenants/{id}/restore', [\App\Http\Controllers\Admin\TenantController::class, 'restore'])->name('tenants.restore');
+    Route::delete('tenants/{id}/force-delete', [\App\Http\Controllers\Admin\TenantController::class, 'forceDelete'])->name('tenants.force-delete');
 
     // Subscription Plans
     Route::resource('plans', \App\Http\Controllers\Admin\PlanController::class);

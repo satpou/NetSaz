@@ -24,6 +24,7 @@ class Customer extends CustomerAuthenticatable
         'longitude',
         'ktp_id',
         'ktp_image',
+        'house_image',
         'package_id',
         'status',
         'join_date',

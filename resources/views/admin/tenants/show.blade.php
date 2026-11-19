@@ -17,6 +17,13 @@
         <a href="{{ route('admin.tenants.edit', $tenant) }}" class="btn btn-primary">
             Edit Tenant
         </a>
+        <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tenant \'{{ $tenant->name }}\'? Tenant akan dipindahkan ke kotak sampah (Trash).')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-outline" style="color:var(--red);border-color:var(--red-tint)">
+                Hapus Tenant
+            </button>
+        </form>
     </div>
 </x-page-header>
 
