@@ -106,26 +106,68 @@
 
     <!-- Panel 3: Integrasi Payment Gateway (Duitku & Midtrans) -->
     <div x-data="{ pg: '{{ old('payment_gateway_provider', $settings['payment_gateway_provider'] ?? ($tenant->getSecretSetting('duitku_api_key') || !empty($settings['duitku_merchant_code']) ? 'duitku' : 'midtrans')) }}' }" class="panel reveal d3" style="padding:26px 28px;margin-bottom:24px">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
-            <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:10px">
+        <div style="margin-bottom:20px">
+            <h3 style="font-size:16px;font-weight:700;color:var(--ink);margin:0 0 6px;display:flex;align-items:center;gap:10px">
                 <span style="width:28px;height:28px;border-radius:7px;background:var(--primary-tint);color:var(--primary);display:inline-flex;align-items:center;justify-content:center">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 </span>
-                Integrasi Payment Gateway (Otomatis QRIS, VA Bank &amp; E-Wallet)
+                Integrasi Payment Gateway
             </h3>
-
-            <!-- Switcher Tabs -->
-            <div style="display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px">
-                <button type="button" @click="pg = 'duitku'" :style="pg === 'duitku' ? 'background:var(--primary);color:#05131c;font-weight:700' : 'background:transparent;color:var(--ink-soft)'" style="border:none;padding:6px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;transition:all .15s">
-                    Duitku
-                </button>
-                <button type="button" @click="pg = 'midtrans'" :style="pg === 'midtrans' ? 'background:var(--primary);color:#05131c;font-weight:700' : 'background:transparent;color:var(--ink-soft)'" style="border:none;padding:6px 14px;border-radius:6px;font-size:12.5px;cursor:pointer;transition:all .15s">
-                    Midtrans
-                </button>
-            </div>
+            <p style="font-size:13px;color:var(--ink-soft);margin:0">
+                Pilih payment gateway yang Anda gunakan untuk menerima pembayaran otomatis (QRIS, Virtual Account bank, Alfamart/Indomaret, &amp; E-Wallet) dari pelanggan ISP.
+            </p>
         </div>
 
         <input type="hidden" name="payment_gateway_provider" :value="pg">
+
+        <!-- Payment Gateway Selection Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px">
+            <!-- Duitku Card -->
+            <div @click="pg = 'duitku'" 
+                 :class="{ 'pg-card-active': pg === 'duitku' }"
+                 class="pg-choice-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div class="pg-badge-icon" :class="{ 'active': pg === 'duitku' }">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink)">Duitku</div>
+                            <div style="font-size:11.5px;color:var(--ink-faint)">duitku.com</div>
+                        </div>
+                    </div>
+                    <div class="pg-radio-circle" :class="{ 'selected': pg === 'duitku' }">
+                        <div class="pg-radio-dot"></div>
+                    </div>
+                </div>
+                <p style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.4">
+                    Mendukung QRIS instan, Virtual Account semua bank (BCA, Mandiri, BRI, BNI, Permata), retail outlet, dan e-wallet.
+                </p>
+            </div>
+
+            <!-- Midtrans Card -->
+            <div @click="pg = 'midtrans'" 
+                 :class="{ 'pg-card-active': pg === 'midtrans' }"
+                 class="pg-choice-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <div class="pg-badge-icon" :class="{ 'active': pg === 'midtrans' }">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                        </div>
+                        <div>
+                            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--ink)">Midtrans</div>
+                            <div style="font-size:11.5px;color:var(--ink-faint)">midtrans.com</div>
+                        </div>
+                    </div>
+                    <div class="pg-radio-circle" :class="{ 'selected': pg === 'midtrans' }">
+                        <div class="pg-radio-dot"></div>
+                    </div>
+                </div>
+                <p style="font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.4">
+                    Mendukung Midtrans Snap QRIS, Virtual Account bank terintegrasi, dan kartu kredit/debit online.
+                </p>
+            </div>
+        </div>
 
         <!-- Duitku Section -->
         <div x-show="pg === 'duitku'" x-cloak>
@@ -497,5 +539,76 @@ function whatsappGateway() {
 <style>
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
+
+/* Payment Gateway Selector Cards */
+.pg-choice-card {
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    user-select: none;
+}
+.pg-choice-card:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.02);
+}
+.pg-choice-card.pg-card-active {
+    border-color: var(--primary);
+    background: rgba(0, 214, 143, 0.06);
+    box-shadow: 0 0 0 1px var(--primary), 0 8px 24px -6px rgba(0, 214, 143, 0.25);
+}
+.pg-badge-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.pg-badge-icon.active {
+    background: rgba(0, 214, 143, 0.15);
+    border-color: rgba(0, 214, 143, 0.3);
+    color: var(--primary);
+}
+.pg-radio-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.pg-radio-circle.selected {
+    border-color: var(--primary);
+    background: rgba(0, 214, 143, 0.1);
+}
+.pg-radio-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pg-radio-circle.selected .pg-radio-dot {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 640px) {
+    .pg-choice-card {
+        padding: 14px 16px;
+    }
+}
 </style>
 @endsection
