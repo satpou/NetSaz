@@ -149,7 +149,7 @@
 
         <div style="margin-bottom:20px">
             <label class="form-label" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)">Metode WhatsApp Gateway</label>
-            <select name="wa_gateway_provider" x-model="provider" class="form-input" style="width:100%;max-width:560px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
+            <select name="wa_gateway_provider" x-model="provider" @change="fetchStatus()" class="form-input" style="width:100%;max-width:560px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px">
                 <option value="internal">Gateway Bawaan NetSaz (Scan QR Langsung di Layar - Otomatis & Tanpa Terminal)</option>
                 <option value="open_wa">Open-WA (wa-automate - www.open-wa.org) [External REST API]</option>
                 <option value="fonnte">Fonnte (Cloud API)</option>
@@ -226,9 +226,10 @@
             </div>
 
             <!-- JIKA STATUS: INITIALIZING / DISCONNECTED -->
-            <div x-show="status !== 'SCAN_QR' && status !== 'CONNECTED'" style="padding:30px 20px;text-align:center;color:var(--ink-soft)">
-                <div style="font-size:14px;font-weight:600;margin-bottom:8px" x-text="status === 'INITIALIZING' ? 'Memulai WhatsApp Gateway...' : 'Menghubungkan ke Service Gateway...'"></div>
-                <div style="font-size:12.5px">Mohon tunggu beberapa detik, sistem sedang menyiapkan koneksi WhatsApp...</div>
+            <div x-show="status !== 'SCAN_QR' && status !== 'CONNECTED'" style="padding:32px 20px;text-align:center;color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="width:36px;height:36px;border:3px solid rgba(16, 185, 129, 0.2);border-top-color:#10B981;border-radius:50%;margin-bottom:14px" class="spin"></div>
+                <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px" x-text="status === 'INITIALIZING' ? 'Memulai WhatsApp Gateway...' : 'Sedang Menyiapkan QR Code WhatsApp...'"></div>
+                <div style="font-size:12.5px">Mohon tunggu beberapa detik, sistem sedang menyiapkan sesi QR Code WhatsApp...</div>
             </div>
         </div>
 
@@ -344,12 +345,12 @@ function whatsappGateway() {
 
         init() {
             this.fetchStatus();
-            // Auto poll every 3 seconds if on internal mode and not connected
+            // Polling interval: 1.5s when waiting for QR or connecting
             this.pollTimer = setInterval(() => {
                 if (this.provider === 'internal' && this.status !== 'CONNECTED') {
                     this.fetchStatus(false);
                 }
-            }, 3000);
+            }, 1500);
         },
 
         statusText() {
@@ -362,7 +363,9 @@ function whatsappGateway() {
         async fetchStatus(showSpin = true) {
             if (showSpin) this.isRefreshing = true;
             try {
-                const res = await fetch('{{ route('tenant.settings.whatsapp-status', $ts ? ['tenant_slug' => $ts] : []) }}');
+                const url = new URL('{{ route('tenant.settings.whatsapp-status', $ts ? ['tenant_slug' => $ts] : []) }}', window.location.origin);
+                url.searchParams.set('provider', this.provider);
+                const res = await fetch(url.toString());
                 const data = await res.json();
                 this.status = data.status || (data.connected ? 'CONNECTED' : 'DISCONNECTED');
                 this.qr = data.qr || null;

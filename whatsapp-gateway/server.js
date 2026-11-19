@@ -32,6 +32,19 @@ function sanitizeSessionId(id) {
     return clean || 'default';
 }
 
+// Cache Baileys version globally to prevent network delay on every session connect
+let cachedBaileysVersion = null;
+async function getBaileysVersion() {
+    if (cachedBaileysVersion) return cachedBaileysVersion;
+    try {
+        const { version } = await fetchLatestBaileysVersion();
+        cachedBaileysVersion = version;
+        return cachedBaileysVersion;
+    } catch (e) {
+        return [2, 3000, 1015901307];
+    }
+}
+
 /**
  * TenantSession manages an isolated Baileys socket and credentials for a single ISP tenant
  */
@@ -64,12 +77,11 @@ class TenantSession {
 
         try {
             const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
-            const { version } = await fetchLatestBaileysVersion();
+            const version = await getBaileysVersion();
 
             this.sock = makeWASocket({
                 version,
                 auth: state,
-                printQRInTerminal: false,
                 logger: pino({ level: 'silent' }),
                 browser: ['NetSaz (' + this.sessionId + ')', 'Chrome', '120.0.0.0'],
                 connectTimeoutMs: 60000,
@@ -105,7 +117,14 @@ class TenantSession {
                     this.connectedUser = null;
                     this.connectedAt = null;
 
-                    if (statusCode === DisconnectReason.loggedOut) {
+                    if (statusCode === 408) {
+                        // QR timeout: reconnect immediately (500ms) to generate fresh QR without delay
+                        console.log(`[WA Gateway][${this.sessionId}] QR Code timed out, refreshing immediately...`);
+                        this.status = 'INITIALIZING';
+                        this.qrDataUrl = null;
+                        this.isReconnecting = false;
+                        this.reconnectTimer = setTimeout(() => this.connect(), 500);
+                    } else if (statusCode === DisconnectReason.loggedOut) {
                         console.log(`[WA Gateway][${this.sessionId}] Session logged out. Clearing auth credentials...`);
                         try {
                             fs.rmSync(this.authDir, { recursive: true, force: true });
@@ -113,10 +132,10 @@ class TenantSession {
                         } catch (e) {}
                         this.qrDataUrl = null;
                         this.isReconnecting = false;
-                        this.reconnectTimer = setTimeout(() => this.connect(), 2000);
+                        this.reconnectTimer = setTimeout(() => this.connect(), 1000);
                     } else {
                         this.isReconnecting = false;
-                        this.reconnectTimer = setTimeout(() => this.connect(), 4000);
+                        this.reconnectTimer = setTimeout(() => this.connect(), 1500);
                     }
                 } else if (connection === 'open') {
                     this.status = 'CONNECTED';
@@ -229,6 +248,10 @@ function restoreSavedSessions() {
 app.get('/status', (req, res) => {
     const sessionId = req.query.sessionId || req.query.session || req.headers['x-session-id'] || 'default';
     const session = getOrCreateSession(sessionId);
+    // If disconnected and not reconnecting, kickstart connection immediately
+    if (session.status === 'DISCONNECTED' && !session.isReconnecting && !session.reconnectTimer) {
+        session.connect();
+    }
     res.json(session.getStatusPayload());
 });
 

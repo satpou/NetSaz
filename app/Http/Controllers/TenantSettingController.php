@@ -113,13 +113,13 @@ class TenantSettingController extends Controller
         return back()->with('error', $result['message']);
     }
 
-    public function checkWhatsappStatus()
+    public function checkWhatsappStatus(Request $request)
     {
         $tid = tenantId();
         $tenant = Tenant::findOrFail($tid);
         $waService = new WhatsAppService($tenant);
 
-        $provider = $tenant->settings['wa_gateway_provider'] ?? 'internal';
+        $provider = $request->query('provider') ?: ($tenant->settings['wa_gateway_provider'] ?? 'internal');
         if ($provider === 'internal') {
             $status = $waService->getInternalStatus();
             return response()->json($status);
